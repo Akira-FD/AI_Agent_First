@@ -1,0 +1,2 @@
+APP_VERSION = "0.1.0"
+DEFAULT_SUMMARY_PLACEHOLDER = "No summary yet."
