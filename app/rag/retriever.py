@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from app.rag.context_builder import ContextBuilder, RetrievalResult
-from app.rag.reranker import KeywordReranker
-from app.rag.vector_store import InMemoryVectorStore
+from app.rag.embedding_service import EmbeddingProvider, HashEmbeddingProvider
+from app.rag.reranker import BaseReranker, KeywordReranker
+from app.rag.vector_store import InMemoryVectorStore, VectorStore
 from app.repositories.sqlite_repo import SQLiteRepository
 
 
@@ -12,13 +13,15 @@ class Retriever:
         repository: SQLiteRepository,
         top_k: int = 5,
         max_context_chars: int = 2400,
-        vector_store: InMemoryVectorStore | None = None,
-        reranker: KeywordReranker | None = None,
+        vector_store: VectorStore | None = None,
+        embedding_provider: EmbeddingProvider | None = None,
+        reranker: BaseReranker | None = None,
         context_builder: ContextBuilder | None = None,
     ) -> None:
         self.repository = repository
         self.top_k = top_k
-        self.vector_store = vector_store or InMemoryVectorStore()
+        self.embedding_provider = embedding_provider or HashEmbeddingProvider()
+        self.vector_store = vector_store or InMemoryVectorStore(embedding_provider=self.embedding_provider)
         self.reranker = reranker or KeywordReranker()
         self.context_builder = context_builder or ContextBuilder(max_context_chars=max_context_chars)
 

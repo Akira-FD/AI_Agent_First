@@ -6,6 +6,7 @@ import argparse
 
 from app.agent.graph import MVPAgent
 from app.config.settings import AppSettings
+from app.rag.factory import build_retriever
 from app.repositories.sqlite_repo import SQLiteRepository
 from app.services.document_service import DocumentService
 from app.services.llm_service import build_llm_service
@@ -22,6 +23,7 @@ class BootstrappedApplication:
     document_service: DocumentService
     llm_service: object
     tool_registry: ToolRegistry
+    vector_store: object
     agent: MVPAgent
     ui_shell: DesktopAppShell
 
@@ -34,6 +36,8 @@ def bootstrap_application(root: Path | None = None) -> BootstrappedApplication:
     document_service = DocumentService(repository)
     llm_service = build_llm_service(settings)
     tool_registry = ToolRegistry.with_defaults()
+    retriever = build_retriever(settings=settings, repository=repository)
+    vector_store = retriever.vector_store
     agent = MVPAgent(
         settings=settings,
         repository=repository,
@@ -41,6 +45,8 @@ def bootstrap_application(root: Path | None = None) -> BootstrappedApplication:
         document_service=document_service,
         llm_service=llm_service,
         tool_registry=tool_registry,
+        retriever=retriever,
+        vector_store=vector_store,
     )
     ui_shell = DesktopAppShell(
         agent=agent,
@@ -55,6 +61,7 @@ def bootstrap_application(root: Path | None = None) -> BootstrappedApplication:
         document_service=document_service,
         llm_service=llm_service,
         tool_registry=tool_registry,
+        vector_store=vector_store,
         agent=agent,
         ui_shell=ui_shell,
     )

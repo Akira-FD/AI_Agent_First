@@ -57,6 +57,8 @@ class SettingsTests(unittest.TestCase):
             self.assertEqual(settings.llm_api_key, "test-key")
             self.assertEqual(settings.llm_base_url, "https://api.openai.com/v1")
             self.assertEqual(settings.llm_model, "gpt-5.2")
+            self.assertEqual(settings.llm_retry_attempts, 2)
+            self.assertAlmostEqual(settings.llm_retry_backoff_seconds, 0.4)
 
         for key, value in previous.items():
             if value is None:
@@ -89,11 +91,84 @@ class SettingsTests(unittest.TestCase):
             self.assertEqual(settings.llm_base_url, "https://api1.oai1.online/v1")
             self.assertEqual(settings.llm_model, "gpt-5.2")
 
+    def test_reads_retry_configuration_from_environment(self) -> None:
+        previous = {
+            "AI_AGENT_FIRST_LLM_RETRY_ATTEMPTS": os.environ.get("AI_AGENT_FIRST_LLM_RETRY_ATTEMPTS"),
+            "AI_AGENT_FIRST_LLM_RETRY_BACKOFF_SECONDS": os.environ.get("AI_AGENT_FIRST_LLM_RETRY_BACKOFF_SECONDS"),
+        }
+        os.environ["AI_AGENT_FIRST_LLM_RETRY_ATTEMPTS"] = "4"
+        os.environ["AI_AGENT_FIRST_LLM_RETRY_BACKOFF_SECONDS"] = "1.25"
+        try:
+            settings = AppSettings.from_root(Path.cwd())
+            self.assertEqual(settings.llm_retry_attempts, 4)
+            self.assertAlmostEqual(settings.llm_retry_backoff_seconds, 1.25)
+        finally:
+            for key, value in previous.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
         for key, value in previous.items():
             if value is None:
                 os.environ.pop(key, None)
             else:
                 os.environ[key] = value
+
+    def test_reads_milvus_configuration_from_environment(self) -> None:
+        previous = {
+            "AI_AGENT_FIRST_MILVUS_ENABLED": os.environ.get("AI_AGENT_FIRST_MILVUS_ENABLED"),
+            "AI_AGENT_FIRST_MILVUS_URI": os.environ.get("AI_AGENT_FIRST_MILVUS_URI"),
+            "AI_AGENT_FIRST_MILVUS_COLLECTION": os.environ.get("AI_AGENT_FIRST_MILVUS_COLLECTION"),
+            "AI_AGENT_FIRST_MILVUS_DIMENSION": os.environ.get("AI_AGENT_FIRST_MILVUS_DIMENSION"),
+            "AI_AGENT_FIRST_MILVUS_LITE_PATH": os.environ.get("AI_AGENT_FIRST_MILVUS_LITE_PATH"),
+        }
+        os.environ["AI_AGENT_FIRST_MILVUS_ENABLED"] = "true"
+        os.environ["AI_AGENT_FIRST_MILVUS_URI"] = "http://localhost:19530"
+        os.environ["AI_AGENT_FIRST_MILVUS_COLLECTION"] = "ai_agent_first_chunks"
+        os.environ["AI_AGENT_FIRST_MILVUS_DIMENSION"] = "96"
+        os.environ["AI_AGENT_FIRST_MILVUS_LITE_PATH"] = "data/milvus/agent.db"
+        try:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                settings = AppSettings.from_root(Path(tmpdir))
+                self.assertTrue(settings.milvus_enabled)
+                self.assertEqual(settings.milvus_uri, "http://localhost:19530")
+                self.assertEqual(settings.milvus_collection, "ai_agent_first_chunks")
+                self.assertEqual(settings.milvus_dimension, 96)
+                self.assertEqual(settings.milvus_lite_path.name, "agent.db")
+        finally:
+            for key, value in previous.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
+    def test_reads_retrieval_backend_configuration_from_environment(self) -> None:
+        previous = {
+            "AI_AGENT_FIRST_RETRIEVAL_BACKEND": os.environ.get("AI_AGENT_FIRST_RETRIEVAL_BACKEND"),
+            "AI_AGENT_FIRST_EMBEDDING_BACKEND": os.environ.get("AI_AGENT_FIRST_EMBEDDING_BACKEND"),
+            "AI_AGENT_FIRST_REMOTE_RETRIEVAL_URL": os.environ.get("AI_AGENT_FIRST_REMOTE_RETRIEVAL_URL"),
+            "AI_AGENT_FIRST_RERANKER_BACKEND": os.environ.get("AI_AGENT_FIRST_RERANKER_BACKEND"),
+            "AI_AGENT_FIRST_BGE_RERANKER_MODEL": os.environ.get("AI_AGENT_FIRST_BGE_RERANKER_MODEL"),
+        }
+        os.environ["AI_AGENT_FIRST_RETRIEVAL_BACKEND"] = "milvus-lite"
+        os.environ["AI_AGENT_FIRST_EMBEDDING_BACKEND"] = "hash"
+        os.environ["AI_AGENT_FIRST_REMOTE_RETRIEVAL_URL"] = "http://127.0.0.1:9000/retrieve"
+        os.environ["AI_AGENT_FIRST_RERANKER_BACKEND"] = "bge"
+        os.environ["AI_AGENT_FIRST_BGE_RERANKER_MODEL"] = "BAAI/bge-reranker-v2-m3"
+        try:
+            settings = AppSettings.from_root(Path.cwd())
+            self.assertEqual(settings.retrieval_backend, "milvus-lite")
+            self.assertEqual(settings.embedding_backend, "hash")
+            self.assertEqual(settings.remote_retrieval_url, "http://127.0.0.1:9000/retrieve")
+            self.assertEqual(settings.reranker_backend, "bge")
+            self.assertEqual(settings.bge_reranker_model, "BAAI/bge-reranker-v2-m3")
+        finally:
+            for key, value in previous.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
 
     def test_reads_llm_configuration_from_windows_persistent_env_when_process_env_is_empty(self) -> None:
         previous = {

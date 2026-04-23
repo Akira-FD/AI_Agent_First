@@ -13,7 +13,11 @@ from app.rag.ingest_pipeline import IngestPipeline
 
 def main() -> None:
     app = bootstrap_application(ROOT)
-    IngestPipeline(settings=app.settings, repository=app.repository).ingest_directory(app.settings.docs_dir)
+    IngestPipeline(
+        settings=app.settings,
+        repository=app.repository,
+        vector_indexer=app.vector_store,
+    ).ingest_directory(app.settings.docs_dir)
     response = app.agent.run(session_id="demo", user_query="请帮我重启 redis 服务")
     print(response.answer)
     print("Sources:", response.sources)

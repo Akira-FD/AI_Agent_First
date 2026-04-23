@@ -56,6 +56,32 @@ class RetrieverTests(unittest.TestCase):
             self.assertLessEqual(len(result.context_text), 120)
             self.assertTrue(result.sources)
 
+    def test_can_retrieve_from_external_vector_store_port(self) -> None:
+        class StubVectorStore:
+            def __init__(self) -> None:
+                self.queries = []
+
+            def search(self, query: str, chunks, top_k: int):
+                self.queries.append((query, top_k))
+                selected = [chunk for chunk in chunks if "重启服务" in chunk.title or "重启服务" in " ".join(chunk.section_path)]
+                return [type("SearchMatch", (), {"chunk": selected[0], "score": 9.5})()] if selected else []
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            settings = AppSettings.from_root(root)
+            (settings.docs_dir / "ops.md").write_text(SAMPLE_DOC, encoding="utf-8")
+
+            repo = SQLiteRepository(settings.sqlite_path)
+            IngestPipeline(settings=settings, repository=repo).ingest_directory(settings.docs_dir)
+            vector_store = StubVectorStore()
+
+            retriever = Retriever(repository=repo, top_k=3, vector_store=vector_store)
+            result = retriever.retrieve("如何重启 redis 服务")
+
+            self.assertEqual(vector_store.queries, [("如何重启 redis 服务", 6)])
+            self.assertIn("重启服务", result.context_text)
+            self.assertTrue(result.sources)
+
 
 if __name__ == "__main__":
     unittest.main()

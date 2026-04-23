@@ -83,6 +83,11 @@ class GithubDatasetArchitectureTests(unittest.TestCase):
         self.assertEqual(cases[0]["expected_source"], "redis-redis-issues-456.md")
         self.assertIn("Redis OOM timeout", cases[0]["query"])
         self.assertIn("maxmemory", cases[0]["answer_keywords"])
+        self.assertEqual(cases[0]["expected_plan_route"], "answer")
+        self.assertEqual(cases[0]["expected_plan_steps"], ["retrieve_context", "answer_with_context"])
+        self.assertEqual(cases[0]["expected_tool_names"], [])
+        self.assertEqual(cases[0]["expected_recovery_action"], "")
+        self.assertEqual(cases[0]["expected_replan_steps"], [])
 
 
 if __name__ == "__main__":

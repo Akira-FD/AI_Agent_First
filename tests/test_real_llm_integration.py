@@ -114,6 +114,8 @@ class RealLLMIntegrationTests(unittest.TestCase):
                     "llm_base_url": "https://example.com/v1",
                     "llm_model": "demo-model",
                     "llm_timeout_seconds": 15,
+                    "llm_retry_attempts": 2,
+                    "llm_retry_backoff_seconds": 0,
                 },
             )(),
             requester=FakeRequester(error=RuntimeError("network down")),
@@ -196,6 +198,92 @@ class RealLLMIntegrationTests(unittest.TestCase):
         self.assertEqual(len(requester.calls), 1)
         self.assertIn("进程", answer)
 
+    def test_answer_result_exposes_timeout_diagnostics_after_retry_exhaustion(self) -> None:
+        requester = SequencedRequester([TimeoutError("timed out"), TimeoutError("timed out")])
+        service = OpenAICompatibleLLMService(
+            api_key="test-key",
+            base_url="https://relay.example.com/v1",
+            model="gpt-5.2",
+            requester=requester,
+            retry_attempts=2,
+            retry_backoff_seconds=0,
+        )
+
+        result = service.generate_answer_result(
+            user_query="Redis OOM 时应该优先检查哪些指标和配置？",
+            context_text="建议优先检查 maxmemory、内存碎片率和淘汰策略。",
+        )
+
+        self.assertEqual(result.answer_backend, "fallback")
+        self.assertEqual(result.provider_status, "timeout")
+        self.assertEqual(result.provider_attempts, 2)
+        self.assertIn("timed out", result.provider_error)
+
+    def test_answer_result_exposes_disconnect_diagnostics_after_retry_exhaustion(self) -> None:
+        requester = SequencedRequester(
+            [
+                RemoteDisconnected("Remote end closed connection without response"),
+                RemoteDisconnected("Remote end closed connection without response"),
+            ]
+        )
+        service = OpenAICompatibleLLMService(
+            api_key="test-key",
+            base_url="https://relay.example.com/v1",
+            model="gpt-5.2",
+            requester=requester,
+            retry_attempts=2,
+            retry_backoff_seconds=0,
+        )
+
+        result = service.generate_answer_result(
+            user_query="MySQL aborted connection 通常先怎么排查？",
+            context_text="建议先看 error log、wait_timeout、网络抖动和连接池参数。",
+        )
+
+        self.assertEqual(result.answer_backend, "fallback")
+        self.assertEqual(result.provider_status, "disconnect")
+        self.assertEqual(result.provider_attempts, 2)
+
+    def test_answer_result_exposes_http_status_code_diagnostics(self) -> None:
+        requester = SequencedRequester([RuntimeError("LLM request failed with HTTP 429")])
+        service = OpenAICompatibleLLMService(
+            api_key="test-key",
+            base_url="https://relay.example.com/v1",
+            model="gpt-5.2",
+            requester=requester,
+            retry_attempts=3,
+            retry_backoff_seconds=0,
+        )
+
+        result = service.generate_answer_result(
+            user_query="Kubernetes Pod 反复 CrashLoopBackOff 怎么排查？",
+            context_text="建议先看 describe 和 previous logs。",
+        )
+
+        self.assertEqual(result.answer_backend, "fallback")
+        self.assertEqual(result.provider_status, "http_429")
+        self.assertEqual(result.provider_attempts, 1)
+
+    def test_answer_result_marks_provider_success(self) -> None:
+        requester = SequencedRequester(
+            [{"choices": [{"message": {"content": "先看 describe、events 和 previous logs。"}}]}]
+        )
+        service = OpenAICompatibleLLMService(
+            api_key="test-key",
+            base_url="https://relay.example.com/v1",
+            model="gpt-5.2",
+            requester=requester,
+        )
+
+        result = service.generate_answer_result(
+            user_query="Kubernetes Pod 反复 CrashLoopBackOff 怎么排查？",
+            context_text="建议先看 describe 和 previous logs。",
+        )
+
+        self.assertEqual(result.answer_backend, "remote")
+        self.assertEqual(result.provider_status, "success")
+        self.assertEqual(result.provider_attempts, 1)
+
     def test_bootstrap_uses_real_llm_service_when_api_key_exists(self) -> None:
         previous = {
             "AI_AGENT_FIRST_LLM_API_KEY": os.environ.get("AI_AGENT_FIRST_LLM_API_KEY"),
@@ -208,12 +296,33 @@ class RealLLMIntegrationTests(unittest.TestCase):
                 app = bootstrap_application(Path.cwd())
             self.assertIsInstance(app.llm_service, OpenAICompatibleLLMService)
             self.assertIn("demo-model", app.ui_shell.render_status())
+            self.assertEqual(app.settings.llm_retry_attempts, 2)
         finally:
             for key, value in previous.items():
                 if value is None:
                     os.environ.pop(key, None)
                 else:
                     os.environ[key] = value
+
+    def test_builder_passes_retry_configuration_to_real_llm_service(self) -> None:
+        service = build_llm_service(
+            settings=type(
+                "Settings",
+                (),
+                {
+                    "llm_api_key": "test-key",
+                    "llm_base_url": "https://example.com/v1",
+                    "llm_model": "demo-model",
+                    "llm_timeout_seconds": 15,
+                    "llm_retry_attempts": 4,
+                    "llm_retry_backoff_seconds": 1.5,
+                },
+            )(),
+            requester=FakeRequester(),
+        )
+
+        self.assertEqual(service.retry_attempts, 4)
+        self.assertAlmostEqual(service.retry_backoff_seconds, 1.5)
 
     def test_status_mentions_missing_api_key_when_model_is_configured(self) -> None:
         settings = AppSettings.from_root(Path.cwd())

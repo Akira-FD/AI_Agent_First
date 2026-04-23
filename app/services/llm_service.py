@@ -4,19 +4,44 @@ import json
 import re
 import time
 import urllib.request
+from dataclasses import dataclass
 from http.client import RemoteDisconnected
 from urllib.error import HTTPError, URLError
+
+
+@dataclass(frozen=True)
+class LLMAnswerResult:
+    answer: str
+    answer_backend: str
+    provider_status: str = "not_used"
+    provider_error: str = ""
+    provider_attempts: int = 0
 
 
 class RuleBasedLLMService:
     def backend_label(self) -> str:
         return "local-rule-based-fallback"
 
-    def generate_answer(self, user_query: str, context_text: str, tool_message: str | None = None) -> str:
+    def generate_answer_result(self, user_query: str, context_text: str, tool_message: str | None = None) -> LLMAnswerResult:
         summary = self._summarize_context(context_text)
         if tool_message:
-            return f"已根据请求执行操作。{tool_message}\n\n建议：{summary or '暂无知识库上下文。'}"
-        return f"根据知识库，针对“{user_query}”的建议如下：\n{summary or '暂无可用上下文，请先导入文档。'}"
+            return LLMAnswerResult(
+                answer=f"已根据请求执行操作。{tool_message}\n\n建议：{summary or '暂无知识库上下文。'}",
+                answer_backend="fallback",
+                provider_status="not_used",
+            )
+        return LLMAnswerResult(
+            answer=f"根据知识库，针对“{user_query}”的建议如下：\n{summary or '暂无可用上下文，请先导入文档。'}",
+            answer_backend="fallback",
+            provider_status="not_used",
+        )
+
+    def generate_answer(self, user_query: str, context_text: str, tool_message: str | None = None) -> str:
+        return self.generate_answer_result(
+            user_query=user_query,
+            context_text=context_text,
+            tool_message=tool_message,
+        ).answer
 
     def _summarize_context(self, context_text: str) -> str:
         if not context_text.strip():
@@ -80,13 +105,34 @@ class OpenAICompatibleLLMService:
         self.fallback = fallback or RuleBasedLLMService()
         self.retry_attempts = max(1, retry_attempts)
         self.retry_backoff_seconds = max(0.0, retry_backoff_seconds)
+        self._last_provider_status = "not_started"
+        self._last_provider_error = ""
+        self._last_provider_attempts = 0
 
     def backend_label(self) -> str:
         return f"openai-compatible:{self.model}"
 
     def generate_answer(self, user_query: str, context_text: str, tool_message: str | None = None) -> str:
+        return self.generate_answer_result(
+            user_query=user_query,
+            context_text=context_text,
+            tool_message=tool_message,
+        ).answer
+
+    def generate_answer_result(self, user_query: str, context_text: str, tool_message: str | None = None) -> LLMAnswerResult:
         if not self.api_key:
-            return self.fallback.generate_answer(user_query=user_query, context_text=context_text, tool_message=tool_message)
+            fallback_result = self.fallback.generate_answer_result(
+                user_query=user_query,
+                context_text=context_text,
+                tool_message=tool_message,
+            )
+            return LLMAnswerResult(
+                answer=fallback_result.answer,
+                answer_backend="fallback",
+                provider_status="missing_api_key",
+                provider_error="AI_AGENT_FIRST_LLM_API_KEY/OPENAI_API_KEY missing",
+                provider_attempts=0,
+            )
 
         system_prompt = (
             "你是一个企业研发与运维知识助手。请结合给定上下文，输出简洁、可执行、中文回答。"
@@ -118,17 +164,56 @@ class OpenAICompatibleLLMService:
                 timeout=self.timeout_seconds,
             )
             content = response["choices"][0]["message"]["content"].strip()
-            return content or self.fallback.generate_answer(user_query=user_query, context_text=context_text, tool_message=tool_message)
+            if content:
+                return LLMAnswerResult(
+                    answer=content,
+                    answer_backend="remote",
+                    provider_status="success",
+                    provider_error="",
+                    provider_attempts=self._last_provider_attempts,
+                )
+            fallback_result = self.fallback.generate_answer_result(
+                user_query=user_query,
+                context_text=context_text,
+                tool_message=tool_message,
+            )
+            return LLMAnswerResult(
+                answer=fallback_result.answer,
+                answer_backend="fallback",
+                provider_status="empty_response",
+                provider_error="provider returned empty content",
+                provider_attempts=self._last_provider_attempts,
+            )
         except Exception:
-            return self.fallback.generate_answer(user_query=user_query, context_text=context_text, tool_message=tool_message)
+            fallback_result = self.fallback.generate_answer_result(
+                user_query=user_query,
+                context_text=context_text,
+                tool_message=tool_message,
+            )
+            return LLMAnswerResult(
+                answer=fallback_result.answer,
+                answer_backend="fallback",
+                provider_status=self._last_provider_status,
+                provider_error=self._last_provider_error,
+                provider_attempts=self._last_provider_attempts,
+            )
 
     def _request_with_retry(self, *, url: str, headers: dict[str, str], payload: dict[str, object], timeout: int) -> dict:
         last_error: Exception | None = None
+        self._last_provider_status = "not_started"
+        self._last_provider_error = ""
+        self._last_provider_attempts = 0
         for attempt in range(1, self.retry_attempts + 1):
+            self._last_provider_attempts = attempt
             try:
-                return self.requester(url=url, headers=headers, payload=payload, timeout=timeout)
+                response = self.requester(url=url, headers=headers, payload=payload, timeout=timeout)
+                self._last_provider_status = "success"
+                self._last_provider_error = ""
+                return response
             except Exception as exc:
                 last_error = exc
+                self._last_provider_status = self._classify_provider_error(exc)
+                self._last_provider_error = str(exc)
                 if not self._is_retryable_error(exc) or attempt >= self.retry_attempts:
                     raise
                 if self.retry_backoff_seconds:
@@ -138,18 +223,29 @@ class OpenAICompatibleLLMService:
         raise RuntimeError("LLM request failed before any attempt was made")
 
     def _is_retryable_error(self, exc: Exception) -> bool:
-        if isinstance(exc, (TimeoutError, RemoteDisconnected)):
-            return True
-        message = str(exc)
-        if "timed out" in message.lower():
-            return True
-        if "Remote end closed connection" in message:
-            return True
-        if "HTTP 401" in message or "HTTP 403" in message or "HTTP 404" in message or "HTTP 429" in message:
-            return False
-        if "HTTP 5" in message:
+        if self._classify_provider_error(exc) in {"timeout", "disconnect", "http_5xx"}:
             return True
         return False
+
+    def _classify_provider_error(self, exc: Exception) -> str:
+        if isinstance(exc, TimeoutError):
+            return "timeout"
+        if isinstance(exc, RemoteDisconnected):
+            return "disconnect"
+        message = str(exc)
+        if "timed out" in message.lower():
+            return "timeout"
+        if "Remote end closed connection" in message:
+            return "disconnect"
+        http_match = re.search(r"HTTP\s+(\d{3})", message)
+        if http_match:
+            code = http_match.group(1)
+            if code.startswith("5"):
+                return "http_5xx"
+            return f"http_{code}"
+        if "HTTP 5" in message:
+            return "http_5xx"
+        return "error"
 
     def _default_requester(self, *, url: str, headers: dict[str, str], payload: dict[str, object], timeout: int) -> dict:
         request = urllib.request.Request(
@@ -177,5 +273,7 @@ def build_llm_service(settings, requester=None):
             timeout_seconds=settings.llm_timeout_seconds,
             requester=requester,
             fallback=fallback,
+            retry_attempts=getattr(settings, "llm_retry_attempts", 2),
+            retry_backoff_seconds=getattr(settings, "llm_retry_backoff_seconds", 0.4),
         )
     return fallback

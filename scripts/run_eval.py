@@ -24,6 +24,11 @@ def load_cases(path: Path) -> list[EvalCase]:
             expected_source=item["expected_source"],
             answer_keywords=item.get("answer_keywords", []),
             provenance_url=item.get("provenance_url", ""),
+            expected_plan_route=item.get("expected_plan_route", ""),
+            expected_plan_steps=item.get("expected_plan_steps", []),
+            expected_tool_names=item.get("expected_tool_names", []),
+            expected_recovery_action=item.get("expected_recovery_action", ""),
+            expected_replan_steps=item.get("expected_replan_steps", []),
         )
         for item in raw_cases
     ]

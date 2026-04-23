@@ -9,14 +9,23 @@ if str(ROOT) not in sys.path:
 
 from app.config.settings import AppSettings
 from app.rag.ingest_pipeline import IngestPipeline
+from app.rag.vector_store import build_vector_store
 from app.repositories.sqlite_repo import SQLiteRepository
 
 
 def main() -> None:
     settings = AppSettings.from_root(ROOT)
     repository = SQLiteRepository(settings.sqlite_path)
-    result = IngestPipeline(settings=settings, repository=repository).ingest_directory(settings.docs_dir)
-    print(f"Ingested {result.document_count} documents and {result.chunk_count} chunks.")
+    vector_store = build_vector_store(settings)
+    result = IngestPipeline(
+        settings=settings,
+        repository=repository,
+        vector_indexer=vector_store,
+    ).ingest_directory(settings.docs_dir)
+    print(
+        f"Ingested {result.document_count} documents, {result.chunk_count} chunks, "
+        f"indexed {result.indexed_chunk_count} chunks."
+    )
 
 
 if __name__ == "__main__":

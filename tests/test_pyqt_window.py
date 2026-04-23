@@ -39,6 +39,7 @@ class PyQtWindowTests(unittest.TestCase):
             self.assertIn("已执行模拟工具", window.chat_history.toPlainText())
             self.assertIn("Redis", window.sources_panel.toPlainText())
             self.assertIn("restart_mock_service", window.tool_logs_panel.toPlainText())
+            self.assertIn("fallback", window.request_status.text())
             app_instance.processEvents()
 
     def test_main_window_sends_requests_without_blocking_ui(self) -> None:
@@ -253,6 +254,214 @@ class PyQtWindowTests(unittest.TestCase):
 
             self.assertEqual(chat_page.calls.count("Kubernetes Pod 重启频繁怎么办？"), 2)
             self.assertNotIn("超时后的旧回答", window.chat_history.toPlainText())
+
+    def test_main_window_marks_remote_answer_source_in_status(self) -> None:
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PyQt6.QtWidgets import QApplication
+
+        class RemoteChatPage:
+            def __init__(self) -> None:
+                self.messages = []
+
+            def send_message(self, content: str):
+                self.messages.append({"role": "user", "content": content})
+                return SimpleNamespace(
+                    answer="这是远程模型的回答。",
+                    sources=[],
+                    tool_logs=[],
+                    answer_backend="remote",
+                    provider_status="success",
+                    provider_error="",
+                    provider_attempts=1,
+                )
+
+        app_instance = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as tmpdir:
+            app = bootstrap_application(Path(tmpdir))
+            window = MainWindow(
+                agent=app.agent,
+                settings=app.settings,
+                document_service=app.document_service,
+                llm_service=app.llm_service,
+            )
+            window.chat_page = RemoteChatPage()
+            window._stream_chunk_size = 100
+
+            window.input_box.setPlainText("测试远程回答来源")
+            window.handle_send()
+
+            deadline = time.monotonic() + 2.0
+            while "这是远程模型的回答" not in window.chat_history.toPlainText():
+                if time.monotonic() > deadline:
+                    self.fail("Timed out waiting for remote answer label.")
+                app_instance.processEvents()
+                time.sleep(0.02)
+
+            self.assertIn("remote", window.request_status.text())
+            self.assertIn("success", window.request_status.text())
+
+    def test_main_window_marks_provider_failure_diagnostics_in_status(self) -> None:
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PyQt6.QtWidgets import QApplication
+
+        class FallbackChatPage:
+            def __init__(self) -> None:
+                self.messages = []
+
+            def send_message(self, content: str):
+                self.messages.append({"role": "user", "content": content})
+                return SimpleNamespace(
+                    answer="这是 fallback 回答。",
+                    sources=[],
+                    tool_logs=[],
+                    answer_backend="fallback",
+                    provider_status="timeout",
+                    provider_error="timed out",
+                    provider_attempts=2,
+                )
+
+        app_instance = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as tmpdir:
+            app = bootstrap_application(Path(tmpdir))
+            window = MainWindow(
+                agent=app.agent,
+                settings=app.settings,
+                document_service=app.document_service,
+                llm_service=app.llm_service,
+            )
+            window.chat_page = FallbackChatPage()
+            window._stream_chunk_size = 100
+
+            window.input_box.setPlainText("测试 provider 失败诊断")
+            window.handle_send()
+
+            deadline = time.monotonic() + 2.0
+            while "这是 fallback 回答" not in window.chat_history.toPlainText():
+                if time.monotonic() > deadline:
+                    self.fail("Timed out waiting for provider diagnostics label.")
+                app_instance.processEvents()
+                time.sleep(0.02)
+
+            self.assertIn("fallback", window.request_status.text())
+            self.assertIn("timeout", window.request_status.text())
+            self.assertIn("attempts=2", window.request_status.text())
+
+    def test_main_window_displays_current_session_summary(self) -> None:
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PyQt6.QtWidgets import QApplication
+
+        class SummaryChatPage:
+            def __init__(self) -> None:
+                self.messages = []
+
+            def send_message(self, content: str):
+                self.messages.append({"role": "user", "content": content})
+                return SimpleNamespace(
+                    answer="建议先检查 Redis maxmemory 和 slowlog。",
+                    sources=[],
+                    tool_logs=[],
+                    summary="本轮问题：Redis OOM 怎么排查；最新结论：检查 maxmemory 和 slowlog。",
+                    answer_backend="fallback",
+                    provider_status="not_used",
+                    provider_error="",
+                    provider_attempts=0,
+                )
+
+        app_instance = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as tmpdir:
+            app = bootstrap_application(Path(tmpdir))
+            window = MainWindow(
+                agent=app.agent,
+                settings=app.settings,
+                document_service=app.document_service,
+                llm_service=app.llm_service,
+            )
+            window.chat_page = SummaryChatPage()
+            window._stream_chunk_size = 100
+
+            window.input_box.setPlainText("Redis OOM 怎么排查？")
+            window.handle_send()
+
+            deadline = time.monotonic() + 2.0
+            while "maxmemory" not in window.chat_history.toPlainText():
+                if time.monotonic() > deadline:
+                    self.fail("Timed out waiting for answer before checking summary.")
+                app_instance.processEvents()
+                time.sleep(0.02)
+
+            self.assertIn("当前会话摘要", window.session_summary_panel.toPlainText())
+            self.assertIn("Redis OOM", window.session_summary_panel.toPlainText())
+            self.assertIn("slowlog", window.session_summary_panel.toPlainText())
+
+    def test_main_window_displays_retrieval_and_embedding_backends(self) -> None:
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PyQt6.QtWidgets import QApplication
+
+        class BackendChatPage:
+            def __init__(self) -> None:
+                self.messages = []
+
+            def send_message(self, content: str):
+                self.messages.append({"role": "user", "content": content})
+                return SimpleNamespace(
+                    answer="检索已完成。",
+                    sources=[],
+                    tool_logs=[],
+                    summary="暂无摘要。",
+                    answer_backend="fallback",
+                    provider_status="not_used",
+                    provider_error="",
+                    provider_attempts=0,
+                    retrieval_backend="remote",
+                    embedding_backend="hash",
+                    reranker_backend="bge",
+                    node_trace=["intent", "retrieve", "plan", "answer"],
+                    plan_route="answer",
+                    recovery_action="retry_repaired_action",
+                    tool_actions=[
+                        {"tool_name": "check_service_status", "tool_input": {"service_name": "redis"}},
+                        {"tool_name": "search_error_logs", "tool_input": {"keyword": "timeout"}},
+                    ],
+                )
+
+        app_instance = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as tmpdir:
+            app = bootstrap_application(Path(tmpdir))
+            settings = SimpleNamespace(**vars(app.settings))
+            settings.retrieval_backend = "remote"
+            settings.embedding_backend = "hash"
+            settings.reranker_backend = "bge"
+            window = MainWindow(
+                agent=app.agent,
+                settings=settings,
+                document_service=app.document_service,
+                llm_service=app.llm_service,
+            )
+            window.chat_page = BackendChatPage()
+            window._stream_chunk_size = 100
+
+            self.assertIn("Retrieval 后端：remote", window.retrieval_status.text())
+            self.assertIn("Embedding 后端：hash", window.embedding_status.text())
+            self.assertIn("Reranker 后端：bge", window.reranker_status.text())
+
+            window.input_box.setPlainText("测试检索后端展示")
+            window.handle_send()
+
+            deadline = time.monotonic() + 2.0
+            while "检索已完成" not in window.chat_history.toPlainText():
+                if time.monotonic() > deadline:
+                    self.fail("Timed out waiting for backend metadata response.")
+                app_instance.processEvents()
+                time.sleep(0.02)
+
+            self.assertIn("retrieval=remote", window.request_status.text())
+            self.assertIn("embedding=hash", window.request_status.text())
+            self.assertIn("reranker=bge", window.request_status.text())
+            self.assertIn("plan=answer", window.request_status.text())
+            self.assertIn("trace=intent>retrieve>plan>answer", window.request_status.text())
+            self.assertIn("actions=2", window.request_status.text())
+            self.assertIn("tools=check_service_status,search_error_logs", window.request_status.text())
+            self.assertIn("recovery=retry_repaired_action", window.request_status.text())
 
 
 if __name__ == "__main__":

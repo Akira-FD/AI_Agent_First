@@ -19,6 +19,11 @@ class GithubEvalCaseBuilder:
                     "expected_source": document.source_filename,
                     "answer_keywords": document.answer_keywords,
                     "provenance_url": document.provenance_url,
+                    "expected_plan_route": "answer",
+                    "expected_plan_steps": ["retrieve_context", "answer_with_context"],
+                    "expected_tool_names": [],
+                    "expected_recovery_action": "",
+                    "expected_replan_steps": [],
                 }
             )
         return cases

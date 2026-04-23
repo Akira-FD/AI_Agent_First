@@ -49,19 +49,22 @@ flowchart TD
   Loads runtime settings, project-local `.env`, and Windows persistent environment variables.
 
 - `app/rag`
-  Handles markdown parsing, chunking, ingest, retrieval, and reranking.
+  Handles markdown parsing, chunking, ingest, retrieval, reranking, and optional Milvus vector recall.
 
 - `app/repositories`
-  Uses SQLite to persist documents, chunks, chat messages, and tool logs.
+  Uses SQLite to persist documents, chunks, chat messages, session summaries, and tool logs.
 
 - `app/agent`
-  Orchestrates query flow through intent recognition, retrieval, tool decision, and answer generation.
+  Orchestrates query flow through intent recognition, retrieval, tool decision, answer generation, and summary memory updates.
 
 - `app/tools`
   Provides mock operational tools such as service status check, log search, and restart simulation.
 
 - `app/services/llm_service.py`
   Connects to OpenAI-compatible `/chat/completions`, supports fallback, and now includes automatic retry for transient relay failures.
+
+- `app/services/session_service.py` and `app/services/summary_service.py`
+  Maintain the recent-message window and compact session summary used by long-dialog memory.
 
 - `app/ui`
   Provides the PyQt6 desktop UI, including source display, tool log panel, async request handling, streaming-like rendering, cancel, timeout, and retry interaction.
@@ -81,7 +84,9 @@ At the current stage, the project can already do the following:
 - Ingest local markdown documents from `data/docs/`
 - Parse heading structure and split long sections into chunks
 - Persist chunk metadata and content into SQLite
+- Optionally upsert dense vectors into Milvus when Milvus is enabled and reachable
 - Retrieve context by keyword overlap and reranked technical stack terms
+- Support pluggable vector store recall, with Milvus enabled path and in-memory fallback path
 - Return source references together with answers
 
 ### 4.2 Agent And Tool Flow
@@ -105,12 +110,22 @@ At the current stage, the project can already do the following:
 - Support model selection such as `gpt-5.2`
 - Fall back to local rule-based answers when remote calls fail
 - Retry transient relay failures such as timeout and disconnect
+- Expose retry attempts and retry backoff through runtime settings
+- Mark each completed answer as `remote` or `fallback` in the desktop interaction state
+- Surface provider-side diagnostics in the desktop request state, including `timeout`, `disconnect`, `http_401`, `http_429`, and attempt count
 
 ### 4.5 Dataset And Evaluation
 
 - Harvest high-signal GitHub issue/discussion content into normalized markdown documents
 - Generate deterministic evaluation cases from the same provenance
 - Run batch evaluation and export JSON/Markdown reports
+
+### 4.6 Session Memory
+
+- Keep recent user/assistant messages in `SessionService`
+- Merge prior summary, latest user question, and latest answer into a compact session summary
+- Persist session summaries in SQLite so a restarted runtime can restore long-dialog context
+- Return the updated summary from `MVPAgent.run()` for later UI display or evaluation inspection
 
 ## 5. Current Directory-Level Flow
 
@@ -122,7 +137,8 @@ At the current stage, the project can already do the following:
 4. `MVPAgent` + `SQLiteRepository` + `LLMService` + UI are initialized
 5. UI sends user query to agent
 6. Agent performs retrieval, optional tool routing, and answer generation
-7. UI renders answer, sources, and logs
+7. Agent updates recent messages and persisted session summary
+8. UI renders answer, sources, and logs
 
 ### Data flow
 
@@ -208,8 +224,5 @@ The project is usable as an MVP, but still has several practical limitations:
 
 ## 9. Recommended Next Steps
 
-- expose retry count and backoff through settings
-- mark remote-answer vs fallback-answer explicitly in UI
-- add provider-side request diagnostics to help relay troubleshooting
 - continue replacing mock tools with real safe tool adapters
 - expand evaluation set with more live and adversarial cases

@@ -117,6 +117,18 @@ def describe_llm_backend(settings, llm_service) -> str:
     return backend
 
 
+def describe_retrieval_backend(settings) -> str:
+    return getattr(settings, "retrieval_backend", "unknown")
+
+
+def describe_embedding_backend(settings) -> str:
+    return getattr(settings, "embedding_backend", "unknown")
+
+
+def describe_reranker_backend(settings) -> str:
+    return getattr(settings, "reranker_backend", "unknown")
+
+
 class MainWindow(QMainWindow):
     def __init__(self, agent, settings, document_service=None, llm_service=None) -> None:
         super().__init__()
@@ -141,6 +153,12 @@ class MainWindow(QMainWindow):
         self._stream_chunk_size = 18
         self._pending_stream_text = ""
         self._pending_stream_response = None
+        self._pending_answer_backend = "unknown"
+        self._pending_provider_status = "not_used"
+        self._pending_provider_error = ""
+        self._pending_provider_attempts = 0
+        self._pending_plan_steps = []
+        self._pending_replan_steps = []
         self._ignore_current_response = False
         self._pending_retry_query = None
         self._last_query = ""
@@ -159,6 +177,15 @@ class MainWindow(QMainWindow):
         self.backend_status = QLabel(f"LLM 后端：{backend}")
         self.backend_status.setStyleSheet("font-size: 12px; color: #4b5563; padding: 0 8px 8px 8px;")
         root_layout.addWidget(self.backend_status)
+        self.retrieval_status = QLabel(f"Retrieval 后端：{describe_retrieval_backend(self.settings)}")
+        self.retrieval_status.setStyleSheet("font-size: 12px; color: #4b5563; padding: 0 8px 4px 8px;")
+        root_layout.addWidget(self.retrieval_status)
+        self.embedding_status = QLabel(f"Embedding 后端：{describe_embedding_backend(self.settings)}")
+        self.embedding_status.setStyleSheet("font-size: 12px; color: #4b5563; padding: 0 8px 8px 8px;")
+        root_layout.addWidget(self.embedding_status)
+        self.reranker_status = QLabel(f"Reranker 后端：{describe_reranker_backend(self.settings)}")
+        self.reranker_status.setStyleSheet("font-size: 12px; color: #4b5563; padding: 0 8px 8px 8px;")
+        root_layout.addWidget(self.reranker_status)
         self.request_status = QLabel("状态：空闲")
         self.request_status.setStyleSheet("font-size: 12px; color: #4b5563; padding: 0 8px 8px 8px;")
         root_layout.addWidget(self.request_status)
@@ -211,6 +238,11 @@ class MainWindow(QMainWindow):
     def _build_side_panel(self):
         panel = QWidget()
         layout = QVBoxLayout(panel)
+        layout.addWidget(QLabel("当前会话摘要"))
+        self.session_summary_panel = QTextBrowser()
+        self.session_summary_panel.setPlainText("当前会话摘要：暂无")
+        self.session_summary_panel.setMaximumHeight(120)
+        layout.addWidget(self.session_summary_panel)
         layout.addWidget(QLabel("来源引用"))
         self.sources_panel = QTextBrowser()
         layout.addWidget(self.sources_panel)
@@ -240,6 +272,12 @@ class MainWindow(QMainWindow):
         self._pending_retry_query = None
         self._pending_stream_text = ""
         self._pending_stream_response = None
+        self._pending_answer_backend = "unknown"
+        self._pending_provider_status = "not_used"
+        self._pending_provider_error = ""
+        self._pending_provider_attempts = 0
+        self._pending_plan_steps = []
+        self._pending_replan_steps = []
         self.chat_history.append(f"用户：{query}")
         self._set_controls(send_enabled=False, cancel_enabled=True, retry_enabled=False)
         self.request_status.setText("状态：处理中...")
@@ -265,12 +303,28 @@ class MainWindow(QMainWindow):
             return
         self._pending_stream_response = response
         self._pending_stream_text = response.answer or ""
+        self._pending_answer_backend = getattr(response, "answer_backend", "unknown")
+        self._pending_provider_status = getattr(response, "provider_status", "not_used")
+        self._pending_provider_error = getattr(response, "provider_error", "")
+        self._pending_provider_attempts = getattr(response, "provider_attempts", 0)
+        self._pending_retrieval_backend = getattr(response, "retrieval_backend", describe_retrieval_backend(self.settings))
+        self._pending_embedding_backend = getattr(response, "embedding_backend", describe_embedding_backend(self.settings))
+        self._pending_reranker_backend = getattr(response, "reranker_backend", describe_reranker_backend(self.settings))
+        self._pending_plan_route = getattr(response, "plan_route", "")
+        self._pending_plan_steps = list(getattr(response, "plan_steps", []))
+        self._pending_node_trace = list(getattr(response, "node_trace", []))
+        self._pending_tool_actions = list(getattr(response, "tool_actions", []))
+        self._pending_recovery_action = getattr(response, "recovery_action", "")
+        self._pending_replan_steps = list(getattr(response, "replan_steps", []))
         self._render_response_metadata(response)
         self.chat_history.append("助手：")
         if not self._pending_stream_text:
             self._finish_streaming_response()
             return
-        self.request_status.setText("状态：输出中...")
+        self.request_status.setText(
+            f"状态：输出中... | 回答来源：{self._pending_answer_backend} | "
+            f"provider={self._pending_provider_status} | attempts={self._pending_provider_attempts}"
+        )
         self._set_controls(send_enabled=False, cancel_enabled=True, retry_enabled=False)
         self._stream_timer.start(self._stream_interval_ms)
 
@@ -311,15 +365,61 @@ class MainWindow(QMainWindow):
     def _finish_streaming_response(self) -> None:
         self._stream_timer.stop()
         response = self._pending_stream_response
+        answer_backend = self._pending_answer_backend
+        provider_status = self._pending_provider_status
+        provider_error = self._pending_provider_error
+        provider_attempts = self._pending_provider_attempts
+        retrieval_backend = getattr(self, "_pending_retrieval_backend", describe_retrieval_backend(self.settings))
+        embedding_backend = getattr(self, "_pending_embedding_backend", describe_embedding_backend(self.settings))
+        reranker_backend = getattr(self, "_pending_reranker_backend", describe_reranker_backend(self.settings))
+        plan_route = getattr(self, "_pending_plan_route", "")
+        plan_steps = getattr(self, "_pending_plan_steps", [])
+        node_trace = getattr(self, "_pending_node_trace", [])
+        tool_actions = getattr(self, "_pending_tool_actions", [])
+        recovery_action = getattr(self, "_pending_recovery_action", "")
+        replan_steps = getattr(self, "_pending_replan_steps", [])
         self._pending_stream_response = None
         self._pending_stream_text = ""
+        self._pending_answer_backend = "unknown"
+        self._pending_provider_status = "not_used"
+        self._pending_provider_error = ""
+        self._pending_provider_attempts = 0
+        self._pending_retrieval_backend = describe_retrieval_backend(self.settings)
+        self._pending_embedding_backend = describe_embedding_backend(self.settings)
+        self._pending_reranker_backend = describe_reranker_backend(self.settings)
+        self._pending_plan_route = ""
+        self._pending_plan_steps = []
+        self._pending_node_trace = []
+        self._pending_tool_actions = []
+        self._pending_recovery_action = ""
+        self._pending_replan_steps = []
         if self._ignore_current_response or response is None:
             self.request_status.setText("状态：已取消")
             self._set_controls(send_enabled=True, cancel_enabled=False, retry_enabled=bool(self._last_query))
             return
 
         self.chat_history.append("")
-        self.request_status.setText("状态：已完成")
+        status_text = (
+            f"状态：已完成 | 回答来源：{answer_backend} | "
+            f"provider={provider_status} | attempts={provider_attempts} | "
+            f"retrieval={retrieval_backend} | embedding={embedding_backend} | reranker={reranker_backend}"
+        )
+        if plan_route:
+            status_text += f" | plan={plan_route}"
+        if plan_steps:
+            status_text += f" | steps={'>'.join(plan_steps)}"
+        if node_trace:
+            status_text += f" | trace={'>'.join(node_trace)}"
+        if tool_actions:
+            tool_names = ",".join(str(action.get("tool_name", "")) for action in tool_actions)
+            status_text += f" | actions={len(tool_actions)} | tools={tool_names}"
+        if recovery_action:
+            status_text += f" | recovery={recovery_action}"
+        if replan_steps:
+            status_text += f" | replan={'>'.join(replan_steps)}"
+        if provider_error:
+            status_text += f" | error={provider_error}"
+        self.request_status.setText(status_text)
         self._set_controls(send_enabled=True, cancel_enabled=False, retry_enabled=bool(self._last_query))
 
     def _handle_request_timeout(self) -> None:
@@ -361,6 +461,15 @@ class MainWindow(QMainWindow):
         self.retry_button.setEnabled(retry_enabled)
 
     def _render_response_metadata(self, response) -> None:
+        summary = getattr(response, "summary", "")
+        self.session_summary_panel.setPlainText(f"当前会话摘要：{summary or '暂无'}")
+        retrieval_backend = getattr(response, "retrieval_backend", describe_retrieval_backend(self.settings))
+        embedding_backend = getattr(response, "embedding_backend", describe_embedding_backend(self.settings))
+        reranker_backend = getattr(response, "reranker_backend", describe_reranker_backend(self.settings))
+        self.retrieval_status.setText(f"Retrieval 后端：{retrieval_backend}")
+        self.embedding_status.setText(f"Embedding 后端：{embedding_backend}")
+        self.reranker_status.setText(f"Reranker 后端：{reranker_backend}")
+
         self.sources_panel.clear()
         for source in response.sources:
             self.sources_panel.append(SourceCard(source).render_text())

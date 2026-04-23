@@ -3,12 +3,16 @@ import unittest
 from pathlib import Path
 
 from app.agent.graph import MVPAgent
+from app.agent.state import AgentState
+from app.agent.nodes.tool_router_node import ToolAction, route_tools
 from app.config.settings import AppSettings
 from app.rag.ingest_pipeline import IngestPipeline
 from app.repositories.sqlite_repo import SQLiteRepository
 from app.services.document_service import DocumentService
 from app.services.llm_service import RuleBasedLLMService
 from app.services.session_service import SessionService
+from app.models.tool_result import ToolResult
+from app.tools.base import ToolDefinition
 from app.tools.registry import ToolRegistry
 
 
@@ -67,6 +71,13 @@ class ToolsAndAgentTests(unittest.TestCase):
         self.assertEqual(response.tool_logs[0]["tool_name"], "restart_mock_service")
         self.assertIn("已执行模拟工具", response.answer)
 
+    def test_tool_router_builds_action_list_for_multi_step_request(self) -> None:
+        actions = route_tools("请先查询 redis 状态，再查一下 timeout 相关日志")
+
+        self.assertEqual([action.tool_name for action in actions], ["check_service_status", "search_error_logs"])
+        self.assertEqual(actions[0].tool_input, {"service_name": "redis"})
+        self.assertEqual(actions[1].tool_input, {"keyword": "timeout"})
+
     def test_does_not_misfire_tool_for_explanatory_restart_question(self) -> None:
         response = self.agent.run(session_id="s3", user_query="解释一下 Redis 重启前为什么要确认写入任务")
 
@@ -87,6 +98,300 @@ class ToolsAndAgentTests(unittest.TestCase):
         self.assertEqual(response.intent, "execute")
         self.assertTrue(response.tool_logs)
         self.assertIn("mysql", response.answer.lower())
+
+    def test_agent_state_records_node_trace_for_knowledge_path(self) -> None:
+        state = AgentState(session_id="s6", user_query="Redis 连接失败时先做什么？")
+
+        self.assertEqual(state.session_id, "s6")
+        self.assertEqual(state.user_query, "Redis 连接失败时先做什么？")
+        self.assertEqual(state.node_trace, [])
+
+        response = self.agent.run(session_id="s6", user_query=state.user_query)
+
+        self.assertEqual(response.intent, "troubleshoot")
+        self.assertIn("intent", response.node_trace)
+        self.assertIn("retrieve", response.node_trace)
+        self.assertIn("plan", response.node_trace)
+        self.assertIn("answer", response.node_trace)
+        self.assertIn("summary", response.node_trace)
+        self.assertNotIn("tool_router", response.node_trace)
+        self.assertNotIn("tool_exec", response.node_trace)
+
+    def test_agent_state_records_tool_nodes_for_execute_path(self) -> None:
+        response = self.agent.run(session_id="s7", user_query="请帮我重启 redis 服务")
+
+        self.assertEqual(response.intent, "execute")
+        self.assertEqual(response.plan_route, "tool")
+        self.assertEqual(
+            response.node_trace,
+            [
+                "load_memory",
+                "persist_user_message",
+                "intent",
+                "retrieve",
+                "plan",
+                "tool_router",
+                "tool_exec",
+                "answer",
+                "persist_assistant_message",
+                "summary",
+            ],
+        )
+        self.assertEqual(response.selected_tool, "restart_mock_service")
+
+    def test_agent_plan_route_separates_knowledge_troubleshoot_and_execute(self) -> None:
+        knowledge = self.agent.run(session_id="s8", user_query="解释一下 Redis maxmemory 的作用")
+        troubleshoot = self.agent.run(session_id="s9", user_query="Redis 连接失败时怎么排查？")
+        execute = self.agent.run(session_id="s10", user_query="请帮我重启 redis 服务")
+
+        self.assertEqual(knowledge.plan_route, "answer")
+        self.assertEqual(troubleshoot.plan_route, "diagnose")
+        self.assertEqual(execute.plan_route, "tool")
+
+    def test_agent_records_observation_and_recovery_for_failed_tool(self) -> None:
+        class FailingRestartTool:
+            definition = ToolDefinition(
+                name="restart_mock_service",
+                description="Always fails for recovery testing.",
+            )
+
+            def run(self, payload: dict[str, str]) -> ToolResult:
+                return ToolResult(
+                    success=False,
+                    code="MOCK_FAILURE",
+                    message="模拟重启失败，需要人工确认服务状态。",
+                    data={"service_name": payload.get("service_name", "")},
+                    retryable=False,
+                )
+
+        registry = ToolRegistry.with_defaults()
+        registry.register("restart_mock_service", FailingRestartTool())
+        agent = MVPAgent(
+            settings=self.settings,
+            repository=self.repo,
+            session_service=SessionService(),
+            document_service=DocumentService(self.repo),
+            llm_service=RuleBasedLLMService(),
+            tool_registry=registry,
+        )
+
+        response = agent.run(session_id="s11", user_query="请帮我重启 redis 服务")
+
+        self.assertEqual(response.tool_logs[0]["status"], "failed")
+        self.assertIn("observation", response.node_trace)
+        self.assertIn("recovery", response.node_trace)
+        self.assertIn("replan", response.node_trace)
+        self.assertEqual(response.recovery_action, "degrade_to_answer")
+        self.assertEqual(response.replan_steps, ["degrade_to_answer", "answer_with_available_context"])
+        self.assertIn("模拟重启失败", response.observations[0])
+
+    def test_agent_executes_multiple_tool_actions_in_order(self) -> None:
+        response = self.agent.run(session_id="s12", user_query="请先查询 redis 状态，再查一下 timeout 相关日志")
+
+        self.assertEqual(response.intent, "execute")
+        self.assertEqual(response.plan_route, "tool")
+        self.assertEqual(
+            response.plan_steps,
+            [
+                "retrieve_context",
+                "check_service_status",
+                "search_error_logs",
+                "answer_with_tool_results",
+            ],
+        )
+        self.assertEqual(
+            [log["tool_name"] for log in response.tool_logs],
+            ["check_service_status", "search_error_logs"],
+        )
+        self.assertEqual(
+            [action["tool_name"] for action in response.tool_actions],
+            ["check_service_status", "search_error_logs"],
+        )
+        self.assertEqual(response.selected_tool, "check_service_status")
+        self.assertEqual(response.node_trace.count("tool_exec"), 2)
+        self.assertIn("服务 redis 当前状态为 running", response.observations[0])
+        self.assertIn("timeout", response.observations[1])
+
+    def test_agent_recovers_retryable_validation_error_with_repaired_action(self) -> None:
+        class AliasRepairTool:
+            definition = ToolDefinition(
+                name="check_service_status",
+                description="Fails once with a repair hint then succeeds.",
+            )
+
+            def __init__(self) -> None:
+                self.calls: list[dict[str, str]] = []
+
+            def run(self, payload: dict[str, str]) -> ToolResult:
+                self.calls.append(dict(payload))
+                if "service_name" not in payload and "service" in payload:
+                    return ToolResult(
+                        success=False,
+                        code="VALIDATION_ERROR",
+                        message="工具参数校验失败，请根据结构化错误修正参数。",
+                        data={
+                            "missing_fields": ["service_name"],
+                            "received_fields": ["service"],
+                            "repaired_payload": {"service_name": payload["service"]},
+                        },
+                        retryable=True,
+                    )
+                return ToolResult(
+                    success=True,
+                    code="OK",
+                    message=f"服务 {payload['service_name']} 当前状态为 running。",
+                    data={"service_name": payload["service_name"], "status": "running"},
+                )
+
+        tool = AliasRepairTool()
+        registry = ToolRegistry.with_defaults()
+        registry.register("check_service_status", tool)
+        agent = MVPAgent(
+            settings=self.settings,
+            repository=self.repo,
+            session_service=SessionService(),
+            document_service=DocumentService(self.repo),
+            llm_service=RuleBasedLLMService(),
+            tool_registry=registry,
+        )
+
+        response = agent.run(
+            session_id="s13",
+            user_query="请检查 redis 状态",
+            tool_actions=[ToolAction("check_service_status", {"service": "redis"})],
+        )
+
+        self.assertEqual(response.recovery_action, "retry_repaired_action")
+        self.assertEqual(
+            response.replan_steps,
+            ["retry_repaired_action", "check_service_status", "answer_with_tool_results"],
+        )
+        self.assertEqual(response.node_trace.count("tool_exec"), 2)
+        self.assertEqual(response.node_trace.count("recovery"), 1)
+        self.assertEqual(response.node_trace.count("replan"), 1)
+        self.assertEqual([log["status"] for log in response.tool_logs], ["failed", "success"])
+        self.assertEqual(tool.calls, [{"service": "redis"}, {"service_name": "redis"}])
+        self.assertIn("running", response.observations[-1])
+
+    def test_agent_stops_remaining_actions_after_degrade_replan(self) -> None:
+        class FailingStatusTool:
+            definition = ToolDefinition(
+                name="check_service_status",
+                description="Fails and forces degrade-to-answer replan.",
+            )
+
+            def run(self, payload: dict[str, str]) -> ToolResult:
+                return ToolResult(
+                    success=False,
+                    code="STATUS_CHECK_FAILED",
+                    message="状态检查失败，无法继续执行后续运维动作。",
+                    data={"service_name": payload.get("service_name", "")},
+                    retryable=False,
+                )
+
+        class TrackingLogTool:
+            definition = ToolDefinition(
+                name="search_error_logs",
+                description="Tracks whether the second action executed.",
+            )
+
+            def __init__(self) -> None:
+                self.calls: list[dict[str, str]] = []
+
+            def run(self, payload: dict[str, str]) -> ToolResult:
+                self.calls.append(dict(payload))
+                return ToolResult(
+                    success=True,
+                    code="OK",
+                    message="日志检查已执行。",
+                    data={"keyword": payload.get("keyword", "")},
+                )
+
+        tracking_tool = TrackingLogTool()
+        registry = ToolRegistry.with_defaults()
+        registry.register("check_service_status", FailingStatusTool())
+        registry.register("search_error_logs", tracking_tool)
+        agent = MVPAgent(
+            settings=self.settings,
+            repository=self.repo,
+            session_service=SessionService(),
+            document_service=DocumentService(self.repo),
+            llm_service=RuleBasedLLMService(),
+            tool_registry=registry,
+        )
+
+        response = agent.run(
+            session_id="s14",
+            user_query="请先查询 redis 状态，再查一下 timeout 相关日志",
+        )
+
+        self.assertEqual(response.recovery_action, "degrade_to_answer")
+        self.assertEqual(response.replan_steps, ["degrade_to_answer", "answer_with_available_context"])
+        self.assertEqual(response.node_trace.count("tool_exec"), 1)
+        self.assertEqual([log["tool_name"] for log in response.tool_logs], ["check_service_status"])
+        self.assertEqual(tracking_tool.calls, [])
+
+    def test_agent_stops_remaining_actions_after_retry_later_replan(self) -> None:
+        class RetryLaterTool:
+            definition = ToolDefinition(
+                name="check_service_status",
+                description="Returns retryable error without repaired payload.",
+            )
+
+            def run(self, payload: dict[str, str]) -> ToolResult:
+                return ToolResult(
+                    success=False,
+                    code="UPSTREAM_UNAVAILABLE",
+                    message="状态源暂时不可用，请稍后重试。",
+                    data={"service_name": payload.get("service_name", "")},
+                    retryable=True,
+                )
+
+        class TrackingRestartTool:
+            definition = ToolDefinition(
+                name="restart_mock_service",
+                description="Tracks whether restart action executed.",
+            )
+
+            def __init__(self) -> None:
+                self.calls: list[dict[str, str]] = []
+
+            def run(self, payload: dict[str, str]) -> ToolResult:
+                self.calls.append(dict(payload))
+                return ToolResult(
+                    success=True,
+                    code="OK",
+                    message="已执行模拟工具。",
+                    data={"service_name": payload.get("service_name", "")},
+                )
+
+        tracking_tool = TrackingRestartTool()
+        registry = ToolRegistry.with_defaults()
+        registry.register("check_service_status", RetryLaterTool())
+        registry.register("restart_mock_service", tracking_tool)
+        agent = MVPAgent(
+            settings=self.settings,
+            repository=self.repo,
+            session_service=SessionService(),
+            document_service=DocumentService(self.repo),
+            llm_service=RuleBasedLLMService(),
+            tool_registry=registry,
+        )
+
+        response = agent.run(
+            session_id="s15",
+            user_query="请先查询 redis 状态，再重启 redis 服务",
+            tool_actions=[
+                ToolAction("check_service_status", {"service_name": "redis"}),
+                ToolAction("restart_mock_service", {"service_name": "redis"}),
+            ],
+        )
+
+        self.assertEqual(response.recovery_action, "retry_later")
+        self.assertEqual(response.replan_steps, ["retry_later", "answer_with_retry_guidance"])
+        self.assertEqual(response.node_trace.count("tool_exec"), 1)
+        self.assertEqual([log["tool_name"] for log in response.tool_logs], ["check_service_status"])
+        self.assertEqual(tracking_tool.calls, [])
 
 
 if __name__ == "__main__":

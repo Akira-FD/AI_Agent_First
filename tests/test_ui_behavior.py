@@ -28,6 +28,46 @@ class UIBehaviorTests(unittest.TestCase):
             self.assertTrue(chat_page.sources)
             self.assertTrue(chat_page.tool_logs)
             self.assertIn("已执行模拟工具", response.answer)
+            self.assertIn(response.answer_backend, {"remote", "fallback"})
+
+    def test_chat_page_exposes_answer_backend_metadata(self) -> None:
+        class FakeAgent:
+            def run(self, session_id: str, user_query: str):
+                return type(
+                    "AgentResponse",
+                    (),
+                    {
+                        "answer": "这是远程模型回答。",
+                        "sources": [],
+                        "tool_logs": [],
+                        "answer_backend": "remote",
+                        "provider_status": "success",
+                        "provider_error": "",
+                        "provider_attempts": 1,
+                        "reranker_backend": "bge",
+                        "node_trace": ["intent", "retrieve", "plan", "answer"],
+                        "plan_route": "answer",
+                        "plan_steps": ["retrieve_context", "answer_with_context"],
+                        "tool_actions": [],
+                        "recovery_action": "none",
+                        "replan_steps": [],
+                    },
+                )()
+
+        chat_page = ChatPage(agent=FakeAgent(), session_id="ui-test")
+
+        response = chat_page.send_message("测试问题")
+
+        self.assertEqual(response.answer_backend, "remote")
+        self.assertEqual(response.provider_status, "success")
+        self.assertEqual(chat_page.reranker_backend, "bge")
+        self.assertEqual(chat_page.node_trace, ["intent", "retrieve", "plan", "answer"])
+        self.assertEqual(chat_page.plan_route, "answer")
+        self.assertEqual(chat_page.plan_steps, ["retrieve_context", "answer_with_context"])
+        self.assertEqual(chat_page.tool_actions, [])
+        self.assertEqual(chat_page.recovery_action, "none")
+        self.assertEqual(chat_page.replan_steps, [])
+        self.assertEqual(chat_page.messages[-1]["role"], "assistant")
 
     def test_docs_page_loads_document_metadata_for_sidebar(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

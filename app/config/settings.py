@@ -74,6 +74,18 @@ class AppSettings:
     llm_base_url: str
     llm_model: str
     llm_timeout_seconds: int
+    llm_retry_attempts: int
+    llm_retry_backoff_seconds: float
+    retrieval_backend: str
+    embedding_backend: str
+    reranker_backend: str
+    bge_reranker_model: str
+    milvus_enabled: bool
+    milvus_uri: str
+    milvus_collection: str
+    milvus_dimension: int
+    milvus_lite_path: Path
+    remote_retrieval_url: str
 
     @classmethod
     def from_root(cls, root_dir: Path) -> "AppSettings":
@@ -83,8 +95,19 @@ class AppSettings:
         docs_dir = data_dir / "docs"
         cache_dir = data_dir / "cache"
         sqlite_dir = data_dir / "sqlite"
-        for path in (data_dir, docs_dir, cache_dir, sqlite_dir):
+        milvus_dir = data_dir / "milvus"
+        for path in (data_dir, docs_dir, cache_dir, sqlite_dir, milvus_dir):
             path.mkdir(parents=True, exist_ok=True)
+        milvus_lite_value = _get_setting(
+            "AI_AGENT_FIRST_MILVUS_LITE_PATH",
+            str(milvus_dir / "ai_agent_first_milvus_lite.db"),
+            file_values,
+            persistent_values,
+        )
+        milvus_lite_path = Path(milvus_lite_value)
+        if not milvus_lite_path.is_absolute():
+            milvus_lite_path = (root_dir / milvus_lite_path).resolve()
+        milvus_lite_path.parent.mkdir(parents=True, exist_ok=True)
         return cls(
             root_dir=root_dir,
             app_name="AI Agent First",
@@ -111,5 +134,64 @@ class AppSettings:
             llm_model=_get_setting("AI_AGENT_FIRST_LLM_MODEL", "gpt-4.1-mini", file_values, persistent_values),
             llm_timeout_seconds=int(
                 _get_setting("AI_AGENT_FIRST_LLM_TIMEOUT_SECONDS", "30", file_values, persistent_values)
+            ),
+            llm_retry_attempts=int(
+                _get_setting("AI_AGENT_FIRST_LLM_RETRY_ATTEMPTS", "2", file_values, persistent_values)
+            ),
+            llm_retry_backoff_seconds=float(
+                _get_setting("AI_AGENT_FIRST_LLM_RETRY_BACKOFF_SECONDS", "0.4", file_values, persistent_values)
+            ),
+            retrieval_backend=_get_setting(
+                "AI_AGENT_FIRST_RETRIEVAL_BACKEND",
+                "in-memory",
+                file_values,
+                persistent_values,
+            ),
+            embedding_backend=_get_setting(
+                "AI_AGENT_FIRST_EMBEDDING_BACKEND",
+                "hash",
+                file_values,
+                persistent_values,
+            ),
+            reranker_backend=_get_setting(
+                "AI_AGENT_FIRST_RERANKER_BACKEND",
+                "keyword",
+                file_values,
+                persistent_values,
+            ),
+            bge_reranker_model=_get_setting(
+                "AI_AGENT_FIRST_BGE_RERANKER_MODEL",
+                "BAAI/bge-reranker-v2-m3",
+                file_values,
+                persistent_values,
+            ),
+            milvus_enabled=_get_setting(
+                "AI_AGENT_FIRST_MILVUS_ENABLED",
+                "false",
+                file_values,
+                persistent_values,
+            ).lower()
+            in {"1", "true", "yes", "on"},
+            milvus_uri=_get_setting(
+                "AI_AGENT_FIRST_MILVUS_URI",
+                "http://localhost:19530",
+                file_values,
+                persistent_values,
+            ),
+            milvus_collection=_get_setting(
+                "AI_AGENT_FIRST_MILVUS_COLLECTION",
+                "ai_agent_first_chunks",
+                file_values,
+                persistent_values,
+            ),
+            milvus_dimension=int(
+                _get_setting("AI_AGENT_FIRST_MILVUS_DIMENSION", "96", file_values, persistent_values)
+            ),
+            milvus_lite_path=milvus_lite_path,
+            remote_retrieval_url=_get_setting(
+                "AI_AGENT_FIRST_REMOTE_RETRIEVAL_URL",
+                "",
+                file_values,
+                persistent_values,
             ),
         )

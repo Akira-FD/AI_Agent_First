@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.services.llm_service import RuleBasedLLMService
+from app.services.llm_service import LLMAnswerResult, RuleBasedLLMService
 
 
 def build_answer(
@@ -8,5 +8,9 @@ def build_answer(
     user_query: str,
     context_text: str,
     tool_message: str | None = None,
-) -> str:
-    return llm_service.generate_answer(user_query=user_query, context_text=context_text, tool_message=tool_message)
+) -> LLMAnswerResult:
+    return llm_service.generate_answer_result(
+        user_query=user_query,
+        context_text=context_text,
+        tool_message=tool_message,
+    )

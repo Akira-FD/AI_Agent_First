@@ -64,10 +64,18 @@ class SQLiteRepository:
                 CREATE TABLE IF NOT EXISTS chat_sessions (
                     session_id TEXT PRIMARY KEY,
                     title TEXT NOT NULL DEFAULT '',
+                    summary TEXT NOT NULL DEFAULT '',
                     created_at TEXT NOT NULL,
                     updated_at TEXT NOT NULL
                 )
                 """
+            )
+            self._ensure_columns(
+                conn,
+                "chat_sessions",
+                {
+                    "summary": "TEXT NOT NULL DEFAULT ''",
+                },
             )
             conn.execute(
                 """
@@ -214,8 +222,8 @@ class SQLiteRepository:
         with closing(self._connect()) as conn:
             conn.execute(
                 """
-                INSERT INTO chat_sessions(session_id, title, created_at, updated_at)
-                VALUES(?, ?, ?, ?)
+                INSERT INTO chat_sessions(session_id, title, summary, created_at, updated_at)
+                VALUES(?, ?, '', ?, ?)
                 ON CONFLICT(session_id) DO UPDATE SET
                     updated_at = excluded.updated_at,
                     title = CASE
@@ -226,6 +234,23 @@ class SQLiteRepository:
                 (session_id, title, now, now),
             )
             conn.commit()
+
+    def save_session_summary(self, session_id: str, summary: str) -> None:
+        self.ensure_chat_session(session_id)
+        with closing(self._connect()) as conn:
+            conn.execute(
+                "UPDATE chat_sessions SET summary = ?, updated_at = ? WHERE session_id = ?",
+                (summary, self._now(), session_id),
+            )
+            conn.commit()
+
+    def get_session_summary(self, session_id: str) -> str:
+        with closing(self._connect()) as conn:
+            row = conn.execute(
+                "SELECT summary FROM chat_sessions WHERE session_id = ?",
+                (session_id,),
+            ).fetchone()
+        return row[0] if row else ""
 
     def save_chat_message(self, session_id: str, role: str, content: str) -> None:
         self.ensure_chat_session(session_id, title=content[:32] if role == "user" else "")
