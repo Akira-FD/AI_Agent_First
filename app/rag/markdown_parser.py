@@ -18,15 +18,22 @@ class MarkdownSection:
 
 class MarkdownParser:
     heading_pattern = re.compile(r"^(#{1,6})\s+(.+)$")
+    fence_pattern = re.compile(r"^\s*(```|~~~)")
 
     def parse(self, text: str) -> list[MarkdownSection]:
         sections: list[MarkdownSection] = []
         path_stack: list[str] = []
         current = MarkdownSection(title="ROOT", level=0, path=[])
+        in_code_fence = False
 
         for line in text.splitlines():
+            if self.fence_pattern.match(line):
+                in_code_fence = not in_code_fence
+                current.content.append(line)
+                continue
+
             match = self.heading_pattern.match(line)
-            if match:
+            if match and not in_code_fence:
                 if current.text:
                     sections.append(current)
                 level = len(match.group(1))

@@ -4,7 +4,20 @@ from dataclasses import dataclass, field
 
 from app.models.tool_result import ToolResult
 from app.tools.base import ToolDefinition
-from app.tools.validators import require_fields
+from app.tools.validators import validate_tool_input
+
+
+SERVICE_ALIASES = {"service_name": ["service", "serviceName", "name", "服务名"]}
+
+
+def validation_error_result(error: dict[str, object]) -> ToolResult:
+    return ToolResult(
+        success=False,
+        code="VALIDATION_ERROR",
+        message="工具参数校验失败，请根据结构化错误修正参数。",
+        data=error,
+        retryable=True,
+    )
 
 
 @dataclass
@@ -17,8 +30,10 @@ class CheckServiceStatusTool:
     )
 
     def run(self, payload: dict[str, str]) -> ToolResult:
-        require_fields(payload, ["service_name"])
-        service_name = payload["service_name"]
+        valid, repaired, error = validate_tool_input(payload, ["service_name"], SERVICE_ALIASES)
+        if not valid or repaired is None:
+            return validation_error_result(error or {})
+        service_name = repaired["service_name"]
         return ToolResult(
             success=True,
             code="OK",
@@ -37,8 +52,10 @@ class SearchErrorLogsTool:
     )
 
     def run(self, payload: dict[str, str]) -> ToolResult:
-        require_fields(payload, ["keyword"])
-        keyword = payload["keyword"]
+        valid, repaired, error = validate_tool_input(payload, ["keyword"], {"keyword": ["query", "q", "关键词"]})
+        if not valid or repaired is None:
+            return validation_error_result(error or {})
+        keyword = repaired["keyword"]
         return ToolResult(
             success=True,
             code="OK",
@@ -57,8 +74,10 @@ class RestartMockServiceTool:
     )
 
     def run(self, payload: dict[str, str]) -> ToolResult:
-        require_fields(payload, ["service_name"])
-        service_name = payload["service_name"]
+        valid, repaired, error = validate_tool_input(payload, ["service_name"], SERVICE_ALIASES)
+        if not valid or repaired is None:
+            return validation_error_result(error or {})
+        service_name = repaired["service_name"]
         return ToolResult(
             success=True,
             code="OK",

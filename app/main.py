@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import argparse
 
 from app.agent.graph import MVPAgent
 from app.config.settings import AppSettings
@@ -10,7 +11,7 @@ from app.services.document_service import DocumentService
 from app.services.llm_service import RuleBasedLLMService
 from app.services.session_service import SessionService
 from app.tools.registry import ToolRegistry
-from app.ui.main_window import DesktopAppShell
+from app.ui.main_window import DesktopAppShell, launch_pyqt_app
 
 
 @dataclass
@@ -41,7 +42,7 @@ def bootstrap_application(root: Path | None = None) -> BootstrappedApplication:
         llm_service=llm_service,
         tool_registry=tool_registry,
     )
-    ui_shell = DesktopAppShell(agent=agent, settings=settings)
+    ui_shell = DesktopAppShell(agent=agent, settings=settings, document_service=document_service)
     return BootstrappedApplication(
         settings=settings,
         repository=repository,
@@ -55,7 +56,14 @@ def bootstrap_application(root: Path | None = None) -> BootstrappedApplication:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="AI Agent First local MVP")
+    parser.add_argument("--ui", action="store_true", help="Launch the PyQt6 desktop UI.")
+    args = parser.parse_args()
+
     app = bootstrap_application()
+    if args.ui:
+        launch_pyqt_app(app.agent, app.settings, app.document_service)
+        return
     print(app.ui_shell.render_status())
 
 

@@ -36,6 +36,25 @@ class RetrieverTests(unittest.TestCase):
             self.assertTrue(result.context_text)
             self.assertGreaterEqual(len(result.sources), 1)
             self.assertIn("重启服务", result.context_text)
+            self.assertIn("score", result.sources[0])
+            self.assertIn("excerpt", result.sources[0])
+            self.assertGreater(float(result.sources[0]["score"]), 0)
+
+    def test_limits_context_length_for_ui_and_llm_consumption(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            settings = AppSettings.from_root(root)
+            long_doc = "# Redis\n\n## 重启服务\n\n" + " ".join(["redis 重启 验证"] * 80)
+            (settings.docs_dir / "long.md").write_text(long_doc, encoding="utf-8")
+
+            repo = SQLiteRepository(settings.sqlite_path)
+            IngestPipeline(settings=settings, repository=repo).ingest_directory(settings.docs_dir)
+
+            retriever = Retriever(repository=repo, top_k=5, max_context_chars=120)
+            result = retriever.retrieve("redis 重启")
+
+            self.assertLessEqual(len(result.context_text), 120)
+            self.assertTrue(result.sources)
 
 
 if __name__ == "__main__":

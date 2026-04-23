@@ -22,6 +22,15 @@ SAMPLE_DOC = """# Redis 故障排查
 """
 
 
+class RecordingVectorIndexer:
+    def __init__(self) -> None:
+        self.indexed_chunks = []
+
+    def upsert_chunks(self, chunks):
+        self.indexed_chunks.extend(chunks)
+        return len(chunks)
+
+
 class IngestPipelineTests(unittest.TestCase):
     def test_ingests_markdown_into_sqlite_and_memory_store(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -41,6 +50,9 @@ class IngestPipelineTests(unittest.TestCase):
             stored_chunks = repo.list_chunks()
             self.assertEqual(len(stored_docs), 1)
             self.assertEqual(len(stored_chunks), result.chunk_count)
+            self.assertEqual(stored_docs[0].chunk_count, result.chunk_count)
+            self.assertGreater(stored_docs[0].file_size, 0)
+            self.assertTrue(stored_docs[0].updated_at)
 
     def test_reingest_is_idempotent_for_same_markdown_file(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -85,6 +97,22 @@ class IngestPipelineTests(unittest.TestCase):
             pipeline.ingest_directory(settings.docs_dir)
 
             self.assertEqual(len(repo.list_documents()), 1)
+
+    def test_ingest_indexes_chunks_through_vector_indexer_port(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            settings = AppSettings.from_root(root)
+            sample_path = settings.docs_dir / "redis.md"
+            sample_path.write_text(SAMPLE_DOC, encoding="utf-8")
+            indexer = RecordingVectorIndexer()
+
+            repo = SQLiteRepository(settings.sqlite_path)
+            pipeline = IngestPipeline(settings=settings, repository=repo, vector_indexer=indexer)
+
+            result = pipeline.ingest_directory(settings.docs_dir)
+
+            self.assertEqual(result.indexed_chunk_count, result.chunk_count)
+            self.assertEqual(len(indexer.indexed_chunks), result.chunk_count)
 
 
 if __name__ == "__main__":

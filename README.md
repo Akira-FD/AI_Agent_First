@@ -18,4 +18,21 @@ python -m unittest discover -s tests -v
 python scripts/ingest_docs.py
 python scripts/run_demo.py
 python -m app.main
+python scripts/run_desktop.py
 ```
+
+## 桌面端
+
+运行桌面端前先确保安装依赖：
+
+```bash
+python -m pip install PyQt6
+```
+
+启动 PyQt6 MVP：
+
+```bash
+python scripts/run_desktop.py
+```
+
+界面包含左侧文档列表、中间聊天区、右侧来源引用和工具日志区。默认会读取 `data/docs/` 下的 Markdown 文档并入库。

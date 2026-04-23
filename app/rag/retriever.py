@@ -11,6 +11,7 @@ class Retriever:
         self,
         repository: SQLiteRepository,
         top_k: int = 5,
+        max_context_chars: int = 2400,
         vector_store: InMemoryVectorStore | None = None,
         reranker: KeywordReranker | None = None,
         context_builder: ContextBuilder | None = None,
@@ -19,7 +20,7 @@ class Retriever:
         self.top_k = top_k
         self.vector_store = vector_store or InMemoryVectorStore()
         self.reranker = reranker or KeywordReranker()
-        self.context_builder = context_builder or ContextBuilder()
+        self.context_builder = context_builder or ContextBuilder(max_context_chars=max_context_chars)
 
     def retrieve(self, query: str) -> RetrievalResult:
         chunks = self.repository.list_chunks()
