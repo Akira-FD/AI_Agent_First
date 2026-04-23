@@ -8,7 +8,7 @@ from app.agent.graph import MVPAgent
 from app.config.settings import AppSettings
 from app.repositories.sqlite_repo import SQLiteRepository
 from app.services.document_service import DocumentService
-from app.services.llm_service import RuleBasedLLMService
+from app.services.llm_service import build_llm_service
 from app.services.session_service import SessionService
 from app.tools.registry import ToolRegistry
 from app.ui.main_window import DesktopAppShell, launch_pyqt_app
@@ -20,7 +20,7 @@ class BootstrappedApplication:
     repository: SQLiteRepository
     session_service: SessionService
     document_service: DocumentService
-    llm_service: RuleBasedLLMService
+    llm_service: object
     tool_registry: ToolRegistry
     agent: MVPAgent
     ui_shell: DesktopAppShell
@@ -32,7 +32,7 @@ def bootstrap_application(root: Path | None = None) -> BootstrappedApplication:
     repository = SQLiteRepository(settings.sqlite_path)
     session_service = SessionService()
     document_service = DocumentService(repository)
-    llm_service = RuleBasedLLMService()
+    llm_service = build_llm_service(settings)
     tool_registry = ToolRegistry.with_defaults()
     agent = MVPAgent(
         settings=settings,
@@ -42,7 +42,12 @@ def bootstrap_application(root: Path | None = None) -> BootstrappedApplication:
         llm_service=llm_service,
         tool_registry=tool_registry,
     )
-    ui_shell = DesktopAppShell(agent=agent, settings=settings, document_service=document_service)
+    ui_shell = DesktopAppShell(
+        agent=agent,
+        settings=settings,
+        document_service=document_service,
+        llm_service=llm_service,
+    )
     return BootstrappedApplication(
         settings=settings,
         repository=repository,
@@ -62,7 +67,7 @@ def main() -> None:
 
     app = bootstrap_application()
     if args.ui:
-        launch_pyqt_app(app.agent, app.settings, app.document_service)
+        launch_pyqt_app(app.agent, app.settings, app.document_service, app.llm_service)
         return
     print(app.ui_shell.render_status())
 

@@ -1,0 +1,1596 @@
+[
+  {
+    "id": "redis-redis-issues-8062",
+    "query": "How should I handle: [CRASH] Unable to start redis-server on Apple Silicon M1 as non-root",
+    "expected_source": "redis-redis-issues-8062.md",
+    "answer_keywords": [
+      "also",
+      "noticed",
+      "this",
+      "when",
+      "trying",
+      "use",
+      "Redis",
+      "with"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/8062"
+  },
+  {
+    "id": "redis-redis-issues-8693",
+    "query": "How should I handle: Suggestion: Redis Functions, an extension to Lua scripts",
+    "expected_source": "redis-redis-issues-8693.md",
+    "answer_keywords": [
+      "Hey",
+      "zuiderkwast",
+      "wasn",
+      "fake",
+      "all",
+      "But",
+      "not",
+      "work"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/8693"
+  },
+  {
+    "id": "redis-redis-issues-3763",
+    "query": "How should I handle: Does redis-cli require a time-out option?",
+    "expected_source": "redis-redis-issues-3763.md",
+    "answer_keywords": [
+      "Sounds",
+      "like",
+      "good",
+      "feature",
+      "have",
+      "that",
+      "shouldn",
+      "too"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/3763"
+  },
+  {
+    "id": "redis-redis-issues-2866",
+    "query": "How should I handle: Added authentication to cluster redis-trib.rb",
+    "expected_source": "redis-redis-issues-2866.md",
+    "answer_keywords": [
+      "noted",
+      "https",
+      "github",
+      "com",
+      "redis",
+      "pull",
+      "redis-trib",
+      "now"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/2866"
+  },
+  {
+    "id": "redis-redis-issues-5145",
+    "query": "How should I handle: Make INFO faster again!11one",
+    "expected_source": "redis-redis-issues-5145.md",
+    "answer_keywords": [
+      "far",
+      "can",
+      "tell",
+      "all",
+      "the",
+      "concerns",
+      "here",
+      "are"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/5145"
+  },
+  {
+    "id": "redis-redis-issues-8540",
+    "query": "How should I handle: [BUG]Sentinel  stuck with +sdown upon replica pod restart  ",
+    "expected_source": "redis-redis-issues-8540.md",
+    "answer_keywords": [
+      "Hope",
+      "this",
+      "https",
+      "github",
+      "com",
+      "redis",
+      "pull",
+      "will"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/8540"
+  },
+  {
+    "id": "redis-redis-issues-242",
+    "query": "How should I handle: Possibility of Hash/Set/List fields expiration",
+    "expected_source": "redis-redis-issues-242.md",
+    "answer_keywords": [
+      "this",
+      "will",
+      "not",
+      "implemented",
+      "original",
+      "design",
+      "nested",
+      "types"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/242"
+  },
+  {
+    "id": "redis-redis-issues-8024",
+    "query": "How should I handle: [BUG] TimeoutStartSec and TimeoutStopSec values are valid, but redis still warns",
+    "expected_source": "redis-redis-issues-8024.md",
+    "answer_keywords": [
+      "This",
+      "still",
+      "occur",
+      "redis",
+      "Thumbs",
+      "you",
+      "come",
+      "from"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/8024"
+  },
+  {
+    "id": "redis-redis-issues-6646",
+    "query": "How should I handle: peak memory > max memory?",
+    "expected_source": "redis-redis-issues-6646.md",
+    "answer_keywords": [
+      "maxmemory",
+      "not",
+      "related",
+      "RSS",
+      "how",
+      "are",
+      "you",
+      "supposed"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/6646"
+  },
+  {
+    "id": "redis-redis-issues-9996",
+    "query": "How should I handle: [BUG] `XREADGROUP` with no results does not reset `XINFO CONSUMERS` idle timer",
+    "expected_source": "redis-redis-issues-9996.md",
+    "answer_keywords": [
+      "update",
+      "went",
+      "slightly",
+      "different",
+      "direction",
+      "fixed",
+      "the",
+      "current"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/9996"
+  },
+  {
+    "id": "redis-redis-issues-9944",
+    "query": "How should I handle: Module API for providing command infromation",
+    "expected_source": "redis-redis-issues-9944.md",
+    "answer_keywords": [
+      "discussed",
+      "this",
+      "the",
+      "core-team",
+      "meeting",
+      "and",
+      "concluded",
+      "wanna"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/9944"
+  },
+  {
+    "id": "redis-redis-issues-6565",
+    "query": "How should I handle: Eviction does not occur during lua scripts",
+    "expected_source": "redis-redis-issues-6565.md",
+    "answer_keywords": [
+      "Hello",
+      "asgeirrr",
+      "backported",
+      "the",
+      "fix",
+      "already",
+      "branch",
+      "and"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/6565"
+  },
+  {
+    "id": "redis-redis-issues-3768",
+    "query": "How should I handle: \"Test HINCRBYFLOAT for correct float representation\" failing on non x86 architectures",
+    "expected_source": "redis-redis-issues-3768.md",
+    "answer_keywords": [
+      "Same",
+      "issue",
+      "when",
+      "testing",
+      "the",
+      "Bash",
+      "available",
+      "Linux"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/3768"
+  },
+  {
+    "id": "redis-redis-issues-11204",
+    "query": "How should I handle: used_memory_peak keep growing but used_memory/used_memory_rss is small",
+    "expected_source": "redis-redis-issues-11204.md",
+    "answer_keywords": [
+      "let",
+      "see",
+      "get",
+      "this",
+      "right",
+      "some",
+      "point",
+      "clients"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/11204"
+  },
+  {
+    "id": "redis-redis-issues-6673",
+    "query": "How should I handle: swap configuration",
+    "expected_source": "redis-redis-issues-6673.md",
+    "answer_keywords": [
+      "Hello",
+      "thesreyas",
+      "Yes",
+      "that",
+      "recommendation",
+      "relates",
+      "earlier",
+      "versions"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/6673"
+  },
+  {
+    "id": "redis-redis-issues-5229",
+    "query": "How should I handle: slave hung in processUnblockedClients",
+    "expected_source": "redis-redis-issues-5229.md",
+    "answer_keywords": [
+      "bottom",
+      "line",
+      "the",
+      "second",
+      "fix",
+      "one",
+      "about",
+      "scripts"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/5229"
+  },
+  {
+    "id": "redis-redis-issues-14469",
+    "query": "How should I handle: [CRASH] RedisSearch module crash: Redis 8.2.1 segfault in raxGenericInsert (signal 11)",
+    "expected_source": "redis-redis-issues-14469.md",
+    "answer_keywords": [
+      "please",
+      "also",
+      "create",
+      "issue",
+      "https",
+      "github",
+      "com",
+      "RediSearch"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/14469"
+  },
+  {
+    "id": "redis-redis-issues-13314",
+    "query": "How should I handle: [BUG] Record, deleted from stream, stays in PEL",
+    "expected_source": "redis-redis-issues-13314.md",
+    "answer_keywords": [
+      "trilga",
+      "have",
+      "added",
+      "new",
+      "XDELEX",
+      "command",
+      "https",
+      "github"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/13314"
+  },
+  {
+    "id": "redis-redis-issues-14894",
+    "query": "How should I handle: [BUG] Docker image fails redis/redis-stack:latest on MacOs",
+    "expected_source": "redis-redis-issues-14894.md",
+    "answer_keywords": [
+      "similar",
+      "issues",
+      "https",
+      "github",
+      "com",
+      "redis",
+      "oleslav",
+      "thx"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/14894"
+  },
+  {
+    "id": "redis-redis-issues-10547",
+    "query": "How should I handle: [CRASH] Redis sentinel enters tilt mode and dies after a time",
+    "expected_source": "redis-redis-issues-10547.md",
+    "answer_keywords": [
+      "jonathon2nd",
+      "please",
+      "keep",
+      "update",
+      "with",
+      "any",
+      "new",
+      "findings"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/10547"
+  },
+  {
+    "id": "redis-redis-issues-6522",
+    "query": "How should I handle: Redis 4.0.7 crash frequently on arm environment",
+    "expected_source": "redis-redis-issues-6522.md",
+    "answer_keywords": [
+      "seen",
+      "quite",
+      "few",
+      "reports",
+      "crashes",
+      "arm",
+      "with",
+      "older"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/6522"
+  },
+  {
+    "id": "redis-redis-issues-10221",
+    "query": "How should I handle: [CRASH] c->cmd nullified within `cmd->proc` call.",
+    "expected_source": "redis-redis-issues-10221.md",
+    "answer_keywords": [
+      "Looking",
+      "the",
+      "above",
+      "crashes",
+      "current_client",
+      "seems",
+      "NULL",
+      "both"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/10221"
+  },
+  {
+    "id": "redis-redis-issues-8177",
+    "query": "How should I handle: [BUG] Could not connect to Redis at 127.0.0.1:6379: Connection refused - Apple Silicon",
+    "expected_source": "redis-redis-issues-8177.md",
+    "answer_keywords": [
+      "GFPdu",
+      "this",
+      "reminds",
+      "stack",
+      "trace",
+      "seen",
+      "Are",
+      "you"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/8177"
+  },
+  {
+    "id": "redis-redis-issues-1732",
+    "query": "How should I handle: Redis PPA for Ubuntu and Debian",
+    "expected_source": "redis-redis-issues-1732.md",
+    "answer_keywords": [
+      "having",
+      "official",
+      "repo"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/1732"
+  },
+  {
+    "id": "redis-redis-issues-3176",
+    "query": "How should I handle: \"WARNING you have Transparent Huge Pages (THP) support enabled in your kernel\"",
+    "expected_source": "redis-redis-issues-3176.md",
+    "answer_keywords": [
+      "solved",
+      "this",
+      "Ubuntu",
+      "LTS",
+      "and",
+      "adding",
+      "directive",
+      "grub"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/3176"
+  },
+  {
+    "id": "redis-redis-issues-7361",
+    "query": "How should I handle: redis-server with ubuntu server 20.04",
+    "expected_source": "redis-redis-issues-7361.md",
+    "answer_keywords": [
+      "nano",
+      "etc",
+      "systemd",
+      "system",
+      "redis",
+      "service",
+      "ExecStop",
+      "bin"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/7361"
+  },
+  {
+    "id": "redis-redis-issues-4102",
+    "query": "How should I handle: In Redis 4.0 partial synchronization not working when slave instance restarted.",
+    "expected_source": "redis-redis-issues-4102.md",
+    "answer_keywords": [
+      "Hello",
+      "thanks",
+      "for",
+      "your",
+      "hints",
+      "yes",
+      "that",
+      "makes"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/4102"
+  },
+  {
+    "id": "redis-redis-issues-3594",
+    "query": "How should I handle: Redis is trying to write to /var/spool/cron",
+    "expected_source": "redis-redis-issues-3594.md",
+    "answer_keywords": [
+      "your",
+      "Redis",
+      "server",
+      "accessible",
+      "the",
+      "public",
+      "this",
+      "could"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/3594"
+  },
+  {
+    "id": "redis-redis-issues-3978",
+    "query": "How should I handle: rename-command in redis.conf seems to break redis-cli if command starts with a number",
+    "expected_source": "redis-redis-issues-3978.md",
+    "answer_keywords": [
+      "Verified",
+      "and",
+      "there",
+      "are",
+      "actually",
+      "two",
+      "issues",
+      "here"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/3978"
+  },
+  {
+    "id": "redis-redis-issues-8756",
+    "query": "How should I handle: [BUG] Redis Does Not Automatically Reload Certificates When Certificate File Updates",
+    "expected_source": "redis-redis-issues-8756.md",
+    "answer_keywords": [
+      "rjduffner",
+      "You",
+      "should",
+      "able",
+      "trigger",
+      "re-load",
+      "issuing",
+      "CONFIG"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/8756"
+  },
+  {
+    "id": "redis-redis-issues-4300",
+    "query": "How should I handle: Support for password rotation (feature request)",
+    "expected_source": "redis-redis-issues-4300.md",
+    "answer_keywords": [
+      "With",
+      "the",
+      "introduction",
+      "ACL",
+      "each",
+      "user",
+      "may",
+      "have"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/4300"
+  },
+  {
+    "id": "redis-redis-issues-6123",
+    "query": "How should I handle: Redis 5.0.5: WARNING: The TCP backlog setting of 511 cannot be enforced because /proc/sys/net/core/somaxconn is set to the lower value of 128",
+    "expected_source": "redis-redis-issues-6123.md",
+    "answer_keywords": [
+      "have",
+      "you",
+      "try",
+      "echo",
+      "proc",
+      "sys",
+      "net",
+      "core"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/6123"
+  },
+  {
+    "id": "redis-redis-issues-12749",
+    "query": "How should I handle: [NEW]Scan for hash fields only",
+    "expected_source": "redis-redis-issues-12749.md",
+    "answer_keywords": [
+      "think",
+      "adding",
+      "NOVALUES",
+      "argument",
+      "HSCAN",
+      "makes",
+      "sense",
+      "seems"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/12749"
+  },
+  {
+    "id": "redis-redis-issues-8114",
+    "query": "How should I handle: [BUG]Job for redis-server.service failed because the control process exited with error code.",
+    "expected_source": "redis-redis-issues-8114.md",
+    "answer_keywords": [
+      "having",
+      "the",
+      "same",
+      "issue",
+      "installed",
+      "following",
+      "this",
+      "article"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/8114"
+  },
+  {
+    "id": "redis-redis-issues-5767",
+    "query": "How should I handle: [ZREVRANGEBYSCORE] When the offset is too large, the query is very slow.",
+    "expected_source": "redis-redis-issues-5767.md",
+    "answer_keywords": [
+      "Hello",
+      "fuxiaotong",
+      "This",
+      "the",
+      "expected",
+      "behavior",
+      "see",
+      "docs"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/5767"
+  },
+  {
+    "id": "redis-redis-issues-3870",
+    "query": "How should I handle: Redis is crashing every days using version 2.4.8",
+    "expected_source": "redis-redis-issues-3870.md",
+    "answer_keywords": [
+      "Version",
+      "quite",
+      "ancient",
+      "more",
+      "recent",
+      "versions",
+      "include",
+      "fixes"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/3870"
+  },
+  {
+    "id": "redis-redis-issues-1042",
+    "query": "How should I handle: Allow to set an expiration on hash field",
+    "expected_source": "redis-redis-issues-1042.md",
+    "answer_keywords": [
+      "Any",
+      "chance",
+      "this",
+      "feature",
+      "could",
+      "reconsidered",
+      "Here",
+      "are"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/1042"
+  },
+  {
+    "id": "redis-redis-issues-11867",
+    "query": "How should I handle: [QUESTION]Redis allkeys-lfu eviction policy. What happens if multiple keys have least frequency?",
+    "expected_source": "redis-redis-issues-11867.md",
+    "answer_keywords": [
+      "Hello",
+      "josephjacobmorris",
+      "Redis",
+      "eviction",
+      "kicks",
+      "when",
+      "there",
+      "memory"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/11867"
+  },
+  {
+    "id": "redis-redis-issues-1861",
+    "query": "How should I handle: POP from sorted sets",
+    "expected_source": "redis-redis-issues-1861.md",
+    "answer_keywords": [
+      "blocking",
+      "pop",
+      "from",
+      "sorted",
+      "set",
+      "makes",
+      "easy",
+      "implement"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/1861"
+  },
+  {
+    "id": "redis-redis-issues-6065",
+    "query": "How should I handle: Design of new modules API functions: server events and module private data",
+    "expected_source": "redis-redis-issues-6065.md",
+    "answer_keywords": [
+      "good",
+      "plan",
+      "but",
+      "here",
+      "are",
+      "few",
+      "quick",
+      "notes"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/6065"
+  },
+  {
+    "id": "redis-redis-issues-10981",
+    "query": "How should I handle: Performance degrade 7.0.3 vs 6.2.7",
+    "expected_source": "redis-redis-issues-10981.md",
+    "answer_keywords": [
+      "results",
+      "performance",
+      "degration",
+      "Since",
+      "server",
+      "repl_backlog",
+      "will",
+      "created"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/10981"
+  },
+  {
+    "id": "redis-redis-issues-13551",
+    "query": "How should I handle: [NEW] Optimize HyperLogLog by SIMD acceleration",
+    "expected_source": "redis-redis-issues-13551.md",
+    "answer_keywords": [
+      "Nugine",
+      "nice",
+      "saw",
+      "the",
+      "changed",
+      "you",
+      "made",
+      "https"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/13551"
+  },
+  {
+    "id": "redis-redis-issues-10505",
+    "query": "How should I handle: [NEW] Allow WAIT to block until next fsync",
+    "expected_source": "redis-redis-issues-10505.md",
+    "answer_keywords": [
+      "This",
+      "was",
+      "discussed",
+      "the",
+      "past",
+      "IIRC",
+      "called",
+      "WAITAOF"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/10505"
+  },
+  {
+    "id": "redis-redis-issues-13253",
+    "query": "How should I handle: Enable redis stream in redis helm chart bitnami with terraform",
+    "expected_source": "redis-redis-issues-13253.md",
+    "answer_keywords": [
+      "Marwen-TAALLAH",
+      "stream-db-max-len",
+      "not",
+      "valiable",
+      "config",
+      "for",
+      "Redis",
+      "you"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/13253"
+  },
+  {
+    "id": "redis-redis-issues-5335",
+    "query": "How should I handle: Changing Redis master-slave replication terms with something else",
+    "expected_source": "redis-redis-issues-5335.md",
+    "answer_keywords": [
+      "Since",
+      "when",
+      "did",
+      "programming",
+      "start",
+      "bow",
+      "the",
+      "whims"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/5335"
+  },
+  {
+    "id": "redis-redis-issues-3846",
+    "query": "How should I handle: SCRIPT LIST command desirable",
+    "expected_source": "redis-redis-issues-3846.md",
+    "answer_keywords": [
+      "allanwax",
+      "usernameisnull",
+      "redis",
+      "philosophy",
+      "that",
+      "intentionally",
+      "doesn",
+      "want"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/3846"
+  },
+  {
+    "id": "redis-redis-issues-3842",
+    "query": "How to run a redis docker instance with a different port rather than 6379",
+    "expected_source": "redis-redis-issues-3842.md",
+    "answer_keywords": [
+      "yliu120",
+      "You",
+      "simply",
+      "need",
+      "run",
+      "the",
+      "container",
+      "with"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/3842"
+  },
+  {
+    "id": "redis-redis-issues-11641",
+    "query": "How should I handle: [BUG] Sentinels can't decide on a master and are stuck in loop",
+    "expected_source": "redis-redis-issues-11641.md",
+    "answer_keywords": [
+      "You",
+      "can",
+      "try",
+      "latest",
+      "release",
+      "https",
+      "github",
+      "com"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/11641"
+  },
+  {
+    "id": "redis-redis-issues-8455",
+    "query": "How should I handle: Redis 6.0.9 crashed by signal: 11, si_code: 1",
+    "expected_source": "redis-redis-issues-8455.md",
+    "answer_keywords": [
+      "yoav-steinberg",
+      "clen",
+      "may",
+      "not",
+      "the",
+      "compressed",
+      "length",
+      "nodebbpostsearch"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/8455"
+  },
+  {
+    "id": "redis-redis-issues-14541",
+    "query": "How should I handle: [NEW]Option to skip EXEC ACL re-check during AOF loading.",
+    "expected_source": "redis-redis-issues-14541.md",
+    "answer_keywords": [
+      "sounds",
+      "like",
+      "shouldn",
+      "check",
+      "permissions",
+      "when",
+      "loading",
+      "AOF"
+    ],
+    "provenance_url": "https://github.com/redis/redis/issues/14541"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-33664",
+    "query": "How should I handle: Force pods to re-pull an image without changing the image tag",
+    "expected_source": "kubernetes-kubernetes-issues-33664.md",
+    "answer_keywords": [
+      "yujuhong",
+      "Sometimes",
+      "very",
+      "useful",
+      "able",
+      "this",
+      "For",
+      "instance"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/33664"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-51835",
+    "query": "How should I handle: Pods stuck on terminating",
+    "expected_source": "kubernetes-kubernetes-issues-51835.md",
+    "answer_keywords": [
+      "have",
+      "the",
+      "same",
+      "issue",
+      "Kubernetes",
+      "IBM",
+      "Cloud",
+      "After"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/51835"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-1899",
+    "query": "How should I handle: Allow users to wait for conditions from kubectl and using the API",
+    "expected_source": "kubernetes-kubernetes-issues-1899.md",
+    "answer_keywords": [
+      "wonder",
+      "this",
+      "can",
+      "broken",
+      "out",
+      "into",
+      "its",
+      "own"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/1899"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-89898",
+    "query": "How should I handle: Sometime Liveness/Readiness Probes fail because of net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)",
+    "expected_source": "kubernetes-kubernetes-issues-89898.md",
+    "answer_keywords": [
+      "any",
+      "update",
+      "this",
+      "have",
+      "been",
+      "facing",
+      "similar",
+      "issues"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/89898"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-60140",
+    "query": "How should I handle: kubectl cp fails on large files ",
+    "expected_source": "kubernetes-kubernetes-issues-60140.md",
+    "answer_keywords": [
+      "This",
+      "problem",
+      "may",
+      "solved",
+      "kubectl",
+      "would",
+      "implement",
+      "resumable"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/60140"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-60987",
+    "query": "How should I handle: Orphaned pod found - but volume paths are still present on disk",
+    "expected_source": "kubernetes-kubernetes-issues-60987.md",
+    "answer_keywords": [
+      "observe",
+      "lot",
+      "those",
+      "errors",
+      "logged",
+      "kubelet",
+      "clusters",
+      "this"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/60987"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-60807",
+    "query": "How should I handle: deleting namespace stuck at \"Terminating\" state",
+    "expected_source": "kubernetes-kubernetes-issues-60807.md",
+    "answer_keywords": [
+      "ManifoldFR",
+      "had",
+      "the",
+      "same",
+      "issue",
+      "yours",
+      "and",
+      "managed"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/60807"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-27114",
+    "query": "How should I handle: LivenessProbe should start after ReadinessProbe Succeeded if ReadinessProbe is specified",
+    "expected_source": "kubernetes-kubernetes-issues-27114.md",
+    "answer_keywords": [
+      "see",
+      "this",
+      "still",
+      "not",
+      "implemented",
+      "would",
+      "really",
+      "much"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/27114"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-45419",
+    "query": "How should I handle: Node flapping between Ready/NotReady with PLEG issues",
+    "expected_source": "kubernetes-kubernetes-issues-45419.md",
+    "answer_keywords": [
+      "The",
+      "PLEG",
+      "health",
+      "check",
+      "does",
+      "very",
+      "little",
+      "every"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/45419"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-73297",
+    "query": "How should I handle: Support TLS termination with AWS NLB",
+    "expected_source": "kubernetes-kubernetes-issues-73297.md",
+    "answer_keywords": [
+      "addition",
+      "certificate",
+      "ARN",
+      "the",
+      "listener",
+      "need",
+      "ssl",
+      "security"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/73297"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-28746",
+    "query": "How should I handle: kubectl logs should *not* fail while a pod is being started, because it makes for a terrible initial experience",
+    "expected_source": "kubernetes-kubernetes-issues-28746.md",
+    "answer_keywords": [
+      "Thanks",
+      "stszap",
+      "found",
+      "the",
+      "Initialized",
+      "condition",
+      "was",
+      "not"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/28746"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-56903",
+    "query": "How should I handle: DNS intermittent delays of 5s",
+    "expected_source": "kubernetes-kubernetes-issues-56903.md",
+    "answer_keywords": [
+      "tests",
+      "using",
+      "this",
+      "option",
+      "etc",
+      "resolv",
+      "conf",
+      "options"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/56903"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-37218",
+    "query": "How should I handle: Multiple liveness checks (feature request)",
+    "expected_source": "kubernetes-kubernetes-issues-37218.md",
+    "answer_keywords": [
+      "Let",
+      "assume",
+      "for",
+      "minute",
+      "that",
+      "had",
+      "nothing",
+      "more"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/37218"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-69697",
+    "query": "How should I handle: PV is stuck at terminating after PVC is deleted",
+    "expected_source": "kubernetes-kubernetes-issues-69697.md",
+    "answer_keywords": [
+      "got",
+      "rid",
+      "this",
+      "issue",
+      "performing",
+      "the",
+      "following",
+      "actions"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/69697"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-85643",
+    "query": "How should I handle: Create ability to do zero downtime deployments when using externalTrafficPolicy: Local",
+    "expected_source": "kubernetes-kubernetes-issues-85643.md",
+    "answer_keywords": [
+      "FYI",
+      "alpha",
+      "feature",
+      "fix",
+      "this",
+      "issue",
+      "was",
+      "merged"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/85643"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-484",
+    "query": "How should I handle: Service scale-to-zero (fka \"Socket activation\")",
+    "expected_source": "kubernetes-kubernetes-issues-484.md",
+    "answer_keywords": [
+      "any",
+      "progress",
+      "would",
+      "really",
+      "great",
+      "socket",
+      "activate",
+      "pods"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/484"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-55713",
+    "query": "How should I handle: Pods are not moved when Node in NotReady state",
+    "expected_source": "kubernetes-kubernetes-issues-55713.md",
+    "answer_keywords": [
+      "have",
+      "the",
+      "same",
+      "problem",
+      "pods",
+      "are",
+      "evicted",
+      "node"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/55713"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-78446",
+    "query": "How should I handle: kubectl port-forward doesn't properly recover from interrupted connection errors",
+    "expected_source": "kubernetes-kubernetes-issues-78446.md",
+    "answer_keywords": [
+      "Same",
+      "error",
+      "when",
+      "port-forwarding",
+      "AWS",
+      "EKS",
+      "pod",
+      "E0806"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/78446"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-126811",
+    "query": "How should I handle: CVE-2021-25742: Ingress-nginx custom snippets allows retrieval of ingress-nginx serviceaccount token and secrets across all namespaces",
+    "expected_source": "kubernetes-kubernetes-issues-126811.md",
+    "answer_keywords": [
+      "Well",
+      "Kubescape",
+      "https",
+      "github",
+      "com",
+      "armosec",
+      "already",
+      "came"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/126811"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-54482",
+    "query": "How should I handle: --hostname-override ignored when --cloud-provider is specified",
+    "expected_source": "kubernetes-kubernetes-issues-54482.md",
+    "answer_keywords": [
+      "have",
+      "this",
+      "issue",
+      "also",
+      "Our",
+      "DEV",
+      "Kubernetes",
+      "live"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/54482"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-13382",
+    "query": "How should I handle: Suddenly getting TLS Handshake timeout on most requests to the api server",
+    "expected_source": "kubernetes-kubernetes-issues-13382.md",
+    "answer_keywords": [
+      "lavalamp",
+      "running",
+      "into",
+      "the",
+      "same",
+      "problem",
+      "unfortunately",
+      "doesn"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/13382"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-79606",
+    "query": "How should I handle: kubectl wait works for Deployment, but does not for StatefulSet",
+    "expected_source": "kubernetes-kubernetes-issues-79606.md",
+    "answer_keywords": [
+      "For",
+      "everybody",
+      "coming",
+      "here",
+      "suggest",
+      "you",
+      "try",
+      "use"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/79606"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-53533",
+    "query": "How should I handle: Kubelet/Kubernetes should work with Swap Enabled",
+    "expected_source": "kubernetes-kubernetes-issues-53533.md",
+    "answer_keywords": [
+      "Not",
+      "supporting",
+      "swap",
+      "default",
+      "was",
+      "surprised",
+      "hear",
+      "this"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/53533"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-61937",
+    "query": "How should I handle: application crash due to k8s 1.9.x open the kernel memory accounting by default",
+    "expected_source": "kubernetes-kubernetes-issues-61937.md",
+    "answer_keywords": [
+      "Not",
+      "only",
+      "but",
+      "also",
+      "and",
+      "master",
+      "have",
+      "same"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/61937"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-54491",
+    "query": "How should I handle: kubectl get pods should report last restart time?",
+    "expected_source": "kubernetes-kubernetes-issues-54491.md",
+    "answer_keywords": [
+      "This",
+      "feature",
+      "should",
+      "there",
+      "helps",
+      "identifying",
+      "issue",
+      "much"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/54491"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-70179",
+    "query": "How should I handle: Kubernetes pod resource utilization metrics need better documentation",
+    "expected_source": "kubernetes-kubernetes-issues-70179.md",
+    "answer_keywords": [
+      "kubernetes",
+      "cluster",
+      "the",
+      "cadvisor",
+      "used",
+      "for",
+      "mem",
+      "metrics"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/70179"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-52345",
+    "query": "How should I handle: Re-run initContainers in a Deployment when containers exit on error",
+    "expected_source": "kubernetes-kubernetes-issues-52345.md",
+    "answer_keywords": [
+      "aisengard",
+      "did",
+      "you",
+      "ever",
+      "find",
+      "solution",
+      "this",
+      "hit"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/52345"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-64137",
+    "query": "How should I handle: Kubelet CPU/Memory Usage linearly increases using CronJob",
+    "expected_source": "kubernetes-kubernetes-issues-64137.md",
+    "answer_keywords": [
+      "everyone",
+      "believe",
+      "having",
+      "the",
+      "same",
+      "issue",
+      "were",
+      "able"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/64137"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-98423",
+    "query": "How should I handle: Kube-apiserver high memory usage on pending pods storm",
+    "expected_source": "kubernetes-kubernetes-issues-98423.md",
+    "answer_keywords": [
+      "This",
+      "unfortunatly",
+      "one",
+      "the",
+      "known",
+      "problems",
+      "when",
+      "you"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/98423"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-129982",
+    "query": "How should I handle: Excessive conntrack cleanup causes high memory (12GB) and CPU usage when any Pod with a UDP port changes",
+    "expected_source": "kubernetes-kubernetes-issues-129982.md",
+    "answer_keywords": [
+      "tried",
+      "reproduce",
+      "this",
+      "locally",
+      "with",
+      "profiling",
+      "enabled",
+      "and"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/129982"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-140",
+    "query": "How should I handle: PreStart and PostStop event hooks",
+    "expected_source": "kubernetes-kubernetes-issues-140.md",
+    "answer_keywords": [
+      "bgrant0607",
+      "This",
+      "issue",
+      "open",
+      "since",
+      "long",
+      "close"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/140"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-19825",
+    "query": "How should I handle: Container Termination Discrepancy  for Exit Code 137",
+    "expected_source": "kubernetes-kubernetes-issues-19825.md",
+    "answer_keywords": [
+      "Hey",
+      "guys",
+      "Sorry",
+      "bump",
+      "this",
+      "after",
+      "years",
+      "but"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/19825"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-73269",
+    "query": "How should I handle: New scheduler priority for real load average and free memory",
+    "expected_source": "kubernetes-kubernetes-issues-73269.md",
+    "answer_keywords": [
+      "kabakaev",
+      "unixfox",
+      "The",
+      "Real",
+      "Load",
+      "Aware",
+      "Scheduling",
+      "plugin"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/73269"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-75065",
+    "query": "How should I handle: Potential container runtime state mess-up cause Pod stuck in \"Terminating\" state",
+    "expected_source": "kubernetes-kubernetes-issues-75065.md",
+    "answer_keywords": [
+      "noticed",
+      "this",
+      "bug",
+      "before",
+      "also",
+      "getting",
+      "AWS",
+      "EKS"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/75065"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-61486",
+    "query": "How should I handle: \"externalTrafficPolicy\": \"Local\" on AWS does not work if the dhcp of the vpc is not set exactly to <region>.compute.internal",
+    "expected_source": "kubernetes-kubernetes-issues-61486.md",
+    "answer_keywords": [
+      "can",
+      "confirm",
+      "that",
+      "this",
+      "workaround",
+      "https",
+      "github",
+      "com"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/61486"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-45911",
+    "query": "How should I handle: Cannot retrieve logs of running pod via kubectl",
+    "expected_source": "kubernetes-kubernetes-issues-45911.md",
+    "answer_keywords": [
+      "After",
+      "spending",
+      "some",
+      "time",
+      "browsing",
+      "through",
+      "the",
+      "source"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/45911"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-30763",
+    "query": "How should I handle: Add support for fish shell autocompletion",
+    "expected_source": "kubernetes-kubernetes-issues-30763.md",
+    "answer_keywords": [
+      "Found",
+      "these",
+      "via",
+      "Google",
+      "search",
+      "the",
+      "meantime",
+      "https"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/30763"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-17088",
+    "query": "How should I handle: Cross-namespace Ingress",
+    "expected_source": "kubernetes-kubernetes-issues-17088.md",
+    "answer_keywords": [
+      "would",
+      "tend",
+      "imagine",
+      "the",
+      "use",
+      "case",
+      "that",
+      "paralin"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/17088"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-44665",
+    "query": "How should I handle: 1.6.1 The connection to the server localhost:8080 was refused",
+    "expected_source": "kubernetes-kubernetes-issues-44665.md",
+    "answer_keywords": [
+      "did",
+      "you",
+      "run",
+      "below",
+      "commands",
+      "after",
+      "kubeadm",
+      "init"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/44665"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-62594",
+    "query": "How should I handle: Liveness/Readiness probes are failing with getsockopt: connection refused",
+    "expected_source": "kubernetes-kubernetes-issues-62594.md",
+    "answer_keywords": [
+      "Hello",
+      "all",
+      "were",
+      "experiencing",
+      "this",
+      "issue",
+      "well",
+      "Using"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/62594"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-43805",
+    "query": "How should I handle: 1.6.0 kubelet fails with error \"misconfiguration: kubelet cgroup driver: \"cgroupfs\" is different from docker cgroup driver: \"systemd\"",
+    "expected_source": "kubernetes-kubernetes-issues-43805.md",
+    "answer_keywords": [
+      "kubelet",
+      "cgroup",
+      "driver",
+      "not",
+      "same",
+      "with",
+      "docker",
+      "update"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/43805"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-23726",
+    "query": "How should I handle: Running Kubernetes Locally via Docker - `kubectl get nodes` returns `The connection to the server localhost:8080 was refused - did you specify the right host or port?`",
+    "expected_source": "kubernetes-kubernetes-issues-23726.md",
+    "answer_keywords": [
+      "You",
+      "can",
+      "solve",
+      "this",
+      "with",
+      "kubectl",
+      "config",
+      "set-cluster"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/23726"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-134080",
+    "query": "How should I handle: kube-apiserver log spammed with \"failed to connect to etcd\"",
+    "expected_source": "kubernetes-kubernetes-issues-134080.md",
+    "answer_keywords": [
+      "Seeing",
+      "the",
+      "same",
+      "cluster",
+      "with",
+      "every",
+      "seconds",
+      "also"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/134080"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-70082",
+    "query": "How should I handle: etcdserver: read-only range request took too long with etcd 3.2.24",
+    "expected_source": "kubernetes-kubernetes-issues-70082.md",
+    "answer_keywords": [
+      "ArchiFleKs",
+      "says",
+      "total",
+      "operations",
+      "took",
+      "less",
+      "than",
+      "equal"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/70082"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-23920",
+    "query": "How should I handle: HostPort seemingly not working",
+    "expected_source": "kubernetes-kubernetes-issues-23920.md",
+    "answer_keywords": [
+      "thockin",
+      "microadam",
+      "Correct",
+      "misunderstanding",
+      "something",
+      "but",
+      "think_",
+      "that"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/23920"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-72102",
+    "query": "How should I handle: kube-apiserver 1.13.x refuses to work when first etcd-server is not available.",
+    "expected_source": "kubernetes-kubernetes-issues-72102.md",
+    "answer_keywords": [
+      "timothysc",
+      "just",
+      "came",
+      "back",
+      "from",
+      "trip",
+      "Will",
+      "start"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/72102"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-29540",
+    "query": "How should I handle: kubernetes-dashboard pod in CrashLoopBackOff state ",
+    "expected_source": "kubernetes-kubernetes-issues-29540.md",
+    "answer_keywords": [
+      "remember",
+      "resolving",
+      "the",
+      "issue",
+      "first",
+      "deleting",
+      "secret",
+      "corresponding"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/29540"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-33729",
+    "query": "How should I handle: kubeadm init hangs on ubuntu 16.04",
+    "expected_source": "kubernetes-kubernetes-issues-33729.md",
+    "answer_keywords": [
+      "oz123",
+      "have",
+      "the",
+      "same",
+      "issue",
+      "here",
+      "doesn",
+      "seems"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/33729"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-51475",
+    "query": "How should I handle: don't require API server connection for `kubectl create configmap ... --dry-run`",
+    "expected_source": "kubernetes-kubernetes-issues-51475.md",
+    "answer_keywords": [
+      "remove-lifecycle",
+      "stale",
+      "have",
+      "another",
+      "use",
+      "case",
+      "for",
+      "running"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/51475"
+  },
+  {
+    "id": "kubernetes-kubernetes-issues-34134",
+    "query": "How should I handle: Create a kubeadm installer container for CoreOS",
+    "expected_source": "kubernetes-kubernetes-issues-34134.md",
+    "answer_keywords": [
+      "got",
+      "kubeadm",
+      "working",
+      "CoreOS",
+      "quite",
+      "easily",
+      "while",
+      "travelling"
+    ],
+    "provenance_url": "https://github.com/kubernetes/kubernetes/issues/34134"
+  }
+]

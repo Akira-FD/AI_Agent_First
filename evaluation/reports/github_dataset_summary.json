@@ -1,0 +1,27 @@
+{
+  "requested_target_count": 100,
+  "harvested_records": 100,
+  "documents_written": 100,
+  "cases_written": 100,
+  "repositories": [
+    "redis/redis",
+    "mysql/mysql-server",
+    "kubernetes/kubernetes",
+    "prometheus/prometheus",
+    "elastic/elasticsearch",
+    "nginx/nginx"
+  ],
+  "keywords": [
+    "timeout",
+    "oom",
+    "connection refused",
+    "restart",
+    "slow query",
+    "memory pressure",
+    "latency",
+    "crashloopbackoff",
+    "logs",
+    "health check"
+  ],
+  "token_present": true
+}

@@ -17,6 +17,18 @@ SAMPLE_DOC = """# Redis 文档
 ## 故障判断
 
 当连接失败时，先检查 redis 进程是否存活，再查看错误日志。
+
+# MySQL 文档
+
+## 慢查询排查
+
+先查看 slow query log，再结合 explain 分析索引命中情况。
+
+# Kubernetes 文档
+
+## Pod Terminating
+
+当 Pod 一直处于 Terminating 状态时，先看 kubectl describe pod、事件和容器运行时日志。
 """
 
 
@@ -54,6 +66,27 @@ class ToolsAndAgentTests(unittest.TestCase):
         self.assertTrue(response.tool_logs)
         self.assertEqual(response.tool_logs[0]["tool_name"], "restart_mock_service")
         self.assertIn("已执行模拟工具", response.answer)
+
+    def test_does_not_misfire_tool_for_explanatory_restart_question(self) -> None:
+        response = self.agent.run(session_id="s3", user_query="解释一下 Redis 重启前为什么要确认写入任务")
+
+        self.assertIn(response.intent, {"knowledge", "troubleshoot"})
+        self.assertFalse(response.tool_logs)
+
+    def test_does_not_misfire_tool_for_mysql_log_analysis_question(self) -> None:
+        response = self.agent.run(session_id="s4", user_query="MySQL 慢查询排查时，应该先看什么日志和信息？")
+
+        self.assertIn(response.intent, {"knowledge", "troubleshoot"})
+        self.assertFalse(response.tool_logs)
+        self.assertTrue(response.sources)
+        self.assertIn("MySQL", response.sources[0]["section_path"])
+
+    def test_routes_restart_tool_with_requested_service_name(self) -> None:
+        response = self.agent.run(session_id="s5", user_query="请重启 mysql 服务")
+
+        self.assertEqual(response.intent, "execute")
+        self.assertTrue(response.tool_logs)
+        self.assertIn("mysql", response.answer.lower())
 
 
 if __name__ == "__main__":

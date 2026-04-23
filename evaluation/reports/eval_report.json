@@ -1,0 +1,2189 @@
+{
+  "summary": {
+    "case_count": 100,
+    "passed_count": 97,
+    "pass_rate": 0.97,
+    "source_hit_rate": 0.98,
+    "top1_source_accuracy": 0.97,
+    "keyword_hit_rate": 1.0
+  },
+  "results": [
+    {
+      "id": "redis-redis-issues-8062",
+      "query": "How should I handle: [CRASH] Unable to start redis-server on Apple Silicon M1 as non-root",
+      "expected_source": "redis-redis-issues-8062.md",
+      "top_source": "redis-redis-issues-8062.md",
+      "source_names": [
+        "redis-redis-issues-8062.md",
+        "redis-redis-issues-8062.md",
+        "redis-redis-issues-8062.md",
+        "redis-redis-issues-8062.md",
+        "redis-redis-issues-8062.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: [CRASH] Unable to start redis-server on Apple Silicon M1 as non-root”的建议如下： [[CRASH] Unable to start redis-server on Apple Silicon M1 as non-root > Curated Answers > High Signal Answer 1] I also noticed this wh",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-8693",
+      "query": "How should I handle: Suggestion: Redis Functions, an extension to Lua scripts",
+      "expected_source": "redis-redis-issues-8693.md",
+      "top_source": "redis-redis-issues-8693.md",
+      "source_names": [
+        "redis-redis-issues-8693.md",
+        "redis-redis-issues-8693.md",
+        "redis-redis-issues-8693.md",
+        "redis-redis-issues-8693.md",
+        "redis-redis-issues-8693.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Suggestion: Redis Functions, an extension to Lua scripts”的建议如下： [Suggestion: Redis Functions, an extension to Lua scripts > Problem] Engine name * Run count(how many times it run) * Total runtime * Description ",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 2,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-3763",
+      "query": "How should I handle: Does redis-cli require a time-out option?",
+      "expected_source": "redis-redis-issues-3763.md",
+      "top_source": "redis-redis-issues-3763.md",
+      "source_names": [
+        "redis-redis-issues-3763.md",
+        "redis-redis-issues-3763.md",
+        "redis-redis-issues-3763.md",
+        "redis-redis-issues-5335.md",
+        "redis-redis-issues-8756.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Does redis-cli require a time-out option?”的建议如下： [Does redis-cli require a time-out option? > GitHub Provenance] - Repository: redis/redis  - Issue: #3763  - State: closed  - Labels: none  - Repository stars: 7",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-2866",
+      "query": "How should I handle: Added authentication to cluster redis-trib.rb",
+      "expected_source": "redis-redis-issues-2866.md",
+      "top_source": "redis-redis-issues-2866.md",
+      "source_names": [
+        "redis-redis-issues-2866.md",
+        "redis-redis-issues-2866.md",
+        "redis-redis-issues-2866.md",
+        "redis-redis-issues-2866.md",
+        "redis-redis-issues-2866.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Added authentication to cluster redis-trib.rb”的建议如下： [Added authentication to cluster redis-trib.rb > GitHub Provenance] - Repository: redis/redis  - Issue: #2866  - State: closed  - Labels: none  - Repository ",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 5,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-5145",
+      "query": "How should I handle: Make INFO faster again!11one",
+      "expected_source": "redis-redis-issues-5145.md",
+      "top_source": "redis-redis-issues-5145.md",
+      "source_names": [
+        "redis-redis-issues-5145.md",
+        "redis-redis-issues-5145.md",
+        "redis-redis-issues-5145.md",
+        "redis-redis-issues-5145.md",
+        "kubernetes-kubernetes-issues-98423.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Make INFO faster again!11one”的建议如下： [Make INFO faster again!11one > Curated Answers > High Signal Answer 1] as far as i can tell all of the concerns here are already handled by f69876280c630d49574fa094808d3a479",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-8540",
+      "query": "How should I handle: [BUG]Sentinel  stuck with +sdown upon replica pod restart  ",
+      "expected_source": "redis-redis-issues-8540.md",
+      "top_source": "redis-redis-issues-8540.md",
+      "source_names": [
+        "redis-redis-issues-8540.md",
+        "redis-redis-issues-8540.md",
+        "redis-redis-issues-8540.md",
+        "redis-redis-issues-8540.md",
+        "redis-redis-issues-8540.md"
+      ],
+      "answer_preview": "已根据请求执行操作。已执行模拟工具，redis 服务重启成功。  结合知识库上下文： [[BUG]Sentinel  stuck with +sdown upon replica pod restart > GitHub Provenance] - Repository: redis/redis  - Issue: #8540  - State: closed  - Labels: none  - Repository stars: 73959  - URL: https:/",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 5,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-242",
+      "query": "How should I handle: Possibility of Hash/Set/List fields expiration",
+      "expected_source": "redis-redis-issues-242.md",
+      "top_source": "redis-redis-issues-242.md",
+      "source_names": [
+        "redis-redis-issues-242.md",
+        "redis-redis-issues-242.md",
+        "redis-redis-issues-242.md",
+        "redis-redis-issues-242.md",
+        "redis-redis-issues-1042.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Possibility of Hash/Set/List fields expiration”的建议如下： [Possibility of Hash/Set/List fields expiration > Problem] Now it's possible to set expiration only for keys to main objects, not for collecion elements. I ",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-8024",
+      "query": "How should I handle: [BUG] TimeoutStartSec and TimeoutStopSec values are valid, but redis still warns",
+      "expected_source": "redis-redis-issues-8024.md",
+      "top_source": "redis-redis-issues-8024.md",
+      "source_names": [
+        "redis-redis-issues-8024.md",
+        "redis-redis-issues-8024.md",
+        "redis-redis-issues-8024.md",
+        "redis-redis-issues-8024.md",
+        "redis-redis-issues-8024.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: [BUG] TimeoutStartSec and TimeoutStopSec values are valid, but redis still warns”的建议如下： [[BUG] TimeoutStartSec and TimeoutStopSec values are valid, but redis still warns > Problem] Between 'systemctl daemon-rel",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 5,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-6646",
+      "query": "How should I handle: peak memory > max memory?",
+      "expected_source": "redis-redis-issues-6646.md",
+      "top_source": "redis-redis-issues-6646.md",
+      "source_names": [
+        "redis-redis-issues-6646.md",
+        "redis-redis-issues-6646.md",
+        "redis-redis-issues-6646.md",
+        "redis-redis-issues-6646.md",
+        "redis-redis-issues-6646.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: peak memory > max memory?”的建议如下： [peak memory > max memory? > Curated Answers > High Signal Answer 1] If `maxmemory` is not related to RSS, how are you supposed to know which value to set it? Should your databa",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-9996",
+      "query": "How should I handle: [BUG] `XREADGROUP` with no results does not reset `XINFO CONSUMERS` idle timer",
+      "expected_source": "redis-redis-issues-9996.md",
+      "top_source": "redis-redis-issues-9996.md",
+      "source_names": [
+        "redis-redis-issues-9996.md",
+        "redis-redis-issues-9996.md",
+        "redis-redis-issues-9996.md",
+        "redis-redis-issues-9996.md",
+        "redis-redis-issues-9996.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: [BUG] `XREADGROUP` with no results does not reset `XINFO CONSUMERS` idle timer”的建议如下： [[BUG] `XREADGROUP` with no results does not reset `XINFO CONSUMERS` idle timer > Problem] **Expected behavior** The `idle` ",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-9944",
+      "query": "How should I handle: Module API for providing command infromation",
+      "expected_source": "redis-redis-issues-9944.md",
+      "top_source": "redis-redis-issues-9944.md",
+      "source_names": [
+        "redis-redis-issues-9944.md",
+        "redis-redis-issues-9944.md",
+        "redis-redis-issues-9944.md",
+        "kubernetes-kubernetes-issues-51475.md",
+        "redis-redis-issues-14894.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Module API for providing command infromation”的建议如下： [Module API for providing command infromation > Curated Answers > High Signal Answer 1] we discussed this in the core-team meeting, and concluded we wanna pro",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-6565",
+      "query": "How should I handle: Eviction does not occur during lua scripts",
+      "expected_source": "redis-redis-issues-6565.md",
+      "top_source": "redis-redis-issues-6565.md",
+      "source_names": [
+        "redis-redis-issues-6565.md",
+        "redis-redis-issues-6565.md",
+        "redis-redis-issues-6565.md",
+        "redis-redis-issues-6565.md",
+        "redis-redis-issues-6565.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Eviction does not occur during lua scripts”的建议如下： [Eviction does not occur during lua scripts > Problem > Repo:] Insert the script: `echo -E \"script load \\\"local function commit()\\n local key = ARGV[1]\\n local ",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-3768",
+      "query": "How should I handle: \"Test HINCRBYFLOAT for correct float representation\" failing on non x86 architectures",
+      "expected_source": "redis-redis-issues-3768.md",
+      "top_source": "redis-redis-issues-3768.md",
+      "source_names": [
+        "redis-redis-issues-3768.md",
+        "redis-redis-issues-3768.md",
+        "redis-redis-issues-3768.md",
+        "redis-redis-issues-14894.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: \"Test HINCRBYFLOAT for correct float representation\" failing on non x86 architectures”的建议如下： [\"Test HINCRBYFLOAT for correct float representation\" failing on non x86 architectures > GitHub Provenance] - Reposit",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-11204",
+      "query": "How should I handle: used_memory_peak keep growing but used_memory/used_memory_rss is small",
+      "expected_source": "redis-redis-issues-11204.md",
+      "top_source": "redis-redis-issues-11204.md",
+      "source_names": [
+        "redis-redis-issues-11204.md",
+        "redis-redis-issues-11204.md",
+        "redis-redis-issues-11204.md",
+        "redis-redis-issues-11204.md",
+        "redis-redis-issues-11204.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: used_memory_peak keep growing but used_memory/used_memory_rss is small”的建议如下： [used_memory_peak keep growing but used_memory/used_memory_rss is small > Problem] used_memory_peak is catching up quickly for every",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-6673",
+      "query": "How should I handle: swap configuration",
+      "expected_source": "redis-redis-issues-6673.md",
+      "top_source": "kubernetes-kubernetes-issues-53533.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-53533.md",
+        "redis-redis-issues-6646.md",
+        "kubernetes-kubernetes-issues-53533.md",
+        "kubernetes-kubernetes-issues-75065.md",
+        "kubernetes-kubernetes-issues-53533.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: swap configuration”的建议如下： [Kubelet/Kubernetes should work with Swap Enabled > Problem] This PR https://github.com/kubernetes/kubernetes/pull/31996 and last change which enabled it by default https://github.com/",
+      "checks": {
+        "source_hit": false,
+        "top1_source": false,
+        "keywords": true
+      },
+      "keyword_hit_count": 1,
+      "keyword_total": 8,
+      "passed": false
+    },
+    {
+      "id": "redis-redis-issues-5229",
+      "query": "How should I handle: slave hung in processUnblockedClients",
+      "expected_source": "redis-redis-issues-5229.md",
+      "top_source": "redis-redis-issues-5229.md",
+      "source_names": [
+        "redis-redis-issues-5229.md",
+        "kubernetes-kubernetes-issues-75065.md",
+        "redis-redis-issues-4102.md",
+        "redis-redis-issues-5229.md",
+        "redis-redis-issues-5229.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: slave hung in processUnblockedClients”的建议如下： [slave hung in processUnblockedClients > Problem] Here's an issue i'm unable to figure out. maybe someone can help...    A slave redis (4.0.9) stopped responding, an",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 2,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-14469",
+      "query": "How should I handle: [CRASH] RedisSearch module crash: Redis 8.2.1 segfault in raxGenericInsert (signal 11)",
+      "expected_source": "redis-redis-issues-14469.md",
+      "top_source": "redis-redis-issues-14469.md",
+      "source_names": [
+        "redis-redis-issues-14469.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: [CRASH] RedisSearch module crash: Redis 8.2.1 segfault in raxGenericInsert (signal 11)”的建议如下： [[CRASH] RedisSearch module crash: Redis 8.2.1 segfault in raxGenericInsert (signal 11) > Key Log Excerpts] ``` 1:M ",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 1,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-13314",
+      "query": "How should I handle: [BUG] Record, deleted from stream, stays in PEL",
+      "expected_source": "redis-redis-issues-13314.md",
+      "top_source": "redis-redis-issues-13314.md",
+      "source_names": [
+        "redis-redis-issues-13314.md",
+        "redis-redis-issues-13314.md",
+        "redis-redis-issues-13314.md",
+        "redis-redis-issues-13314.md",
+        "kubernetes-kubernetes-issues-75065.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: [BUG] Record, deleted from stream, stays in PEL”的建议如下： [[BUG] Record, deleted from stream, stays in PEL > Problem] **Describe the bug** In our implementation, after reading messages from stream (with XREADGROUP",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-14894",
+      "query": "How should I handle: [BUG] Docker image fails redis/redis-stack:latest on MacOs",
+      "expected_source": "redis-redis-issues-14894.md",
+      "top_source": "redis-redis-issues-14894.md",
+      "source_names": [
+        "redis-redis-issues-14894.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: [BUG] Docker image fails redis/redis-stack:latest on MacOs”的建议如下： [[BUG] Docker image fails redis/redis-stack:latest on MacOs > Problem] ``` redis-1  | === REDIS BUG REPORT START: Cut & paste starting from here",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 1,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-10547",
+      "query": "How should I handle: [CRASH] Redis sentinel enters tilt mode and dies after a time",
+      "expected_source": "redis-redis-issues-10547.md",
+      "top_source": "redis-redis-issues-10547.md",
+      "source_names": [
+        "redis-redis-issues-10547.md",
+        "redis-redis-issues-10547.md",
+        "redis-redis-issues-10547.md",
+        "redis-redis-issues-10547.md",
+        "redis-redis-issues-10547.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: [CRASH] Redis sentinel enters tilt mode and dies after a time”的建议如下： [[CRASH] Redis sentinel enters tilt mode and dies after a time > Problem] **Additional information** 1. OS distribution and version Deployed ",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 2,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-6522",
+      "query": "How should I handle: Redis 4.0.7 crash frequently on arm environment",
+      "expected_source": "redis-redis-issues-6522.md",
+      "top_source": "redis-redis-issues-6522.md",
+      "source_names": [
+        "redis-redis-issues-6522.md",
+        "redis-redis-issues-6522.md",
+        "redis-redis-issues-6522.md",
+        "redis-redis-issues-6522.md",
+        "redis-redis-issues-6522.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Redis 4.0.7 crash frequently on arm environment”的建议如下： [Redis 4.0.7 crash frequently on arm environment > Problem] Hi, I use redis 4.0.7 deployed as pod under kubernetes environment, the host machine on the env",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 1,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-10221",
+      "query": "How should I handle: [CRASH] c->cmd nullified within `cmd->proc` call.",
+      "expected_source": "redis-redis-issues-10221.md",
+      "top_source": "redis-redis-issues-10221.md",
+      "source_names": [
+        "redis-redis-issues-10221.md",
+        "redis-redis-issues-10221.md",
+        "redis-redis-issues-10221.md",
+        "redis-redis-issues-10221.md",
+        "redis-redis-issues-10221.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: [CRASH] c->cmd nullified within `cmd->proc` call.”的建议如下： [[CRASH] c->cmd nullified within `cmd->proc` call. > Problem] ```  Testing unit: 06-slave-stop-cond.tcl  05:44:02> (init) Restart killed instances: redis",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-8177",
+      "query": "How should I handle: [BUG] Could not connect to Redis at 127.0.0.1:6379: Connection refused - Apple Silicon",
+      "expected_source": "redis-redis-issues-8177.md",
+      "top_source": "redis-redis-issues-8177.md",
+      "source_names": [
+        "redis-redis-issues-8177.md",
+        "redis-redis-issues-8177.md",
+        "redis-redis-issues-8177.md",
+        "redis-redis-issues-8177.md",
+        "redis-redis-issues-6522.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: [BUG] Could not connect to Redis at 127.0.0.1:6379: Connection refused - Apple Silicon”的建议如下： [[BUG] Could not connect to Redis at 127.0.0.1:6379: Connection refused - Apple Silicon > Problem] Redis is failing ",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 2,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-1732",
+      "query": "How should I handle: Redis PPA for Ubuntu and Debian",
+      "expected_source": "redis-redis-issues-1732.md",
+      "top_source": "redis-redis-issues-1732.md",
+      "source_names": [
+        "redis-redis-issues-1732.md",
+        "redis-redis-issues-1732.md",
+        "redis-redis-issues-1732.md",
+        "redis-redis-issues-8114.md",
+        "redis-redis-issues-8114.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Redis PPA for Ubuntu and Debian”的建议如下： [Redis PPA for Ubuntu and Debian > Problem] There already exists a couple different PPAs which host the latest versions of Redis, however, they pose a significant security",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 3,
+      "keyword_total": 3,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-3176",
+      "query": "How should I handle: \"WARNING you have Transparent Huge Pages (THP) support enabled in your kernel\"",
+      "expected_source": "redis-redis-issues-3176.md",
+      "top_source": "redis-redis-issues-3176.md",
+      "source_names": [
+        "redis-redis-issues-3176.md",
+        "redis-redis-issues-3176.md",
+        "redis-redis-issues-3176.md",
+        "redis-redis-issues-3176.md",
+        "redis-redis-issues-3176.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: \"WARNING you have Transparent Huge Pages (THP) support enabled in your kernel\"”的建议如下： [\"WARNING you have Transparent Huge Pages (THP) support enabled in your kernel\" > Problem] along with instructions for how t",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-7361",
+      "query": "How should I handle: redis-server with ubuntu server 20.04",
+      "expected_source": "redis-redis-issues-7361.md",
+      "top_source": "redis-redis-issues-7361.md",
+      "source_names": [
+        "redis-redis-issues-7361.md",
+        "redis-redis-issues-8114.md",
+        "redis-redis-issues-7361.md",
+        "redis-redis-issues-7361.md",
+        "redis-redis-issues-6123.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: redis-server with ubuntu server 20.04”的建议如下： [redis-server with ubuntu server 20.04 > Problem] Hey, tryng to use redis-server with new ubuntu server 20.04, but i get always same error:  redis-server.service: Ca",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 4,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-4102",
+      "query": "How should I handle: In Redis 4.0 partial synchronization not working when slave instance restarted.",
+      "expected_source": "redis-redis-issues-4102.md",
+      "top_source": "redis-redis-issues-4102.md",
+      "source_names": [
+        "redis-redis-issues-4102.md",
+        "redis-redis-issues-4102.md",
+        "redis-redis-issues-4102.md",
+        "redis-redis-issues-4102.md",
+        "redis-redis-issues-4102.md"
+      ],
+      "answer_preview": "已根据请求执行操作。已执行模拟工具，redis 服务重启成功。  结合知识库上下文： [In Redis 4.0 partial synchronization not working when slave instance restarted. > Curated Answers > High Signal Answer 1] Hello, thanks for your hints, yes... that makes sense, it's non obvious ho",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-3594",
+      "query": "How should I handle: Redis is trying to write to /var/spool/cron",
+      "expected_source": "redis-redis-issues-3594.md",
+      "top_source": "redis-redis-issues-3594.md",
+      "source_names": [
+        "redis-redis-issues-3594.md",
+        "redis-redis-issues-3594.md",
+        "redis-redis-issues-3594.md",
+        "redis-redis-issues-3594.md",
+        "redis-redis-issues-3594.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Redis is trying to write to /var/spool/cron”的建议如下： [Redis is trying to write to /var/spool/cron > Problem] by pid 5333 5333:C 06 Nov 14:41:17.091 # Failed opening the RDB file root (in server root dir /var/spoo",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 4,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-3978",
+      "query": "How should I handle: rename-command in redis.conf seems to break redis-cli if command starts with a number",
+      "expected_source": "redis-redis-issues-3978.md",
+      "top_source": "redis-redis-issues-3978.md",
+      "source_names": [
+        "redis-redis-issues-3978.md",
+        "redis-redis-issues-3978.md",
+        "redis-redis-issues-3978.md",
+        "redis-redis-issues-3978.md",
+        "redis-redis-issues-3978.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: rename-command in redis.conf seems to break redis-cli if command starts with a number”的建议如下： [rename-command in redis.conf seems to break redis-cli if command starts with a number > Curated Answers > High Signa",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 6,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-8756",
+      "query": "How should I handle: [BUG] Redis Does Not Automatically Reload Certificates When Certificate File Updates",
+      "expected_source": "redis-redis-issues-8756.md",
+      "top_source": "redis-redis-issues-8756.md",
+      "source_names": [
+        "redis-redis-issues-8756.md",
+        "redis-redis-issues-8756.md",
+        "redis-redis-issues-8756.md",
+        "redis-redis-issues-8756.md",
+        "redis-redis-issues-8756.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: [BUG] Redis Does Not Automatically Reload Certificates When Certificate File Updates”的建议如下： [[BUG] Redis Does Not Automatically Reload Certificates When Certificate File Updates > Curated Answers > High Signal ",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-4300",
+      "query": "How should I handle: Support for password rotation (feature request)",
+      "expected_source": "redis-redis-issues-4300.md",
+      "top_source": "redis-redis-issues-4300.md",
+      "source_names": [
+        "redis-redis-issues-4300.md",
+        "redis-redis-issues-4300.md",
+        "redis-redis-issues-4300.md",
+        "redis-redis-issues-4300.md",
+        "redis-redis-issues-4300.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Support for password rotation (feature request)”的建议如下： [Support for password rotation (feature request) > GitHub Provenance] - Repository: redis/redis  - Issue: #4300  - State: closed  - Labels: none  - Reposit",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-6123",
+      "query": "How should I handle: Redis 5.0.5: WARNING: The TCP backlog setting of 511 cannot be enforced because /proc/sys/net/core/somaxconn is set to the lower value of 128",
+      "expected_source": "redis-redis-issues-6123.md",
+      "top_source": "redis-redis-issues-6123.md",
+      "source_names": [
+        "redis-redis-issues-6123.md",
+        "redis-redis-issues-6123.md",
+        "redis-redis-issues-6123.md",
+        "redis-redis-issues-6123.md",
+        "redis-redis-issues-6123.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Redis 5.0.5: WARNING: The TCP backlog setting of 511 cannot be enforced because /proc/sys/net/core/somaxconn is set to the lower value of 128”的建议如下： [Redis 5.0.5: WARNING: The TCP backlog setting of 511 cannot ",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 5,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-12749",
+      "query": "How should I handle: [NEW]Scan for hash fields only",
+      "expected_source": "redis-redis-issues-12749.md",
+      "top_source": "redis-redis-issues-12749.md",
+      "source_names": [
+        "redis-redis-issues-12749.md",
+        "redis-redis-issues-12749.md",
+        "redis-redis-issues-12749.md",
+        "redis-redis-issues-12749.md",
+        "redis-redis-issues-242.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: [NEW]Scan for hash fields only”的建议如下： [[NEW]Scan for hash fields only > Curated Answers > High Signal Answer 1] i think adding a `[NOVALUES]` argument to HSCAN makes sense.  - Author: oranagra - Quality score: ",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 7,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-8114",
+      "query": "How should I handle: [BUG]Job for redis-server.service failed because the control process exited with error code.",
+      "expected_source": "redis-redis-issues-8114.md",
+      "top_source": "redis-redis-issues-8114.md",
+      "source_names": [
+        "redis-redis-issues-8114.md",
+        "redis-redis-issues-8114.md",
+        "redis-redis-issues-8114.md",
+        "redis-redis-issues-8114.md",
+        "redis-redis-issues-8114.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: [BUG]Job for redis-server.service failed because the control process exited with error code.”的建议如下： [[BUG]Job for redis-server.service failed because the control process exited with error code. > Curated Answer",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-5767",
+      "query": "How should I handle: [ZREVRANGEBYSCORE] When the offset is too large, the query is very slow.",
+      "expected_source": "redis-redis-issues-5767.md",
+      "top_source": "redis-redis-issues-5767.md",
+      "source_names": [
+        "redis-redis-issues-5767.md",
+        "redis-redis-issues-5767.md",
+        "redis-redis-issues-5767.md",
+        "redis-redis-issues-5767.md",
+        "kubernetes-kubernetes-issues-54491.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: [ZREVRANGEBYSCORE] When the offset is too large, the query is very slow.”的建议如下： [[ZREVRANGEBYSCORE] When the offset is too large, the query is very slow. > Problem] ZREVRANGEBYSCORE key max min [WITHSCORES] [LI",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-3870",
+      "query": "How should I handle: Redis is crashing every days using version 2.4.8",
+      "expected_source": "redis-redis-issues-3870.md",
+      "top_source": "redis-redis-issues-3870.md",
+      "source_names": [
+        "redis-redis-issues-3870.md",
+        "redis-redis-issues-3870.md",
+        "redis-redis-issues-3870.md",
+        "redis-redis-issues-3870.md",
+        "redis-redis-issues-3870.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Redis is crashing every days using version 2.4.8”的建议如下： [Redis is crashing every days using version 2.4.8 > Curated Answers > High Signal Answer 1] Version 2.3.8 is quite ancient - more recent versions include ",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-1042",
+      "query": "How should I handle: Allow to set an expiration on hash field",
+      "expected_source": "redis-redis-issues-1042.md",
+      "top_source": "redis-redis-issues-1042.md",
+      "source_names": [
+        "redis-redis-issues-1042.md",
+        "redis-redis-issues-1042.md",
+        "redis-redis-issues-1042.md",
+        "redis-redis-issues-1042.md",
+        "redis-redis-issues-1042.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Allow to set an expiration on hash field”的建议如下： [Allow to set an expiration on hash field > GitHub Provenance] - Repository: redis/redis  - Issue: #1042  - State: closed  - Labels: none  - Repository stars: 739",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 6,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-11867",
+      "query": "How should I handle: [QUESTION]Redis allkeys-lfu eviction policy. What happens if multiple keys have least frequency?",
+      "expected_source": "redis-redis-issues-11867.md",
+      "top_source": "redis-redis-issues-11867.md",
+      "source_names": [
+        "redis-redis-issues-11867.md",
+        "redis-redis-issues-11867.md",
+        "redis-redis-issues-11867.md",
+        "redis-redis-issues-11867.md",
+        "redis-redis-issues-11867.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: [QUESTION]Redis allkeys-lfu eviction policy. What happens if multiple keys have least frequency?”的建议如下： [[QUESTION]Redis allkeys-lfu eviction policy. What happens if multiple keys have least frequency? > Curate",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-1861",
+      "query": "How should I handle: POP from sorted sets",
+      "expected_source": "redis-redis-issues-1861.md",
+      "top_source": "redis-redis-issues-1861.md",
+      "source_names": [
+        "redis-redis-issues-1861.md",
+        "redis-redis-issues-1861.md",
+        "redis-redis-issues-1861.md",
+        "redis-redis-issues-1861.md",
+        "kubernetes-kubernetes-issues-75065.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: POP from sorted sets”的建议如下： [POP from sorted sets > GitHub Provenance] - Repository: redis/redis  - Issue: #1861  - State: closed  - Labels: none  - Repository stars: 73959  - URL: https://github.com/redis/redi",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 4,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-6065",
+      "query": "How should I handle: Design of new modules API functions: server events and module private data",
+      "expected_source": "redis-redis-issues-6065.md",
+      "top_source": "redis-redis-issues-6065.md",
+      "source_names": [
+        "redis-redis-issues-6065.md",
+        "redis-redis-issues-6065.md",
+        "redis-redis-issues-6065.md",
+        "redis-redis-issues-6065.md",
+        "redis-redis-issues-6065.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Design of new modules API functions: server events and module private data”的建议如下： [Design of new modules API functions: server events and module private data > Modules private data (RDB MPD fields)] and the API",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-10981",
+      "query": "How should I handle: Performance degrade 7.0.3 vs 6.2.7",
+      "expected_source": "redis-redis-issues-10981.md",
+      "top_source": "redis-redis-issues-10981.md",
+      "source_names": [
+        "redis-redis-issues-10981.md",
+        "redis-redis-issues-10981.md",
+        "redis-redis-issues-10981.md",
+        "redis-redis-issues-10981.md",
+        "redis-redis-issues-10981.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Performance degrade 7.0.3 vs 6.2.7”的建议如下： [Performance degrade 7.0.3 vs 6.2.7 > Problem] Hi,  I tested on different systems, but every time the results are the same, 7.x works worse than 6.x.  (config attached)",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-13551",
+      "query": "How should I handle: [NEW] Optimize HyperLogLog by SIMD acceleration",
+      "expected_source": "redis-redis-issues-13551.md",
+      "top_source": "redis-redis-issues-13551.md",
+      "source_names": [
+        "redis-redis-issues-13551.md",
+        "redis-redis-issues-13551.md",
+        "redis-redis-issues-13551.md",
+        "redis-redis-issues-13551.md",
+        "redis-redis-issues-13551.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: [NEW] Optimize HyperLogLog by SIMD acceleration”的建议如下： [[NEW] Optimize HyperLogLog by SIMD acceleration > Problem] + Fork: https://github.com/Nugine/redis/tree/hll-simd  + Experiment repo: https://github.com/Nu",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-10505",
+      "query": "How should I handle: [NEW] Allow WAIT to block until next fsync",
+      "expected_source": "redis-redis-issues-10505.md",
+      "top_source": "redis-redis-issues-10505.md",
+      "source_names": [
+        "redis-redis-issues-10505.md",
+        "redis-redis-issues-10505.md",
+        "redis-redis-issues-10505.md",
+        "redis-redis-issues-10505.md",
+        "redis-redis-issues-10505.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: [NEW] Allow WAIT to block until next fsync”的建议如下： [[NEW] Allow WAIT to block until next fsync > Curated Answers > High Signal Answer 1] This was discussed in the past, IIRC called WAITAOF. Should certainly be o",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-13253",
+      "query": "How should I handle: Enable redis stream in redis helm chart bitnami with terraform",
+      "expected_source": "redis-redis-issues-13253.md",
+      "top_source": "redis-redis-issues-13253.md",
+      "source_names": [
+        "redis-redis-issues-13253.md",
+        "redis-redis-issues-13253.md",
+        "redis-redis-issues-13253.md",
+        "redis-redis-issues-13253.md",
+        "redis-redis-issues-13253.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Enable redis stream in redis helm chart bitnami with terraform”的建议如下： [Enable redis stream in redis helm chart bitnami with terraform > Problem] I am trying to deploy a standalone redis with bitnami helm chart ",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 3,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-5335",
+      "query": "How should I handle: Changing Redis master-slave replication terms with something else",
+      "expected_source": "redis-redis-issues-5335.md",
+      "top_source": "redis-redis-issues-5335.md",
+      "source_names": [
+        "redis-redis-issues-5335.md",
+        "redis-redis-issues-5335.md",
+        "redis-redis-issues-5335.md",
+        "redis-redis-issues-5335.md",
+        "redis-redis-issues-5335.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Changing Redis master-slave replication terms with something else”的建议如下： [Changing Redis master-slave replication terms with something else > Curated Answers > High Signal Answer 3] > I don’t believe that termi",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 2,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-3846",
+      "query": "How should I handle: SCRIPT LIST command desirable",
+      "expected_source": "redis-redis-issues-3846.md",
+      "top_source": "redis-redis-issues-3846.md",
+      "source_names": [
+        "redis-redis-issues-3846.md",
+        "redis-redis-issues-3846.md",
+        "redis-redis-issues-3846.md",
+        "redis-redis-issues-3846.md",
+        "redis-redis-issues-3846.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: SCRIPT LIST command desirable”的建议如下： [SCRIPT LIST command desirable > Curated Answers > High Signal Answer 1] @allanwax @usernameisnull, redis philosophy is that it intentionally doesn't want to let you get the",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-3842",
+      "query": "How to run a redis docker instance with a different port rather than 6379",
+      "expected_source": "redis-redis-issues-3842.md",
+      "top_source": "redis-redis-issues-3842.md",
+      "source_names": [
+        "redis-redis-issues-3842.md",
+        "redis-redis-issues-3842.md",
+        "redis-redis-issues-3842.md",
+        "redis-redis-issues-3842.md",
+        "redis-redis-issues-3842.md"
+      ],
+      "answer_preview": "根据知识库，针对“How to run a redis docker instance with a different port rather than 6379”的建议如下： [How to run a redis docker instance with a different port rather than 6379 > GitHub Provenance] - Repository: redis/redis  - Issue: #3842  - State: cl",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-11641",
+      "query": "How should I handle: [BUG] Sentinels can't decide on a master and are stuck in loop",
+      "expected_source": "redis-redis-issues-11641.md",
+      "top_source": "redis-redis-issues-11641.md",
+      "source_names": [
+        "redis-redis-issues-11641.md",
+        "redis-redis-issues-11641.md",
+        "redis-redis-issues-11641.md",
+        "redis-redis-issues-11641.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: [BUG] Sentinels can't decide on a master and are stuck in loop”的建议如下： [[BUG] Sentinels can't decide on a master and are stuck in loop > Problem] **Describe the bug** When a master get's deleted sentinels should",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 2,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "redis-redis-issues-8455",
+      "query": "How should I handle: Redis 6.0.9 crashed by signal: 11, si_code: 1",
+      "expected_source": "redis-redis-issues-8455.md",
+      "top_source": "redis-redis-issues-14894.md",
+      "source_names": [
+        "redis-redis-issues-14894.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Redis 6.0.9 crashed by signal: 11, si_code: 1”的建议如下： [[BUG] Docker image fails redis/redis-stack:latest on MacOs > Problem] ``` redis-1  | === REDIS BUG REPORT START: Cut & paste starting from here === redis-1 ",
+      "checks": {
+        "source_hit": false,
+        "top1_source": false,
+        "keywords": true
+      },
+      "keyword_hit_count": 1,
+      "keyword_total": 8,
+      "passed": false
+    },
+    {
+      "id": "redis-redis-issues-14541",
+      "query": "How should I handle: [NEW]Option to skip EXEC ACL re-check during AOF loading.",
+      "expected_source": "redis-redis-issues-14541.md",
+      "top_source": "redis-redis-issues-14541.md",
+      "source_names": [
+        "redis-redis-issues-14541.md",
+        "redis-redis-issues-14541.md",
+        "redis-redis-issues-14541.md",
+        "redis-redis-issues-14541.md",
+        "redis-redis-issues-14541.md"
+      ],
+      "answer_preview": "已根据请求执行操作。服务 redis 当前状态为 running。  结合知识库上下文： [[NEW]Option to skip EXEC ACL re-check during AOF loading. > Problem] the time, so this additional check arguably shouldn’t be the reason that prevents them from being restored. I mean even if so",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 6,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-33664",
+      "query": "How should I handle: Force pods to re-pull an image without changing the image tag",
+      "expected_source": "kubernetes-kubernetes-issues-33664.md",
+      "top_source": "kubernetes-kubernetes-issues-33664.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-33664.md",
+        "kubernetes-kubernetes-issues-33664.md",
+        "kubernetes-kubernetes-issues-33664.md",
+        "kubernetes-kubernetes-issues-33664.md",
+        "kubernetes-kubernetes-issues-33664.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Force pods to re-pull an image without changing the image tag”的建议如下： [Force pods to re-pull an image without changing the image tag > Problem > Problem] A frequent question that comes up on Slack and Stack Over",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-51835",
+      "query": "How should I handle: Pods stuck on terminating",
+      "expected_source": "kubernetes-kubernetes-issues-51835.md",
+      "top_source": "kubernetes-kubernetes-issues-75065.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-75065.md",
+        "kubernetes-kubernetes-issues-51835.md",
+        "redis-redis-issues-11641.md",
+        "kubernetes-kubernetes-issues-60987.md",
+        "kubernetes-kubernetes-issues-98423.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Pods stuck on terminating”的建议如下： [Potential container runtime state mess-up cause Pod stuck in \"Terminating\" state > Problem] **What you expected to happen**: Pod gets deleted gracefully by kubelet. In such cas",
+      "checks": {
+        "source_hit": true,
+        "top1_source": false,
+        "keywords": true
+      },
+      "keyword_hit_count": 4,
+      "keyword_total": 8,
+      "passed": false
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-1899",
+      "query": "How should I handle: Allow users to wait for conditions from kubectl and using the API",
+      "expected_source": "kubernetes-kubernetes-issues-1899.md",
+      "top_source": "kubernetes-kubernetes-issues-1899.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-1899.md",
+        "kubernetes-kubernetes-issues-1899.md",
+        "kubernetes-kubernetes-issues-1899.md",
+        "kubernetes-kubernetes-issues-1899.md",
+        "kubernetes-kubernetes-issues-1899.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Allow users to wait for conditions from kubectl and using the API”的建议如下： [Allow users to wait for conditions from kubectl and using the API > Problem] Spawned from #1325 It should be easy for users do two thing",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-89898",
+      "query": "How should I handle: Sometime Liveness/Readiness Probes fail because of net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)",
+      "expected_source": "kubernetes-kubernetes-issues-89898.md",
+      "top_source": "kubernetes-kubernetes-issues-89898.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-89898.md",
+        "kubernetes-kubernetes-issues-89898.md",
+        "kubernetes-kubernetes-issues-89898.md",
+        "kubernetes-kubernetes-issues-89898.md",
+        "kubernetes-kubernetes-issues-89898.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Sometime Liveness/Readiness Probes fail because of net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)”的建议如下： [Sometime Liveness/Readiness Probes fail becaus",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 3,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-60140",
+      "query": "How should I handle: kubectl cp fails on large files ",
+      "expected_source": "kubernetes-kubernetes-issues-60140.md",
+      "top_source": "kubernetes-kubernetes-issues-60140.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-60140.md",
+        "kubernetes-kubernetes-issues-60140.md",
+        "kubernetes-kubernetes-issues-60140.md",
+        "kubernetes-kubernetes-issues-60140.md",
+        "kubernetes-kubernetes-issues-60140.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: kubectl cp fails on large files ”的建议如下： [kubectl cp fails on large files > Problem] **What you expected to happen**: The large file to be downloaded from the container. **How to reproduce it (as minimally and p",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 3,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-60987",
+      "query": "How should I handle: Orphaned pod found - but volume paths are still present on disk",
+      "expected_source": "kubernetes-kubernetes-issues-60987.md",
+      "top_source": "kubernetes-kubernetes-issues-60987.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-60987.md",
+        "kubernetes-kubernetes-issues-60987.md",
+        "kubernetes-kubernetes-issues-60987.md",
+        "kubernetes-kubernetes-issues-60987.md",
+        "kubernetes-kubernetes-issues-60987.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Orphaned pod found - but volume paths are still present on disk”的建议如下： [Orphaned pod found - but volume paths are still present on disk > Problem] **What you expected to happen**: Kubelet should intelligently d",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-60807",
+      "query": "How should I handle: deleting namespace stuck at \"Terminating\" state",
+      "expected_source": "kubernetes-kubernetes-issues-60807.md",
+      "top_source": "kubernetes-kubernetes-issues-60807.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-60807.md",
+        "kubernetes-kubernetes-issues-60807.md",
+        "kubernetes-kubernetes-issues-60807.md",
+        "kubernetes-kubernetes-issues-75065.md",
+        "kubernetes-kubernetes-issues-60807.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: deleting namespace stuck at \"Terminating\" state”的建议如下： [deleting namespace stuck at \"Terminating\" state > Curated Answers > High Signal Answer 1] @ManifoldFR , I had the same issue as yours and I managed to mak",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-27114",
+      "query": "How should I handle: LivenessProbe should start after ReadinessProbe Succeeded if ReadinessProbe is specified",
+      "expected_source": "kubernetes-kubernetes-issues-27114.md",
+      "top_source": "kubernetes-kubernetes-issues-27114.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-27114.md",
+        "kubernetes-kubernetes-issues-27114.md",
+        "kubernetes-kubernetes-issues-27114.md",
+        "kubernetes-kubernetes-issues-27114.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: LivenessProbe should start after ReadinessProbe Succeeded if ReadinessProbe is specified”的建议如下： [LivenessProbe should start after ReadinessProbe Succeeded if ReadinessProbe is specified > Curated Answers > High",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-45419",
+      "query": "How should I handle: Node flapping between Ready/NotReady with PLEG issues",
+      "expected_source": "kubernetes-kubernetes-issues-45419.md",
+      "top_source": "kubernetes-kubernetes-issues-45419.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-45419.md",
+        "kubernetes-kubernetes-issues-45419.md",
+        "kubernetes-kubernetes-issues-45419.md",
+        "kubernetes-kubernetes-issues-45419.md",
+        "kubernetes-kubernetes-issues-45419.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Node flapping between Ready/NotReady with PLEG issues”的建议如下： [Node flapping between Ready/NotReady with PLEG issues > Problem] docker daemon is fine (local `docker ps`, `docker images`, etc. all work and respon",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-73297",
+      "query": "How should I handle: Support TLS termination with AWS NLB",
+      "expected_source": "kubernetes-kubernetes-issues-73297.md",
+      "top_source": "kubernetes-kubernetes-issues-73297.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-73297.md",
+        "kubernetes-kubernetes-issues-73297.md",
+        "kubernetes-kubernetes-issues-73297.md",
+        "kubernetes-kubernetes-issues-73297.md",
+        "kubernetes-kubernetes-issues-73297.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Support TLS termination with AWS NLB”的建议如下： [Support TLS termination with AWS NLB > Curated Answers > High Signal Answer 1] In addition to certificate ARN on the listener, we need ssl security policy.  Also TLS",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-28746",
+      "query": "How should I handle: kubectl logs should *not* fail while a pod is being started, because it makes for a terrible initial experience",
+      "expected_source": "kubernetes-kubernetes-issues-28746.md",
+      "top_source": "kubernetes-kubernetes-issues-28746.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-28746.md",
+        "kubernetes-kubernetes-issues-28746.md",
+        "kubernetes-kubernetes-issues-28746.md",
+        "kubernetes-kubernetes-issues-28746.md",
+        "kubernetes-kubernetes-issues-28746.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: kubectl logs should *not* fail while a pod is being started, because it makes for a terrible initial experience”的建议如下： [kubectl logs should *not* fail while a pod is being started, because it makes for a terrib",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-56903",
+      "query": "How should I handle: DNS intermittent delays of 5s",
+      "expected_source": "kubernetes-kubernetes-issues-56903.md",
+      "top_source": "kubernetes-kubernetes-issues-56903.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-56903.md",
+        "kubernetes-kubernetes-issues-56903.md",
+        "kubernetes-kubernetes-issues-56903.md",
+        "kubernetes-kubernetes-issues-56903.md",
+        "kubernetes-kubernetes-issues-56903.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: DNS intermittent delays of 5s”的建议如下： [DNS intermittent delays of 5s > Problem] **Is this a BUG REPORT or FEATURE REQUEST?**:  /kind bug    **What happened**:  DNS lookup is sometimes taking 5 seconds.    **What",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-37218",
+      "query": "How should I handle: Multiple liveness checks (feature request)",
+      "expected_source": "kubernetes-kubernetes-issues-37218.md",
+      "top_source": "kubernetes-kubernetes-issues-37218.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-37218.md",
+        "kubernetes-kubernetes-issues-37218.md",
+        "kubernetes-kubernetes-issues-53533.md",
+        "kubernetes-kubernetes-issues-89898.md",
+        "kubernetes-kubernetes-issues-61937.md"
+      ],
+      "answer_preview": "已根据请求执行操作。服务 redis 当前状态为 running。  结合知识库上下文： [Multiple liveness checks (feature request) > GitHub Provenance] - Repository: kubernetes/kubernetes  - Issue: #37218  - State: closed  - Labels: sig/node, sig/instrumentation  - Repository stars",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 3,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-69697",
+      "query": "How should I handle: PV is stuck at terminating after PVC is deleted",
+      "expected_source": "kubernetes-kubernetes-issues-69697.md",
+      "top_source": "kubernetes-kubernetes-issues-69697.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-69697.md",
+        "kubernetes-kubernetes-issues-69697.md",
+        "kubernetes-kubernetes-issues-69697.md",
+        "kubernetes-kubernetes-issues-69697.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: PV is stuck at terminating after PVC is deleted”的建议如下： [PV is stuck at terminating after PVC is deleted > Problem] **What you expected to happen**: After PVC is deleted, PV should be deleted along with the EBS ",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 3,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-85643",
+      "query": "How should I handle: Create ability to do zero downtime deployments when using externalTrafficPolicy: Local",
+      "expected_source": "kubernetes-kubernetes-issues-85643.md",
+      "top_source": "kubernetes-kubernetes-issues-85643.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-85643.md",
+        "kubernetes-kubernetes-issues-85643.md",
+        "kubernetes-kubernetes-issues-85643.md",
+        "kubernetes-kubernetes-issues-85643.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Create ability to do zero downtime deployments when using externalTrafficPolicy: Local”的建议如下： [Create ability to do zero downtime deployments when using externalTrafficPolicy: Local > Problem] I am using extern",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-484",
+      "query": "How should I handle: Service scale-to-zero (fka \"Socket activation\")",
+      "expected_source": "kubernetes-kubernetes-issues-484.md",
+      "top_source": "kubernetes-kubernetes-issues-484.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-484.md",
+        "kubernetes-kubernetes-issues-484.md",
+        "kubernetes-kubernetes-issues-484.md",
+        "kubernetes-kubernetes-issues-484.md",
+        "kubernetes-kubernetes-issues-484.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Service scale-to-zero (fka \"Socket activation\")”的建议如下： [Service scale-to-zero (fka \"Socket activation\") > Problem] I want to start this issue to drum up support for adding socket activation support to Kubernete",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-55713",
+      "query": "How should I handle: Pods are not moved when Node in NotReady state",
+      "expected_source": "kubernetes-kubernetes-issues-55713.md",
+      "top_source": "kubernetes-kubernetes-issues-55713.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-55713.md",
+        "kubernetes-kubernetes-issues-55713.md",
+        "kubernetes-kubernetes-issues-55713.md",
+        "kubernetes-kubernetes-issues-55713.md",
+        "kubernetes-kubernetes-issues-55713.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Pods are not moved when Node in NotReady state”的建议如下： [Pods are not moved when Node in NotReady state > Problem] **What you expected to happen**:  I excpected the pods on the \"crashed\" node to be moved to the r",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-78446",
+      "query": "How should I handle: kubectl port-forward doesn't properly recover from interrupted connection errors",
+      "expected_source": "kubernetes-kubernetes-issues-78446.md",
+      "top_source": "kubernetes-kubernetes-issues-78446.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-78446.md",
+        "kubernetes-kubernetes-issues-78446.md",
+        "kubernetes-kubernetes-issues-78446.md",
+        "kubernetes-kubernetes-issues-78446.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: kubectl port-forward doesn't properly recover from interrupted connection errors”的建议如下： [kubectl port-forward doesn't properly recover from interrupted connection errors > Problem] **What happened**: When I ope",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 5,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-126811",
+      "query": "How should I handle: CVE-2021-25742: Ingress-nginx custom snippets allows retrieval of ingress-nginx serviceaccount token and secrets across all namespaces",
+      "expected_source": "kubernetes-kubernetes-issues-126811.md",
+      "top_source": "kubernetes-kubernetes-issues-126811.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-126811.md",
+        "kubernetes-kubernetes-issues-126811.md",
+        "kubernetes-kubernetes-issues-126811.md",
+        "kubernetes-kubernetes-issues-126811.md",
+        "kubernetes-kubernetes-issues-126811.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: CVE-2021-25742: Ingress-nginx custom snippets allows retrieval of ingress-nginx serviceaccount token and secrets across all namespaces”的建议如下： [CVE-2021-25742: Ingress-nginx custom snippets allows retrieval of i",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 4,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-54482",
+      "query": "How should I handle: --hostname-override ignored when --cloud-provider is specified",
+      "expected_source": "kubernetes-kubernetes-issues-54482.md",
+      "top_source": "kubernetes-kubernetes-issues-54482.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-54482.md",
+        "kubernetes-kubernetes-issues-54482.md",
+        "kubernetes-kubernetes-issues-54482.md",
+        "kubernetes-kubernetes-issues-54482.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: --hostname-override ignored when --cloud-provider is specified”的建议如下： [--hostname-override ignored when --cloud-provider is specified > Problem] ps aux: root 4610 3.3 7.7 404596 78320 ? Ssl 12:58 0:00 /usr/bin/",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 4,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-13382",
+      "query": "How should I handle: Suddenly getting TLS Handshake timeout on most requests to the api server",
+      "expected_source": "kubernetes-kubernetes-issues-13382.md",
+      "top_source": "kubernetes-kubernetes-issues-13382.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-13382.md",
+        "kubernetes-kubernetes-issues-13382.md",
+        "kubernetes-kubernetes-issues-13382.md",
+        "kubernetes-kubernetes-issues-13382.md",
+        "kubernetes-kubernetes-issues-13382.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Suddenly getting TLS Handshake timeout on most requests to the api server”的建议如下： [Suddenly getting TLS Handshake timeout on most requests to the api server > Problem] I'm unable to use `kubectl` because of TLS ",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-79606",
+      "query": "How should I handle: kubectl wait works for Deployment, but does not for StatefulSet",
+      "expected_source": "kubernetes-kubernetes-issues-79606.md",
+      "top_source": "kubernetes-kubernetes-issues-79606.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-79606.md",
+        "kubernetes-kubernetes-issues-79606.md",
+        "kubernetes-kubernetes-issues-79606.md",
+        "kubernetes-kubernetes-issues-79606.md",
+        "kubernetes-kubernetes-issues-79606.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: kubectl wait works for Deployment, but does not for StatefulSet”的建议如下： [kubectl wait works for Deployment, but does not for StatefulSet > Curated Answers > High Signal Answer 1] For everybody coming here, I sug",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-53533",
+      "query": "How should I handle: Kubelet/Kubernetes should work with Swap Enabled",
+      "expected_source": "kubernetes-kubernetes-issues-53533.md",
+      "top_source": "kubernetes-kubernetes-issues-53533.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-53533.md",
+        "kubernetes-kubernetes-issues-53533.md",
+        "kubernetes-kubernetes-issues-53533.md",
+        "kubernetes-kubernetes-issues-53533.md",
+        "kubernetes-kubernetes-issues-53533.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Kubelet/Kubernetes should work with Swap Enabled”的建议如下： [Kubelet/Kubernetes should work with Swap Enabled > Problem] This PR https://github.com/kubernetes/kubernetes/pull/31996 and last change which enabled it ",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-61937",
+      "query": "How should I handle: application crash due to k8s 1.9.x open the kernel memory accounting by default",
+      "expected_source": "kubernetes-kubernetes-issues-61937.md",
+      "top_source": "kubernetes-kubernetes-issues-61937.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-61937.md",
+        "kubernetes-kubernetes-issues-61937.md",
+        "kubernetes-kubernetes-issues-61937.md",
+        "kubernetes-kubernetes-issues-61937.md",
+        "kubernetes-kubernetes-issues-61937.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: application crash due to k8s 1.9.x open the kernel memory accounting by default”的建议如下： [application crash due to k8s 1.9.x open the kernel memory accounting by default > Problem] I want to know why kernel memor",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-54491",
+      "query": "How should I handle: kubectl get pods should report last restart time?",
+      "expected_source": "kubernetes-kubernetes-issues-54491.md",
+      "top_source": "kubernetes-kubernetes-issues-54491.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-54491.md",
+        "kubernetes-kubernetes-issues-54491.md",
+        "kubernetes-kubernetes-issues-54491.md",
+        "kubernetes-kubernetes-issues-54491.md",
+        "kubernetes-kubernetes-issues-54491.md"
+      ],
+      "answer_preview": "已根据请求执行操作。已执行模拟工具，redis 服务重启成功。  结合知识库上下文： [kubectl get pods should report last restart time? > Problem] When a pod is being restarted, the time it last restarted is very relevant (if it was hours ago, I don't care).  We should consider som",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-70179",
+      "query": "How should I handle: Kubernetes pod resource utilization metrics need better documentation",
+      "expected_source": "kubernetes-kubernetes-issues-70179.md",
+      "top_source": "kubernetes-kubernetes-issues-70179.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-70179.md",
+        "kubernetes-kubernetes-issues-70179.md",
+        "kubernetes-kubernetes-issues-70179.md",
+        "kubernetes-kubernetes-issues-70179.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Kubernetes pod resource utilization metrics need better documentation”的建议如下： [Kubernetes pod resource utilization metrics need better documentation > Problem] process memory consumption observed via `top` to be",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 6,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-52345",
+      "query": "How should I handle: Re-run initContainers in a Deployment when containers exit on error",
+      "expected_source": "kubernetes-kubernetes-issues-52345.md",
+      "top_source": "kubernetes-kubernetes-issues-52345.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-52345.md",
+        "kubernetes-kubernetes-issues-52345.md",
+        "kubernetes-kubernetes-issues-52345.md",
+        "kubernetes-kubernetes-issues-52345.md",
+        "kubernetes-kubernetes-issues-52345.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Re-run initContainers in a Deployment when containers exit on error”的建议如下： [Re-run initContainers in a Deployment when containers exit on error > Problem] **Is this a BUG REPORT or FEATURE REQUEST?**:    /kind ",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 3,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-64137",
+      "query": "How should I handle: Kubelet CPU/Memory Usage linearly increases using CronJob",
+      "expected_source": "kubernetes-kubernetes-issues-64137.md",
+      "top_source": "kubernetes-kubernetes-issues-64137.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-64137.md",
+        "kubernetes-kubernetes-issues-64137.md",
+        "kubernetes-kubernetes-issues-64137.md",
+        "kubernetes-kubernetes-issues-64137.md",
+        "kubernetes-kubernetes-issues-64137.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Kubelet CPU/Memory Usage linearly increases using CronJob”的建议如下： [Kubelet CPU/Memory Usage linearly increases using CronJob > Problem] to restart the kubelet, and everything seems to return to normal. **What yo",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-98423",
+      "query": "How should I handle: Kube-apiserver high memory usage on pending pods storm",
+      "expected_source": "kubernetes-kubernetes-issues-98423.md",
+      "top_source": "kubernetes-kubernetes-issues-98423.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-98423.md",
+        "kubernetes-kubernetes-issues-98423.md",
+        "kubernetes-kubernetes-issues-98423.md",
+        "kubernetes-kubernetes-issues-98423.md",
+        "kubernetes-kubernetes-issues-98423.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Kube-apiserver high memory usage on pending pods storm”的建议如下： [Kube-apiserver high memory usage on pending pods storm > Problem] or kube-scheduler delaying the pods' startup, but it should not lead to OOM kill.",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 3,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-129982",
+      "query": "How should I handle: Excessive conntrack cleanup causes high memory (12GB) and CPU usage when any Pod with a UDP port changes",
+      "expected_source": "kubernetes-kubernetes-issues-129982.md",
+      "top_source": "kubernetes-kubernetes-issues-129982.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-129982.md",
+        "kubernetes-kubernetes-issues-129982.md",
+        "kubernetes-kubernetes-issues-129982.md",
+        "kubernetes-kubernetes-issues-129982.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Excessive conntrack cleanup causes high memory (12GB) and CPU usage when any Pod with a UDP port changes”的建议如下： [Excessive conntrack cleanup causes high memory (12GB) and CPU usage when any Pod with a UDP port ",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-140",
+      "query": "How should I handle: PreStart and PostStop event hooks",
+      "expected_source": "kubernetes-kubernetes-issues-140.md",
+      "top_source": "kubernetes-kubernetes-issues-140.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-140.md",
+        "kubernetes-kubernetes-issues-75065.md",
+        "kubernetes-kubernetes-issues-140.md",
+        "kubernetes-kubernetes-issues-140.md"
+      ],
+      "answer_preview": "已根据请求执行操作。已执行模拟工具，redis 服务重启成功。  结合知识库上下文： [PreStart and PostStop event hooks > Problem] As described in the (liveness probe issue)[https://github.com/GoogleCloudPlatform/kubernetes/issues/66], it would be useful to support multiple types o",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 2,
+      "keyword_total": 7,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-19825",
+      "query": "How should I handle: Container Termination Discrepancy  for Exit Code 137",
+      "expected_source": "kubernetes-kubernetes-issues-19825.md",
+      "top_source": "kubernetes-kubernetes-issues-19825.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-19825.md",
+        "kubernetes-kubernetes-issues-19825.md",
+        "kubernetes-kubernetes-issues-19825.md",
+        "kubernetes-kubernetes-issues-19825.md",
+        "kubernetes-kubernetes-issues-19825.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Container Termination Discrepancy  for Exit Code 137”的建议如下： [Container Termination Discrepancy  for Exit Code 137 > Curated Answers > High Signal Answer 1] Hey guys, Sorry to bump this up after 2 years, but sti",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-73269",
+      "query": "How should I handle: New scheduler priority for real load average and free memory",
+      "expected_source": "kubernetes-kubernetes-issues-73269.md",
+      "top_source": "kubernetes-kubernetes-issues-73269.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-73269.md",
+        "kubernetes-kubernetes-issues-73269.md",
+        "kubernetes-kubernetes-issues-73269.md",
+        "kubernetes-kubernetes-issues-73269.md",
+        "kubernetes-kubernetes-issues-73269.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: New scheduler priority for real load average and free memory”的建议如下： [New scheduler priority for real load average and free memory > Problem] pods are _not_ distributed over cluster according to real-time node u",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 4,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-75065",
+      "query": "How should I handle: Potential container runtime state mess-up cause Pod stuck in \"Terminating\" state",
+      "expected_source": "kubernetes-kubernetes-issues-75065.md",
+      "top_source": "kubernetes-kubernetes-issues-75065.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-75065.md",
+        "kubernetes-kubernetes-issues-75065.md",
+        "kubernetes-kubernetes-issues-75065.md",
+        "kubernetes-kubernetes-issues-75065.md",
+        "kubernetes-kubernetes-issues-75065.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Potential container runtime state mess-up cause Pod stuck in \"Terminating\" state”的建议如下： [Potential container runtime state mess-up cause Pod stuck in \"Terminating\" state > Problem] **What you expected to happen",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 6,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-61486",
+      "query": "How should I handle: \"externalTrafficPolicy\": \"Local\" on AWS does not work if the dhcp of the vpc is not set exactly to <region>.compute.internal",
+      "expected_source": "kubernetes-kubernetes-issues-61486.md",
+      "top_source": "kubernetes-kubernetes-issues-61486.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-61486.md",
+        "kubernetes-kubernetes-issues-61486.md",
+        "kubernetes-kubernetes-issues-61486.md",
+        "kubernetes-kubernetes-issues-61486.md",
+        "kubernetes-kubernetes-issues-61486.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: \"externalTrafficPolicy\": \"Local\" on AWS does not work if the dhcp of the vpc is not set exactly to <region>.compute.internal”的建议如下： [\"externalTrafficPolicy\": \"Local\" on AWS does not work if the dhcp of the vpc ",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-45911",
+      "query": "How should I handle: Cannot retrieve logs of running pod via kubectl",
+      "expected_source": "kubernetes-kubernetes-issues-45911.md",
+      "top_source": "kubernetes-kubernetes-issues-45911.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-45911.md",
+        "kubernetes-kubernetes-issues-45911.md",
+        "kubernetes-kubernetes-issues-45911.md",
+        "kubernetes-kubernetes-issues-45911.md",
+        "kubernetes-kubernetes-issues-45911.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Cannot retrieve logs of running pod via kubectl”的建议如下： [Cannot retrieve logs of running pod via kubectl > Problem] I could see the logs of the new container by running `docker logs <new container id>`, and veri",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 2,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-30763",
+      "query": "How should I handle: Add support for fish shell autocompletion",
+      "expected_source": "kubernetes-kubernetes-issues-30763.md",
+      "top_source": "kubernetes-kubernetes-issues-30763.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-30763.md",
+        "kubernetes-kubernetes-issues-30763.md",
+        "kubernetes-kubernetes-issues-30763.md",
+        "kubernetes-kubernetes-issues-30763.md",
+        "kubernetes-kubernetes-issues-30763.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Add support for fish shell autocompletion”的建议如下： [Add support for fish shell autocompletion > GitHub Provenance] - Repository: kubernetes/kubernetes  - Issue: #30763  - State: closed  - Labels: area/kubectl, pr",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-17088",
+      "query": "How should I handle: Cross-namespace Ingress",
+      "expected_source": "kubernetes-kubernetes-issues-17088.md",
+      "top_source": "kubernetes-kubernetes-issues-17088.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-17088.md",
+        "kubernetes-kubernetes-issues-17088.md",
+        "kubernetes-kubernetes-issues-17088.md",
+        "kubernetes-kubernetes-issues-17088.md",
+        "kubernetes-kubernetes-issues-75065.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Cross-namespace Ingress”的建议如下： [Cross-namespace Ingress > Curated Answers > High Signal Answer 1] I would tend to imagine the use case that @paralin described is common.  I'm looking at an ingress controller as",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-44665",
+      "query": "How should I handle: 1.6.1 The connection to the server localhost:8080 was refused",
+      "expected_source": "kubernetes-kubernetes-issues-44665.md",
+      "top_source": "kubernetes-kubernetes-issues-44665.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-44665.md",
+        "kubernetes-kubernetes-issues-44665.md",
+        "kubernetes-kubernetes-issues-44665.md",
+        "kubernetes-kubernetes-issues-23726.md",
+        "kubernetes-kubernetes-issues-44665.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: 1.6.1 The connection to the server localhost:8080 was refused”的建议如下： [1.6.1 The connection to the server localhost:8080 was refused > Curated Answers > High Signal Answer 3] Reproduce the same error when doing ",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 5,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-62594",
+      "query": "How should I handle: Liveness/Readiness probes are failing with getsockopt: connection refused",
+      "expected_source": "kubernetes-kubernetes-issues-62594.md",
+      "top_source": "kubernetes-kubernetes-issues-62594.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-62594.md",
+        "kubernetes-kubernetes-issues-62594.md",
+        "kubernetes-kubernetes-issues-62594.md",
+        "kubernetes-kubernetes-issues-62594.md",
+        "kubernetes-kubernetes-issues-62594.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Liveness/Readiness probes are failing with getsockopt: connection refused”的建议如下： [Liveness/Readiness probes are failing with getsockopt: connection refused > Problem] Here is how my livenessProbe config [Livene",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 3,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-43805",
+      "query": "How should I handle: 1.6.0 kubelet fails with error \"misconfiguration: kubelet cgroup driver: \"cgroupfs\" is different from docker cgroup driver: \"systemd\"",
+      "expected_source": "kubernetes-kubernetes-issues-43805.md",
+      "top_source": "kubernetes-kubernetes-issues-43805.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-43805.md",
+        "kubernetes-kubernetes-issues-43805.md",
+        "kubernetes-kubernetes-issues-43805.md",
+        "kubernetes-kubernetes-issues-43805.md",
+        "kubernetes-kubernetes-issues-43805.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: 1.6.0 kubelet fails with error \"misconfiguration: kubelet cgroup driver: \"cgroupfs\" is different from docker cgroup driver: \"systemd\"”的建议如下： [1.6.0 kubelet fails with error \"misconfiguration: kubelet cgroup dri",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-23726",
+      "query": "How should I handle: Running Kubernetes Locally via Docker - `kubectl get nodes` returns `The connection to the server localhost:8080 was refused - did you specify the right host or port?`",
+      "expected_source": "kubernetes-kubernetes-issues-23726.md",
+      "top_source": "kubernetes-kubernetes-issues-23726.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-23726.md",
+        "kubernetes-kubernetes-issues-23726.md",
+        "kubernetes-kubernetes-issues-23726.md",
+        "kubernetes-kubernetes-issues-23726.md",
+        "kubernetes-kubernetes-issues-23726.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Running Kubernetes Locally via Docker - `kubectl get nodes` returns `The connection to the server localhost:8080 was refused - did you specify the right host or port?`”的建议如下： [Running Kubernetes Locally via Doc",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 7,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-134080",
+      "query": "How should I handle: kube-apiserver log spammed with \"failed to connect to etcd\"",
+      "expected_source": "kubernetes-kubernetes-issues-134080.md",
+      "top_source": "kubernetes-kubernetes-issues-134080.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-134080.md",
+        "kubernetes-kubernetes-issues-134080.md",
+        "kubernetes-kubernetes-issues-134080.md",
+        "kubernetes-kubernetes-issues-134080.md",
+        "kubernetes-kubernetes-issues-134080.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: kube-apiserver log spammed with \"failed to connect to etcd\"”的建议如下： [kube-apiserver log spammed with \"failed to connect to etcd\" > Problem > How can we reproduce it (as minimally and precisely as possible)?] Dep",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-70082",
+      "query": "How should I handle: etcdserver: read-only range request took too long with etcd 3.2.24",
+      "expected_source": "kubernetes-kubernetes-issues-70082.md",
+      "top_source": "kubernetes-kubernetes-issues-70082.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-70082.md",
+        "kubernetes-kubernetes-issues-70082.md",
+        "kubernetes-kubernetes-issues-70082.md",
+        "kubernetes-kubernetes-issues-70082.md",
+        "kubernetes-kubernetes-issues-70082.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: etcdserver: read-only range request took too long with etcd 3.2.24”的建议如下： [etcdserver: read-only range request took too long with etcd 3.2.24 > Problem] **What you expected to happen**: I expect the logs to be ",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-23920",
+      "query": "How should I handle: HostPort seemingly not working",
+      "expected_source": "kubernetes-kubernetes-issues-23920.md",
+      "top_source": "kubernetes-kubernetes-issues-23920.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-23920.md",
+        "kubernetes-kubernetes-issues-23920.md",
+        "kubernetes-kubernetes-issues-75065.md",
+        "redis-redis-issues-4102.md",
+        "kubernetes-kubernetes-issues-23920.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: HostPort seemingly not working”的建议如下： [HostPort seemingly not working > Problem] From the host (178.x.x.x), running: `curl http://10.x.x.x` gets me the response from nginx that I expect. From the host (178.x.x.",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-72102",
+      "query": "How should I handle: kube-apiserver 1.13.x refuses to work when first etcd-server is not available.",
+      "expected_source": "kubernetes-kubernetes-issues-72102.md",
+      "top_source": "kubernetes-kubernetes-issues-72102.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-72102.md",
+        "kubernetes-kubernetes-issues-72102.md",
+        "kubernetes-kubernetes-issues-72102.md",
+        "kubernetes-kubernetes-issues-72102.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: kube-apiserver 1.13.x refuses to work when first etcd-server is not available.”的建议如下： [kube-apiserver 1.13.x refuses to work when first etcd-server is not available. > Problem] **How to reproduce the problem**:",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-29540",
+      "query": "How should I handle: kubernetes-dashboard pod in CrashLoopBackOff state ",
+      "expected_source": "kubernetes-kubernetes-issues-29540.md",
+      "top_source": "kubernetes-kubernetes-issues-29540.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-29540.md",
+        "kubernetes-kubernetes-issues-29540.md",
+        "kubernetes-kubernetes-issues-29540.md",
+        "kubernetes-kubernetes-issues-29540.md",
+        "kubernetes-kubernetes-issues-75065.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: kubernetes-dashboard pod in CrashLoopBackOff state ”的建议如下： [kubernetes-dashboard pod in CrashLoopBackOff state > Curated Answers > High Signal Answer 1] I remember resolving the issue by first deleting the secr",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-33729",
+      "query": "How should I handle: kubeadm init hangs on ubuntu 16.04",
+      "expected_source": "kubernetes-kubernetes-issues-33729.md",
+      "top_source": "kubernetes-kubernetes-issues-33729.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-33729.md",
+        "kubernetes-kubernetes-issues-33729.md",
+        "kubernetes-kubernetes-issues-33729.md",
+        "kubernetes-kubernetes-issues-33729.md",
+        "kubernetes-kubernetes-issues-33729.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: kubeadm init hangs on ubuntu 16.04”的建议如下： [kubeadm init hangs on ubuntu 16.04 > Related to or a similar discussion happened @ https://github.com/kubernetes/kubernetes/issues/33544] **What you expected to happen",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-51475",
+      "query": "How should I handle: don't require API server connection for `kubectl create configmap ... --dry-run`",
+      "expected_source": "kubernetes-kubernetes-issues-51475.md",
+      "top_source": "kubernetes-kubernetes-issues-51475.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-51475.md",
+        "kubernetes-kubernetes-issues-51475.md",
+        "kubernetes-kubernetes-issues-51475.md",
+        "kubernetes-kubernetes-issues-51475.md",
+        "kubernetes-kubernetes-issues-51475.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: don't require API server connection for `kubectl create configmap ... --dry-run`”的建议如下： [don't require API server connection for `kubectl create configmap ... --dry-run` > Problem] **What you expected to happen",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    },
+    {
+      "id": "kubernetes-kubernetes-issues-34134",
+      "query": "How should I handle: Create a kubeadm installer container for CoreOS",
+      "expected_source": "kubernetes-kubernetes-issues-34134.md",
+      "top_source": "kubernetes-kubernetes-issues-34134.md",
+      "source_names": [
+        "kubernetes-kubernetes-issues-34134.md",
+        "kubernetes-kubernetes-issues-34134.md",
+        "kubernetes-kubernetes-issues-34134.md",
+        "kubernetes-kubernetes-issues-34134.md",
+        "kubernetes-kubernetes-issues-34134.md"
+      ],
+      "answer_preview": "根据知识库，针对“How should I handle: Create a kubeadm installer container for CoreOS”的建议如下： [Create a kubeadm installer container for CoreOS > Curated Answers > High Signal Answer 1] OK, I got kubeadm working on CoreOS quite easily while travellin",
+      "checks": {
+        "source_hit": true,
+        "top1_source": true,
+        "keywords": true
+      },
+      "keyword_hit_count": 8,
+      "keyword_total": 8,
+      "passed": true
+    }
+  ]
+}
