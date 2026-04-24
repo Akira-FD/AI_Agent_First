@@ -158,9 +158,10 @@ flowchart TD
 - 对带 `repaired_payload` 的可修复参数错误选择 `retry_repaired_action`
 - 自动用修复后的 action 重新执行一次
 - 对 `degrade_to_answer` 与 `retry_later` 执行最小重规划并中止剩余 action
+- 对特定失败提示支持 `fallback_to_remaining_actions`，继续执行剩余可用 action
 - 将节点轨迹写入 `AgentResponse.node_trace`
 
-这让系统已经具备基础失败可观测性、一次性参数修复重试能力以及最小可执行重规划，但还没有做到复杂任务级重规划。
+这让系统已经具备基础失败可观测性、一次性参数修复重试能力、最小可执行重规划，以及受控的“替代 action 续行”能力，但还没有做到复杂任务级重规划。
 
 ### 4.6 Tool Router + Tool Exec
 
@@ -183,6 +184,7 @@ flowchart TD
 - 工具注册表独立
 - 工具输出结构统一
 - 复合请求可以顺序执行多个工具
+- 已可跑通“查状态 -> 查日志 -> 总结根因”的固定顺序链路
 - UI 可以展示 actions 数量和工具名列表
 
 但还缺少：
@@ -356,6 +358,7 @@ flowchart LR
 - 多工具 action list 顺序执行
 - 可修复参数错误自动重试一次
 - `degrade_to_answer` / `retry_later` 下的最小重规划中止
+- `fallback_to_remaining_actions` 下的剩余 action 续行
 - 评测报告支持 Agent path 对比维度
 - 可评测、可测试、可演示
 
@@ -366,7 +369,7 @@ flowchart LR
 - Tool 调用修复闭环
   现状：已有失败观察、降级动作和一次性 repaired action 重试
 - 多工具任务
-  现状：已有基于规则的 action list 顺序执行，但还不是模型驱动的任务分解
+  现状：已有基于规则的 action list 顺序执行，并支持固定顺序的“状态 -> 日志 -> 总结”链路，但还不是模型驱动的任务分解
 - 长对话压缩
   现状：有摘要更新，但还不是“任务导向记忆”
 
@@ -390,12 +393,14 @@ flowchart LR
 - 知识型问答
 - 排障建议型问题
 - 单步执行型请求
+- 固定顺序的多步运维请求
 
 例如：
 
 - “Redis 内存压力先看什么”
 - “MySQL 慢查询应该检查哪些日志”
 - “请重启 redis 服务”
+- “先检查 Redis 状态，再查 timeout 日志，最后给我总结根因”
 
 ### 当前项目的 Agent 暂时不适合什么
 

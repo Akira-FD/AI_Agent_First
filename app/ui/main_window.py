@@ -48,6 +48,8 @@ if pyqtSignal is not None:
     class _AsyncRequestWorker(QObject):
         finished = pyqtSignal(object)
         failed = pyqtSignal(str)
+        streamed = pyqtSignal(str)
+        stream_completed = pyqtSignal(object)
 
         def __init__(self, chat_page, query: str) -> None:
             super().__init__()
@@ -56,6 +58,13 @@ if pyqtSignal is not None:
 
         def run(self) -> None:
             try:
+                if hasattr(self.chat_page, "stream_message"):
+                    for event in self.chat_page.stream_message(self.query):
+                        if event.get("type") == "delta":
+                            self.streamed.emit(str(event.get("delta", "")))
+                        elif event.get("type") == "done":
+                            self.stream_completed.emit(event.get("response"))
+                    return
                 response = self.chat_page.send_message(self.query)
             except Exception as exc:  # pragma: no cover - exercised through signal handling
                 self.failed.emit(str(exc))
@@ -98,7 +107,7 @@ def launch_pyqt_app(agent, settings, document_service=None, llm_service=None) ->
 
     app = QApplication.instance() or QApplication([])
     window = MainWindow(agent=agent, settings=settings, document_service=document_service, llm_service=llm_service)
-    window.resize(980, 680)
+    window.resize(1180, 760)
     window.show()
     return app.exec()
 
@@ -148,11 +157,16 @@ class MainWindow(QMainWindow):
         self._request_timer.timeout.connect(self._handle_request_timeout)
         self._stream_timer = QTimer(self)
         self._stream_timer.timeout.connect(self._stream_next_chunk)
+        self._provider_stream_timer = QTimer(self)
+        self._provider_stream_timer.timeout.connect(self._flush_provider_stream_delta)
         self._request_timeout_ms = max(1000, int(getattr(settings, "llm_timeout_seconds", 30) * 1000))
         self._stream_interval_ms = 24
         self._stream_chunk_size = 18
         self._pending_stream_text = ""
         self._pending_stream_response = None
+        self._pending_provider_deltas: list[str] = []
+        self._pending_provider_completed_response = None
+        self._streaming_from_provider = False
         self._pending_answer_backend = "unknown"
         self._pending_provider_status = "not_used"
         self._pending_provider_error = ""
@@ -164,37 +178,77 @@ class MainWindow(QMainWindow):
         self._last_query = ""
 
         self.setWindowTitle(settings.app_name)
+        self._apply_theme()
         self._build_layout()
         self.refresh_documents()
+
+    def _apply_theme(self) -> None:
+        self.setStyleSheet(
+            """
+            QMainWindow, QWidget {
+                background: #f5f7fb;
+                color: #14213d;
+                font-family: "Segoe UI", "Microsoft YaHei";
+            }
+            QLabel {
+                color: #33415c;
+            }
+            QListWidget, QTextBrowser, QTextEdit {
+                background: #ffffff;
+                border: 1px solid #d9e2f2;
+                border-radius: 12px;
+                padding: 8px;
+                selection-background-color: #dbeafe;
+            }
+            QPushButton {
+                background: #0f766e;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                padding: 10px 14px;
+                font-weight: 600;
+            }
+            QPushButton:disabled {
+                background: #b8c4d6;
+                color: #eef2f7;
+            }
+            QPushButton:hover:!disabled {
+                background: #115e59;
+            }
+            """
+        )
 
     def _build_layout(self) -> None:
         root = QWidget()
         root_layout = QVBoxLayout(root)
-        header = QLabel(f"{self.settings.app_name} | 本地 MVP 演示")
-        header.setStyleSheet("font-size: 18px; font-weight: 700; padding: 8px;")
+        header = QLabel(f"{self.settings.app_name} | 桌面端智能助理")
+        header.setStyleSheet("font-size: 24px; font-weight: 700; padding: 6px 8px 0 8px; color: #0f172a;")
         root_layout.addWidget(header)
+        subheader = QLabel("RAG 检索、Agent 执行、LLM 回答与会话摘要的统一工作台")
+        subheader.setStyleSheet("font-size: 13px; color: #64748b; padding: 0 8px 10px 8px;")
+        root_layout.addWidget(subheader)
         backend = describe_llm_backend(self.settings, self.llm_service)
         self.backend_status = QLabel(f"LLM 后端：{backend}")
-        self.backend_status.setStyleSheet("font-size: 12px; color: #4b5563; padding: 0 8px 8px 8px;")
+        self.backend_status.setStyleSheet("font-size: 12px; color: #334155; padding: 4px 10px; background: #e2f3ff; border-radius: 8px;")
         root_layout.addWidget(self.backend_status)
         self.retrieval_status = QLabel(f"Retrieval 后端：{describe_retrieval_backend(self.settings)}")
-        self.retrieval_status.setStyleSheet("font-size: 12px; color: #4b5563; padding: 0 8px 4px 8px;")
+        self.retrieval_status.setStyleSheet("font-size: 12px; color: #334155; padding: 4px 10px; background: #eef6e8; border-radius: 8px;")
         root_layout.addWidget(self.retrieval_status)
         self.embedding_status = QLabel(f"Embedding 后端：{describe_embedding_backend(self.settings)}")
-        self.embedding_status.setStyleSheet("font-size: 12px; color: #4b5563; padding: 0 8px 8px 8px;")
+        self.embedding_status.setStyleSheet("font-size: 12px; color: #334155; padding: 4px 10px; background: #fff6dd; border-radius: 8px;")
         root_layout.addWidget(self.embedding_status)
         self.reranker_status = QLabel(f"Reranker 后端：{describe_reranker_backend(self.settings)}")
-        self.reranker_status.setStyleSheet("font-size: 12px; color: #4b5563; padding: 0 8px 8px 8px;")
+        self.reranker_status.setStyleSheet("font-size: 12px; color: #334155; padding: 4px 10px; background: #fce7f3; border-radius: 8px;")
         root_layout.addWidget(self.reranker_status)
         self.request_status = QLabel("状态：空闲")
-        self.request_status.setStyleSheet("font-size: 12px; color: #4b5563; padding: 0 8px 8px 8px;")
+        self.request_status.setStyleSheet("font-size: 12px; color: #334155; padding: 8px 10px; background: #ffffff; border: 1px solid #d9e2f2; border-radius: 10px;")
         root_layout.addWidget(self.request_status)
 
         splitter = QSplitter(Qt.Orientation.Horizontal)
         splitter.addWidget(self._build_docs_panel())
         splitter.addWidget(self._build_chat_panel())
         splitter.addWidget(self._build_side_panel())
-        splitter.setSizes([220, 520, 300])
+        splitter.setSizes([250, 610, 320])
         root_layout.addWidget(splitter)
         self.setCentralWidget(root)
 
@@ -218,8 +272,8 @@ class MainWindow(QMainWindow):
 
         input_layout = QHBoxLayout()
         self.input_box = QTextEdit()
-        self.input_box.setPlaceholderText("输入问题，例如：请重启 redis 服务")
-        self.input_box.setFixedHeight(72)
+        self.input_box.setPlaceholderText("输入问题，例如：请先查询 redis 状态，再查一下 timeout 日志，最后给我总结根因")
+        self.input_box.setFixedHeight(90)
         self.send_button = QPushButton("发送")
         self.send_button.clicked.connect(self.handle_send)
         self.cancel_button = QPushButton("取消")
@@ -241,7 +295,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(QLabel("当前会话摘要"))
         self.session_summary_panel = QTextBrowser()
         self.session_summary_panel.setPlainText("当前会话摘要：暂无")
-        self.session_summary_panel.setMaximumHeight(120)
+        self.session_summary_panel.setMaximumHeight(150)
         layout.addWidget(self.session_summary_panel)
         layout.addWidget(QLabel("来源引用"))
         self.sources_panel = QTextBrowser()
@@ -272,6 +326,9 @@ class MainWindow(QMainWindow):
         self._pending_retry_query = None
         self._pending_stream_text = ""
         self._pending_stream_response = None
+        self._pending_provider_deltas = []
+        self._pending_provider_completed_response = None
+        self._streaming_from_provider = False
         self._pending_answer_backend = "unknown"
         self._pending_provider_status = "not_used"
         self._pending_provider_error = ""
@@ -288,8 +345,11 @@ class MainWindow(QMainWindow):
         worker.moveToThread(thread)
         thread.started.connect(worker.run)
         worker.finished.connect(self._handle_async_response)
+        worker.streamed.connect(self._handle_stream_delta)
+        worker.stream_completed.connect(self._handle_stream_completed)
         worker.failed.connect(self._handle_async_error)
         worker.finished.connect(thread.quit)
+        worker.stream_completed.connect(thread.quit)
         worker.failed.connect(thread.quit)
         thread.finished.connect(self._cleanup_request_worker)
         thread.start()
@@ -328,6 +388,76 @@ class MainWindow(QMainWindow):
         self._set_controls(send_enabled=False, cancel_enabled=True, retry_enabled=False)
         self._stream_timer.start(self._stream_interval_ms)
 
+    def _handle_stream_delta(self, delta: str) -> None:
+        self._request_timer.stop()
+        if self._ignore_current_response:
+            return
+        if not self._streaming_from_provider:
+            self._streaming_from_provider = True
+            self.chat_history.append("助手：")
+            self.request_status.setText("状态：SSE 输出中... | stream=provider")
+            self._set_controls(send_enabled=False, cancel_enabled=True, retry_enabled=False)
+        if not delta:
+            return
+        self._pending_provider_deltas.append(delta)
+        if not self._provider_stream_timer.isActive():
+            self._provider_stream_timer.start(self._stream_interval_ms)
+
+    def _handle_stream_completed(self, response) -> None:
+        self._request_timer.stop()
+        if self._ignore_current_response:
+            return
+        if not self._streaming_from_provider:
+            self._handle_async_response(response)
+            return
+        if self._pending_provider_deltas or self._provider_stream_timer.isActive():
+            self._pending_provider_completed_response = response
+            return
+        self._finalize_provider_stream(response)
+
+    def _finalize_provider_stream(self, response) -> None:
+        self._pending_stream_response = response
+        self._pending_answer_backend = getattr(response, "answer_backend", "unknown")
+        self._pending_provider_status = getattr(response, "provider_status", "not_used")
+        self._pending_provider_error = getattr(response, "provider_error", "")
+        self._pending_provider_attempts = getattr(response, "provider_attempts", 0)
+        self._pending_retrieval_backend = getattr(response, "retrieval_backend", describe_retrieval_backend(self.settings))
+        self._pending_embedding_backend = getattr(response, "embedding_backend", describe_embedding_backend(self.settings))
+        self._pending_reranker_backend = getattr(response, "reranker_backend", describe_reranker_backend(self.settings))
+        self._pending_plan_route = getattr(response, "plan_route", "")
+        self._pending_plan_steps = list(getattr(response, "plan_steps", []))
+        self._pending_node_trace = list(getattr(response, "node_trace", []))
+        self._pending_tool_actions = list(getattr(response, "tool_actions", []))
+        self._pending_recovery_action = getattr(response, "recovery_action", "")
+        self._pending_replan_steps = list(getattr(response, "replan_steps", []))
+        self._render_response_metadata(response)
+        self._finish_streaming_response()
+
+    def _flush_provider_stream_delta(self) -> None:
+        if self._ignore_current_response:
+            self._provider_stream_timer.stop()
+            self._pending_provider_deltas = []
+            self._pending_provider_completed_response = None
+            return
+        if not self._pending_provider_deltas:
+            self._provider_stream_timer.stop()
+            if self._pending_provider_completed_response is not None:
+                response = self._pending_provider_completed_response
+                self._pending_provider_completed_response = None
+                self._finalize_provider_stream(response)
+            return
+        next_delta = self._pending_provider_deltas.pop(0)
+        cursor = self.chat_history.textCursor()
+        cursor.movePosition(QTextCursor.MoveOperation.End)
+        self.chat_history.setTextCursor(cursor)
+        self.chat_history.insertPlainText(next_delta)
+        if not self._pending_provider_deltas:
+            self._provider_stream_timer.stop()
+            if self._pending_provider_completed_response is not None:
+                response = self._pending_provider_completed_response
+                self._pending_provider_completed_response = None
+                self._finalize_provider_stream(response)
+
     def _handle_async_error(self, error_message: str) -> None:
         self._request_timer.stop()
         self.chat_history.append(f"助手：请求失败，{error_message}")
@@ -364,6 +494,7 @@ class MainWindow(QMainWindow):
 
     def _finish_streaming_response(self) -> None:
         self._stream_timer.stop()
+        self._provider_stream_timer.stop()
         response = self._pending_stream_response
         answer_backend = self._pending_answer_backend
         provider_status = self._pending_provider_status
@@ -378,8 +509,12 @@ class MainWindow(QMainWindow):
         tool_actions = getattr(self, "_pending_tool_actions", [])
         recovery_action = getattr(self, "_pending_recovery_action", "")
         replan_steps = getattr(self, "_pending_replan_steps", [])
+        streamed_from_provider = self._streaming_from_provider
         self._pending_stream_response = None
         self._pending_stream_text = ""
+        self._pending_provider_deltas = []
+        self._pending_provider_completed_response = None
+        self._streaming_from_provider = False
         self._pending_answer_backend = "unknown"
         self._pending_provider_status = "not_used"
         self._pending_provider_error = ""
@@ -404,6 +539,8 @@ class MainWindow(QMainWindow):
             f"provider={provider_status} | attempts={provider_attempts} | "
             f"retrieval={retrieval_backend} | embedding={embedding_backend} | reranker={reranker_backend}"
         )
+        if streamed_from_provider:
+            status_text += " | stream=provider"
         if plan_route:
             status_text += f" | plan={plan_route}"
         if plan_steps:

@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 from app.config.settings import AppSettings
 from app.main import bootstrap_application
-from app.services.llm_service import OpenAICompatibleLLMService, build_llm_service
+from app.services.llm_service import LLMStreamEvent, OpenAICompatibleLLMService, build_llm_service
 from app.ui.main_window import DesktopAppShell
 
 
@@ -59,6 +59,30 @@ class SequencedRequester:
         return outcome
 
 
+class FakeStreamRequester:
+    def __init__(self, chunks: list[bytes] | None = None, error: Exception | None = None) -> None:
+        self.chunks = chunks or [
+            b'data: {"choices":[{"delta":{"content":"\xe5\x85\x88\xe6\xa3\x80\xe6\x9f\xa5 maxmemory"}}]}\n\n',
+            b'data: {"choices":[{"delta":{"content":"\xef\xbc\x8c\xe5\x86\x8d\xe6\x9f\xa5 slowlog\xe3\x80\x82"}}]}\n\n',
+            b"data: [DONE]\n\n",
+        ]
+        self.error = error
+        self.calls: list[dict[str, object]] = []
+
+    def __call__(self, *, url: str, headers: dict[str, str], payload: dict[str, object], timeout: int):
+        self.calls.append(
+            {
+                "url": url,
+                "headers": headers,
+                "payload": payload,
+                "timeout": timeout,
+            }
+        )
+        if self.error:
+            raise self.error
+        return iter(self.chunks)
+
+
 class RealLLMIntegrationTests(unittest.TestCase):
     def test_settings_load_real_llm_configuration_from_environment(self) -> None:
         previous = {
@@ -103,6 +127,81 @@ class RealLLMIntegrationTests(unittest.TestCase):
         self.assertEqual(call["headers"]["Authorization"], "Bearer test-key")
         self.assertEqual(call["payload"]["model"], "demo-model")
         self.assertIn("Redis OOM", json.dumps(call["payload"], ensure_ascii=False))
+
+    def test_openai_compatible_service_streams_sse_chunks_into_final_result(self) -> None:
+        stream_requester = FakeStreamRequester()
+        service = OpenAICompatibleLLMService(
+            api_key="test-key",
+            base_url="https://example.com/v1",
+            model="demo-model",
+            requester=FakeRequester(),
+            stream_requester=stream_requester,
+        )
+
+        events = list(
+            service.stream_answer_result(
+                user_query="Redis OOM 时先看什么？",
+                context_text="建议先检查 maxmemory、slowlog 和连接数。",
+            )
+        )
+
+        self.assertGreaterEqual(len(events), 3)
+        self.assertTrue(all(isinstance(event, LLMStreamEvent) for event in events))
+        self.assertEqual([event.type for event in events[:-1]], ["delta", "delta"])
+        self.assertEqual(events[-1].type, "done")
+        self.assertEqual("".join(event.delta for event in events[:-1]), "先检查 maxmemory，再查 slowlog。")
+        self.assertEqual(events[-1].result.answer_backend, "remote")
+        self.assertEqual(events[-1].result.provider_status, "success")
+        self.assertEqual(stream_requester.calls[0]["url"], "https://example.com/v1/chat/completions")
+        self.assertTrue(stream_requester.calls[0]["payload"]["stream"])
+
+    def test_openai_compatible_service_ignores_empty_sse_choices_and_finish_events(self) -> None:
+        stream_requester = FakeStreamRequester(
+            chunks=[
+                b": keep-alive\n\n",
+                b'data: {"choices":[]}\n\n',
+                b'data: {"choices":[{"delta":{"role":"assistant"}}]}\n\n',
+                b'data: {"choices":[{"delta":{"content":"\xe5\x85\x88\xe7\x9c\x8b error log"}}]}\n\n',
+                b'data: {"choices":[{"finish_reason":"stop"}]}\n\n',
+                b"data: [DONE]\n\n",
+            ]
+        )
+        service = OpenAICompatibleLLMService(
+            api_key="test-key",
+            base_url="https://example.com/v1",
+            model="demo-model",
+            requester=FakeRequester(),
+            stream_requester=stream_requester,
+        )
+
+        events = list(
+            service.stream_answer_result(
+                user_query="MySQL aborted connection 通常先怎么排查？",
+                context_text="建议先看 error log、wait_timeout、网络抖动和连接池参数。",
+            )
+        )
+
+        self.assertEqual([event.type for event in events[:-1]], ["delta"])
+        self.assertEqual(events[0].delta, "先看 error log")
+        self.assertEqual(events[-1].type, "done")
+        self.assertEqual(events[-1].result.answer_backend, "remote")
+
+    def test_generate_answer_result_falls_back_cleanly_when_response_has_no_choices(self) -> None:
+        service = OpenAICompatibleLLMService(
+            api_key="test-key",
+            base_url="https://example.com/v1",
+            model="demo-model",
+            requester=FakeRequester(payload={"choices": []}),
+        )
+
+        result = service.generate_answer_result(
+            user_query="Redis OOM 时先看什么？",
+            context_text="建议先检查 maxmemory、slowlog 和连接数。",
+        )
+
+        self.assertEqual(result.answer_backend, "fallback")
+        self.assertIn(result.provider_status, {"empty_response", "error"})
+        self.assertIn("maxmemory", result.answer)
 
     def test_builder_falls_back_to_rule_based_service_when_remote_call_fails(self) -> None:
         service = build_llm_service(

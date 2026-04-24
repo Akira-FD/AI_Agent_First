@@ -97,9 +97,12 @@ class GetIncidentSummaryTool:
 
     def run(self, payload: dict[str, str]) -> ToolResult:
         incident_id = payload.get("incident_id", "INC-001")
+        service_name = payload.get("service_name", "service")
+        keyword = payload.get("keyword", "关键错误")
+        summary = f"{service_name} 出现与 {keyword} 相关的问题，建议优先检查状态、日志与近期变更。"
         return ToolResult(
             success=True,
             code="OK",
             message=f"事件 {incident_id} 摘要已生成。",
-            data={"incident_id": incident_id, "summary": "Redis latency spike due to memory pressure."},
+            data={"incident_id": incident_id, "summary": summary, "service_name": service_name, "keyword": keyword},
         )

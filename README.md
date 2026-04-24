@@ -9,6 +9,7 @@
 - 一版可运行的 `MVPAgent`，支持知识问答与模拟工具调用
 - recent messages + summary 的会话记忆服务，并将会话摘要持久化到 SQLite
 - 已接入 OpenAI 兼容协议的大语言模型调用链路，未配置时自动回退到本地规则回答
+- 已支持 OpenAI 兼容协议下的 SSE 流式输出，桌面端可优先使用 provider 级流式渲染
 - 桌面端 UI 的占位骨架
 - `scripts/ingest_docs.py` 与 `scripts/run_demo.py` 两个脚本入口
 
@@ -24,6 +25,7 @@ python scripts/ingest_docs.py
 python scripts/run_demo.py
 python -m app.main
 python scripts/run_desktop.py
+python scripts/validate_runtime.py
 ```
 
 ## 大模型接入
@@ -51,8 +53,19 @@ set OPENAI_API_KEY=你的APIKey
 - 配置完成后，CLI 状态输出和桌面端页面顶部会显示当前使用的 `LLM backend`，便于确认是否真的接入远程模型。
 - 如使用第三方平台，只要兼容 OpenAI Chat Completions 协议，修改 `AI_AGENT_FIRST_LLM_BASE_URL` 与模型名即可接入。
 - 桌面端每次回答完成后会显示回答来源：`remote` 表示真实模型返回，`fallback` 表示远程失败后使用本地规则回答。
+- 当远程模型可用时，桌面端会优先使用 `/chat/completions` 的 `stream=true` SSE 流式输出；本地 fallback 继续保持兼容的渐进渲染。
 - 中转站不稳定时可调大 `AI_AGENT_FIRST_LLM_RETRY_ATTEMPTS`，并通过 `AI_AGENT_FIRST_LLM_RETRY_BACKOFF_SECONDS` 控制退避间隔。
 - 桌面端状态栏会显示 provider 诊断信息，例如 `provider=timeout`、`provider=disconnect`、`provider=http_401`、`provider=http_429`、`attempts=2`。
+
+## 功能验证
+
+可以先运行项目内置的运行时验证脚本，快速确认必要能力是否就绪：
+
+```bash
+python scripts/validate_runtime.py
+```
+
+该脚本会输出当前文档目录、SQLite、检索后端、LLM backend、远程模型配置状态，以及是否支持 SSE 流式输出。
 
 ## Milvus 向量检索
 

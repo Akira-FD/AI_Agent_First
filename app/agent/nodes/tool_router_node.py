@@ -20,14 +20,17 @@ def route_tool(user_query: str) -> tuple[str, dict[str, str]]:
 def route_tools(user_query: str) -> list[ToolAction]:
     lowered = user_query.lower()
     service_name = _extract_service_name(lowered)
+    log_keyword = _extract_log_keyword(lowered, service_name)
     actions: list[ToolAction] = []
 
     if _asks_for_status(lowered):
         actions.append(ToolAction("check_service_status", {"service_name": service_name}))
     if _asks_for_logs(lowered):
-        actions.append(ToolAction("search_error_logs", {"keyword": _extract_log_keyword(lowered, service_name)}))
+        actions.append(ToolAction("search_error_logs", {"keyword": log_keyword}))
     if "重启" in lowered or "restart" in lowered:
         actions.append(ToolAction("restart_mock_service", {"service_name": service_name}))
+    if _asks_for_summary(lowered):
+        actions.append(ToolAction("get_incident_summary", {"service_name": service_name, "keyword": log_keyword}))
     if actions:
         return _dedupe_actions(actions)
     return [ToolAction("check_service_status", {"service_name": service_name})]
@@ -39,6 +42,10 @@ def _asks_for_status(lowered_query: str) -> bool:
 
 def _asks_for_logs(lowered_query: str) -> bool:
     return "日志" in lowered_query or "log" in lowered_query
+
+
+def _asks_for_summary(lowered_query: str) -> bool:
+    return any(pattern in lowered_query for pattern in ("总结", "汇总", "summary", "根因"))
 
 
 def _extract_service_name(lowered_query: str) -> str:

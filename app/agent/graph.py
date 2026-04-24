@@ -7,7 +7,7 @@ from app.agent.nodes.answer_node import build_answer
 from app.agent.nodes.intent_node import detect_intent
 from app.agent.nodes.observation_node import observe_tool_result
 from app.agent.nodes.plan_node import create_plan, create_tool_plan
-from app.agent.nodes.replan_node import build_replan_steps
+from app.agent.nodes.replan_node import build_replan_steps, choose_replan_action
 from app.agent.nodes.recovery_node import build_repaired_action, choose_recovery_action
 from app.agent.nodes.retrieve_node import run_retrieval
 from app.agent.nodes.summary_node import update_summary
@@ -68,6 +68,57 @@ class MVPAgent:
         self.summary_service = SummaryService(session_service)
 
     def run(self, session_id: str, user_query: str, tool_actions: list[ToolAction] | None = None) -> AgentResponse:
+        return self._run_internal(session_id=session_id, user_query=user_query, tool_actions=tool_actions)
+
+    def stream(self, session_id: str, user_query: str, tool_actions: list[ToolAction] | None = None):
+        state = self._prepare_state(session_id=session_id, user_query=user_query, tool_actions=tool_actions)
+        final_result = None
+        backend_label = ""
+        if hasattr(self.llm_service, "backend_label"):
+            backend_label = str(self.llm_service.backend_label())
+        if hasattr(self.llm_service, "stream_answer_result") and backend_label.startswith("openai-compatible:"):
+            for event in self.llm_service.stream_answer_result(
+                user_query=user_query,
+                context_text=state.context_text,
+                tool_message=state.tool_message or None,
+            ):
+                if event.type == "delta":
+                    yield {"type": "delta", "delta": event.delta}
+                elif event.type == "done":
+                    final_result = event.result
+                    break
+        if final_result is None:
+            answer_result = build_answer(
+                llm_service=self.llm_service,
+                user_query=user_query,
+                context_text=state.context_text,
+                tool_message=state.tool_message or None,
+            )
+            final_result = answer_result
+        response = self._finalize_state(
+            session_id=session_id,
+            user_query=user_query,
+            state=state,
+            answer_result=final_result,
+        )
+        yield {"type": "done", "response": response}
+
+    def _run_internal(self, session_id: str, user_query: str, tool_actions: list[ToolAction] | None = None) -> AgentResponse:
+        state = self._prepare_state(session_id=session_id, user_query=user_query, tool_actions=tool_actions)
+        answer_result = build_answer(
+            llm_service=self.llm_service,
+            user_query=user_query,
+            context_text=state.context_text,
+            tool_message=state.tool_message or None,
+        )
+        return self._finalize_state(
+            session_id=session_id,
+            user_query=user_query,
+            state=state,
+            answer_result=answer_result,
+        )
+
+    def _prepare_state(self, session_id: str, user_query: str, tool_actions: list[ToolAction] | None = None) -> AgentState:
         state = AgentState(session_id=session_id, user_query=user_query)
 
         state.mark("load_memory")
@@ -106,29 +157,32 @@ class MVPAgent:
             state.selected_tool = first_action.tool_name
             state.tool_input = first_action.tool_input
             state.mark("tool_router")
-            for action in actions:
+            for index, action in enumerate(actions):
                 result = self._execute_action(session_id, state, action)
                 if not result.success:
                     state.observations.extend(observe_tool_result(result))
                     state.mark("observation")
                     state.recovery_action = choose_recovery_action(result)
                     state.mark("recovery")
+                    remaining_actions = actions[index + 1 :]
+                    state.recovery_action = choose_replan_action(action, state.recovery_action, remaining_actions, result)
                     repaired_action = build_repaired_action(action.tool_name, result)
-                    state.replan_steps = build_replan_steps(state.recovery_action, repaired_action)
+                    replan_target = repaired_action
+                    if state.recovery_action == "fallback_to_remaining_actions" and remaining_actions:
+                        replan_target = remaining_actions[0]
+                    state.replan_steps = build_replan_steps(state.recovery_action, replan_target)
                     if state.replan_steps:
                         state.mark("replan")
                     if repaired_action is not None:
                         self._execute_action(session_id, state, repaired_action)
                         continue
+                    if state.recovery_action == "fallback_to_remaining_actions":
+                        continue
                     if state.recovery_action in {"degrade_to_answer", "retry_later"}:
                         break
+        return state
 
-        answer_result = build_answer(
-            llm_service=self.llm_service,
-            user_query=user_query,
-            context_text=state.context_text,
-            tool_message=state.tool_message or None,
-        )
+    def _finalize_state(self, session_id: str, user_query: str, state: AgentState, answer_result) -> AgentResponse:
         state.final_answer = answer_result.answer
         state.answer_backend = answer_result.answer_backend
         state.provider_status = answer_result.provider_status

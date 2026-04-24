@@ -151,6 +151,70 @@ class PyQtWindowTests(unittest.TestCase):
 
             self.assertIn("状态：已完成", window.request_status.text())
 
+    def test_main_window_renders_provider_stream_chunks_without_fake_chunk_timer(self) -> None:
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PyQt6.QtWidgets import QApplication
+
+        class StreamingChatPage:
+            def __init__(self) -> None:
+                self.messages = []
+
+            def stream_message(self, content: str):
+                self.messages.append({"role": "user", "content": content})
+                yield {"type": "delta", "delta": "先检查 Redis 状态，"}
+                time.sleep(0.02)
+                yield {"type": "delta", "delta": "再查看 timeout 日志。"}
+                yield {
+                    "type": "done",
+                    "response": SimpleNamespace(
+                        answer="先检查 Redis 状态，再查看 timeout 日志。",
+                        sources=[],
+                        tool_logs=[],
+                        answer_backend="remote",
+                        provider_status="success",
+                        provider_error="",
+                        provider_attempts=1,
+                    ),
+                }
+
+        app_instance = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as tmpdir:
+            app = bootstrap_application(Path(tmpdir))
+            window = MainWindow(
+                agent=app.agent,
+                settings=app.settings,
+                document_service=app.document_service,
+                llm_service=app.llm_service,
+            )
+            window.chat_page = StreamingChatPage()
+            window._stream_chunk_size = 100
+
+            window.input_box.setPlainText("Redis timeout 怎么排查？")
+            window.handle_send()
+
+            deadline = time.monotonic() + 2.0
+            saw_partial = False
+            while time.monotonic() < deadline:
+                app_instance.processEvents()
+                time.sleep(0.02)
+                text = window.chat_history.toPlainText()
+                if "先检查 Redis 状态，" in text and "timeout 日志。" not in text:
+                    saw_partial = True
+                    break
+
+            self.assertTrue(saw_partial)
+            self.assertIn("stream", window.request_status.text())
+
+            deadline = time.monotonic() + 2.0
+            while "timeout 日志。" not in window.chat_history.toPlainText():
+                if time.monotonic() > deadline:
+                    self.fail("Timed out waiting for provider stream to finish.")
+                app_instance.processEvents()
+                time.sleep(0.02)
+
+            self.assertIn("remote", window.request_status.text())
+            self.assertIn("状态：已完成", window.request_status.text())
+
     def test_main_window_can_cancel_request_and_ignore_late_response(self) -> None:
         os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
         from PyQt6.QtWidgets import QApplication

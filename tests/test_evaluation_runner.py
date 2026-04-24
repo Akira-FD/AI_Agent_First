@@ -121,6 +121,105 @@ class EvaluationRunnerTests(unittest.TestCase):
         self.assertFalse(result.checks["recovery_action"])
         self.assertFalse(result.checks["replan_steps"])
 
+    def test_grades_fallback_to_remaining_actions_replan(self) -> None:
+        response = type(
+            "Response",
+            (),
+            {
+                "answer": "已根据日志继续分析，发现 timeout 相关错误。",
+                "sources": [{"source": "redis-redis-issues-1.md"}],
+                "retrieval_backend": "in-memory",
+                "embedding_backend": "hash",
+                "vector_store_backend": "in-memory",
+                "reranker_backend": "keyword-tech-weighted",
+                "plan_route": "tool",
+                "plan_steps": ["retrieve_context", "check_service_status", "search_error_logs", "answer_with_tool_results"],
+                "node_trace": ["intent", "retrieve", "plan", "tool_router", "tool_exec", "observation", "recovery", "replan", "tool_exec", "answer"],
+                "selected_tool": "check_service_status",
+                "tool_actions": [
+                    {"tool_name": "check_service_status", "tool_input": {"service_name": "redis"}},
+                    {"tool_name": "search_error_logs", "tool_input": {"keyword": "timeout"}},
+                ],
+                "recovery_action": "fallback_to_remaining_actions",
+                "replan_steps": ["fallback_to_remaining_actions", "search_error_logs", "answer_with_tool_results"],
+            },
+        )()
+        case = EvalCase(
+            id="redis-tool-fallback",
+            query="请先查询 redis 状态，再查一下 timeout 相关日志",
+            expected_source="redis-redis-issues-1.md",
+            answer_keywords=["timeout"],
+            provenance_url="https://github.com/redis/redis/issues/1",
+            expected_plan_route="tool",
+            expected_plan_steps=["retrieve_context", "check_service_status", "search_error_logs", "answer_with_tool_results"],
+            expected_tool_names=["check_service_status", "search_error_logs"],
+            expected_recovery_action="fallback_to_remaining_actions",
+            expected_replan_steps=["fallback_to_remaining_actions", "search_error_logs", "answer_with_tool_results"],
+        )
+
+        result = grade_response(case, response)
+
+        self.assertTrue(result.passed)
+        self.assertTrue(result.checks["recovery_action"])
+        self.assertTrue(result.checks["replan_steps"])
+
+    def test_grades_status_logs_summary_tool_chain(self) -> None:
+        response = type(
+            "Response",
+            (),
+            {
+                "answer": "已执行模拟工具。事件 INC-001 摘要已生成。",
+                "sources": [{"source": "redis-redis-issues-1.md"}],
+                "retrieval_backend": "in-memory",
+                "embedding_backend": "hash",
+                "vector_store_backend": "in-memory",
+                "reranker_backend": "keyword-tech-weighted",
+                "plan_route": "tool",
+                "plan_steps": [
+                    "retrieve_context",
+                    "check_service_status",
+                    "search_error_logs",
+                    "get_incident_summary",
+                    "answer_with_tool_results",
+                ],
+                "node_trace": ["intent", "retrieve", "plan", "tool_router", "tool_exec", "tool_exec", "tool_exec", "answer"],
+                "selected_tool": "check_service_status",
+                "tool_actions": [
+                    {"tool_name": "check_service_status", "tool_input": {"service_name": "redis"}},
+                    {"tool_name": "search_error_logs", "tool_input": {"keyword": "timeout"}},
+                    {"tool_name": "get_incident_summary", "tool_input": {"service_name": "redis", "keyword": "timeout"}},
+                ],
+                "recovery_action": "",
+                "replan_steps": [],
+            },
+        )()
+        case = EvalCase(
+            id="redis-tool-summary",
+            query="请先查询 redis 状态，再查一下 timeout 相关日志，最后给我总结根因",
+            expected_source="redis-redis-issues-1.md",
+            answer_keywords=["摘要"],
+            provenance_url="https://github.com/redis/redis/issues/1",
+            expected_plan_route="tool",
+            expected_plan_steps=[
+                "retrieve_context",
+                "check_service_status",
+                "search_error_logs",
+                "get_incident_summary",
+                "answer_with_tool_results",
+            ],
+            expected_tool_names=["check_service_status", "search_error_logs", "get_incident_summary"],
+            expected_recovery_action="",
+            expected_replan_steps=[],
+        )
+
+        result = grade_response(case, response)
+
+        self.assertTrue(result.passed)
+        self.assertEqual(
+            [action["tool_name"] for action in result.tool_actions],
+            ["check_service_status", "search_error_logs", "get_incident_summary"],
+        )
+
     def test_runner_executes_cases_and_summarizes_metrics(self) -> None:
         cases = [
             EvalCase(

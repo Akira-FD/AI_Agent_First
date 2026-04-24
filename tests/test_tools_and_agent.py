@@ -78,6 +78,15 @@ class ToolsAndAgentTests(unittest.TestCase):
         self.assertEqual(actions[0].tool_input, {"service_name": "redis"})
         self.assertEqual(actions[1].tool_input, {"keyword": "timeout"})
 
+    def test_tool_router_adds_incident_summary_action_for_summary_request(self) -> None:
+        actions = route_tools("请先查询 redis 状态，再查一下 timeout 相关日志，最后给我总结根因")
+
+        self.assertEqual(
+            [action.tool_name for action in actions],
+            ["check_service_status", "search_error_logs", "get_incident_summary"],
+        )
+        self.assertEqual(actions[2].tool_input, {"service_name": "redis", "keyword": "timeout"})
+
     def test_does_not_misfire_tool_for_explanatory_restart_question(self) -> None:
         response = self.agent.run(session_id="s3", user_query="解释一下 Redis 重启前为什么要确认写入任务")
 
@@ -211,6 +220,35 @@ class ToolsAndAgentTests(unittest.TestCase):
         self.assertEqual(response.node_trace.count("tool_exec"), 2)
         self.assertIn("服务 redis 当前状态为 running", response.observations[0])
         self.assertIn("timeout", response.observations[1])
+
+    def test_agent_executes_status_logs_and_summary_chain(self) -> None:
+        response = self.agent.run(
+            session_id="s12b",
+            user_query="请先查询 redis 状态，再查一下 timeout 相关日志，最后给我总结根因",
+        )
+
+        self.assertEqual(response.intent, "execute")
+        self.assertEqual(response.plan_route, "tool")
+        self.assertEqual(
+            response.plan_steps,
+            [
+                "retrieve_context",
+                "check_service_status",
+                "search_error_logs",
+                "get_incident_summary",
+                "answer_with_tool_results",
+            ],
+        )
+        self.assertEqual(
+            [log["tool_name"] for log in response.tool_logs],
+            ["check_service_status", "search_error_logs", "get_incident_summary"],
+        )
+        self.assertEqual(
+            [action["tool_name"] for action in response.tool_actions],
+            ["check_service_status", "search_error_logs", "get_incident_summary"],
+        )
+        self.assertEqual(response.node_trace.count("tool_exec"), 3)
+        self.assertIn("摘要已生成", response.answer)
 
     def test_agent_recovers_retryable_validation_error_with_repaired_action(self) -> None:
         class AliasRepairTool:
@@ -392,6 +430,70 @@ class ToolsAndAgentTests(unittest.TestCase):
         self.assertEqual(response.node_trace.count("tool_exec"), 1)
         self.assertEqual([log["tool_name"] for log in response.tool_logs], ["check_service_status"])
         self.assertEqual(tracking_tool.calls, [])
+
+    def test_agent_replans_to_remaining_log_action_after_status_check_failure(self) -> None:
+        class FailingStatusTool:
+            definition = ToolDefinition(
+                name="check_service_status",
+                description="Fails but should allow log-search fallback.",
+            )
+
+            def run(self, payload: dict[str, str]) -> ToolResult:
+                return ToolResult(
+                    success=False,
+                    code="STATUS_CHECK_FAILED",
+                    message="状态检查失败，请改为直接查看错误日志。",
+                    data={"service_name": payload.get("service_name", "")},
+                    retryable=False,
+                )
+
+        class TrackingLogTool:
+            definition = ToolDefinition(
+                name="search_error_logs",
+                description="Tracks the fallback log-search action.",
+            )
+
+            def __init__(self) -> None:
+                self.calls: list[dict[str, str]] = []
+
+            def run(self, payload: dict[str, str]) -> ToolResult:
+                self.calls.append(dict(payload))
+                return ToolResult(
+                    success=True,
+                    code="OK",
+                    message=f"已找到与 {payload.get('keyword', '')} 相关的 2 条模拟日志。",
+                    data={"keyword": payload.get("keyword", ""), "hits": 2},
+                )
+
+        tracking_tool = TrackingLogTool()
+        registry = ToolRegistry.with_defaults()
+        registry.register("check_service_status", FailingStatusTool())
+        registry.register("search_error_logs", tracking_tool)
+        agent = MVPAgent(
+            settings=self.settings,
+            repository=self.repo,
+            session_service=SessionService(),
+            document_service=DocumentService(self.repo),
+            llm_service=RuleBasedLLMService(),
+            tool_registry=registry,
+        )
+
+        response = agent.run(
+            session_id="s16",
+            user_query="请先查询 redis 状态，再查一下 timeout 相关日志",
+        )
+
+        self.assertEqual(response.recovery_action, "fallback_to_remaining_actions")
+        self.assertEqual(
+            response.replan_steps,
+            ["fallback_to_remaining_actions", "search_error_logs", "answer_with_tool_results"],
+        )
+        self.assertEqual(response.node_trace.count("tool_exec"), 2)
+        self.assertEqual(
+            [log["tool_name"] for log in response.tool_logs],
+            ["check_service_status", "search_error_logs"],
+        )
+        self.assertEqual(tracking_tool.calls, [{"keyword": "timeout"}])
 
 
 if __name__ == "__main__":

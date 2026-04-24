@@ -10,6 +10,13 @@ from urllib.error import HTTPError, URLError
 
 
 @dataclass(frozen=True)
+class LLMStreamEvent:
+    type: str
+    delta: str = ""
+    result: "LLMAnswerResult | None" = None
+
+
+@dataclass(frozen=True)
 class LLMAnswerResult:
     answer: str
     answer_backend: str
@@ -42,6 +49,16 @@ class RuleBasedLLMService:
             context_text=context_text,
             tool_message=tool_message,
         ).answer
+
+    def stream_answer_result(self, user_query: str, context_text: str, tool_message: str | None = None):
+        result = self.generate_answer_result(
+            user_query=user_query,
+            context_text=context_text,
+            tool_message=tool_message,
+        )
+        if result.answer:
+            yield LLMStreamEvent(type="delta", delta=result.answer)
+        yield LLMStreamEvent(type="done", result=result)
 
     def _summarize_context(self, context_text: str) -> str:
         if not context_text.strip():
@@ -93,6 +110,7 @@ class OpenAICompatibleLLMService:
         model: str,
         timeout_seconds: int = 30,
         requester=None,
+        stream_requester=None,
         fallback: RuleBasedLLMService | None = None,
         retry_attempts: int = 2,
         retry_backoff_seconds: float = 0.4,
@@ -102,6 +120,7 @@ class OpenAICompatibleLLMService:
         self.model = model
         self.timeout_seconds = timeout_seconds
         self.requester = requester or self._default_requester
+        self.stream_requester = stream_requester or self._default_stream_requester
         self.fallback = fallback or RuleBasedLLMService()
         self.retry_attempts = max(1, retry_attempts)
         self.retry_backoff_seconds = max(0.0, retry_backoff_seconds)
@@ -163,8 +182,10 @@ class OpenAICompatibleLLMService:
                 payload=payload,
                 timeout=self.timeout_seconds,
             )
-            content = response["choices"][0]["message"]["content"].strip()
+            content = self._extract_message_content(response)
             if content:
+                self._last_provider_status = "success"
+                self._last_provider_error = ""
                 return LLMAnswerResult(
                     answer=content,
                     answer_backend="remote",
@@ -198,6 +219,109 @@ class OpenAICompatibleLLMService:
                 provider_attempts=self._last_provider_attempts,
             )
 
+    def stream_answer_result(self, user_query: str, context_text: str, tool_message: str | None = None):
+        if not self.api_key:
+            fallback_result = self.fallback.generate_answer_result(
+                user_query=user_query,
+                context_text=context_text,
+                tool_message=tool_message,
+            )
+            if fallback_result.answer:
+                yield LLMStreamEvent(type="delta", delta=fallback_result.answer)
+            yield LLMStreamEvent(
+                type="done",
+                result=LLMAnswerResult(
+                    answer=fallback_result.answer,
+                    answer_backend="fallback",
+                    provider_status="missing_api_key",
+                    provider_error="AI_AGENT_FIRST_LLM_API_KEY/OPENAI_API_KEY missing",
+                    provider_attempts=0,
+                ),
+            )
+            return
+
+        system_prompt = (
+            "你是一个企业研发与运维知识助手。请结合给定上下文，输出简洁、可执行、中文回答。"
+            "优先总结关键检查步骤、风险点和建议，不要原样抄录 provenance、长日志或大段配置。"
+        )
+        user_prompt = (
+            f"用户问题：{user_query}\n\n"
+            f"工具执行结果：{tool_message or '无'}\n\n"
+            f"知识库上下文：\n{context_text or '暂无上下文'}\n\n"
+            "请输出：1. 结论 2. 建议步骤 3. 如有必要给出风险提醒。"
+        )
+        payload = {
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            "temperature": 0.2,
+            "stream": True,
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}",
+        }
+        collected_parts: list[str] = []
+        try:
+            for delta in self._stream_request_with_retry(
+                url=f"{self.base_url}/chat/completions",
+                headers=headers,
+                payload=payload,
+                timeout=self.timeout_seconds,
+            ):
+                if not delta:
+                    continue
+                collected_parts.append(delta)
+                yield LLMStreamEvent(type="delta", delta=delta)
+            content = "".join(collected_parts).strip()
+            if content:
+                yield LLMStreamEvent(
+                    type="done",
+                    result=LLMAnswerResult(
+                        answer=content,
+                        answer_backend="remote",
+                        provider_status="success",
+                        provider_error="",
+                        provider_attempts=self._last_provider_attempts,
+                    ),
+                )
+                return
+            fallback_result = self.fallback.generate_answer_result(
+                user_query=user_query,
+                context_text=context_text,
+                tool_message=tool_message,
+            )
+            yield LLMStreamEvent(
+                type="done",
+                result=LLMAnswerResult(
+                    answer=fallback_result.answer,
+                    answer_backend="fallback",
+                    provider_status="empty_response",
+                    provider_error="provider returned empty content",
+                    provider_attempts=self._last_provider_attempts,
+                ),
+            )
+        except Exception:
+            fallback_result = self.fallback.generate_answer_result(
+                user_query=user_query,
+                context_text=context_text,
+                tool_message=tool_message,
+            )
+            if fallback_result.answer:
+                yield LLMStreamEvent(type="delta", delta=fallback_result.answer)
+            yield LLMStreamEvent(
+                type="done",
+                result=LLMAnswerResult(
+                    answer=fallback_result.answer,
+                    answer_backend="fallback",
+                    provider_status=self._last_provider_status,
+                    provider_error=self._last_provider_error,
+                    provider_attempts=self._last_provider_attempts,
+                ),
+            )
+
     def _request_with_retry(self, *, url: str, headers: dict[str, str], payload: dict[str, object], timeout: int) -> dict:
         last_error: Exception | None = None
         self._last_provider_status = "not_started"
@@ -207,8 +331,6 @@ class OpenAICompatibleLLMService:
             self._last_provider_attempts = attempt
             try:
                 response = self.requester(url=url, headers=headers, payload=payload, timeout=timeout)
-                self._last_provider_status = "success"
-                self._last_provider_error = ""
                 return response
             except Exception as exc:
                 last_error = exc
@@ -221,6 +343,76 @@ class OpenAICompatibleLLMService:
         if last_error:
             raise last_error
         raise RuntimeError("LLM request failed before any attempt was made")
+
+    def _stream_request_with_retry(self, *, url: str, headers: dict[str, str], payload: dict[str, object], timeout: int):
+        last_error: Exception | None = None
+        self._last_provider_status = "not_started"
+        self._last_provider_error = ""
+        self._last_provider_attempts = 0
+        for attempt in range(1, self.retry_attempts + 1):
+            self._last_provider_attempts = attempt
+            try:
+                stream = self.stream_requester(url=url, headers=headers, payload=payload, timeout=timeout)
+                for delta in self._iter_sse_content(stream):
+                    yield delta
+                self._last_provider_status = "success"
+                self._last_provider_error = ""
+                return
+            except Exception as exc:
+                last_error = exc
+                self._last_provider_status = self._classify_provider_error(exc)
+                self._last_provider_error = str(exc)
+                if not self._is_retryable_error(exc) or attempt >= self.retry_attempts:
+                    raise
+                if self.retry_backoff_seconds:
+                    time.sleep(self.retry_backoff_seconds * attempt)
+        if last_error:
+            raise last_error
+        raise RuntimeError("LLM stream request failed before any attempt was made")
+
+    def _iter_sse_content(self, stream):
+        for raw_chunk in stream:
+            if isinstance(raw_chunk, bytes):
+                text = raw_chunk.decode("utf-8")
+            else:
+                text = str(raw_chunk)
+            for line in text.splitlines():
+                stripped = line.strip()
+                if not stripped.startswith("data:"):
+                    continue
+                data = stripped[5:].strip()
+                if data == "[DONE]":
+                    return
+                if not data:
+                    continue
+                payload = json.loads(data)
+                choices = payload.get("choices")
+                if not isinstance(choices, list) or not choices:
+                    continue
+                first_choice = choices[0]
+                if not isinstance(first_choice, dict):
+                    continue
+                delta_payload = first_choice.get("delta")
+                if not isinstance(delta_payload, dict):
+                    continue
+                delta = delta_payload.get("content", "")
+                if delta:
+                    yield delta
+
+    def _extract_message_content(self, response: dict[str, object]) -> str:
+        choices = response.get("choices")
+        if not isinstance(choices, list) or not choices:
+            return ""
+        first_choice = choices[0]
+        if not isinstance(first_choice, dict):
+            return ""
+        message = first_choice.get("message")
+        if not isinstance(message, dict):
+            return ""
+        content = message.get("content", "")
+        if not isinstance(content, str):
+            return ""
+        return content.strip()
 
     def _is_retryable_error(self, exc: Exception) -> bool:
         if self._classify_provider_error(exc) in {"timeout", "disconnect", "http_5xx"}:
@@ -257,6 +449,22 @@ class OpenAICompatibleLLMService:
         try:
             with urllib.request.urlopen(request, timeout=timeout) as response:
                 return json.loads(response.read().decode("utf-8"))
+        except HTTPError as exc:
+            raise RuntimeError(f"LLM request failed with HTTP {exc.code}") from exc
+        except URLError as exc:
+            raise RuntimeError("LLM network request failed") from exc
+
+    def _default_stream_requester(self, *, url: str, headers: dict[str, str], payload: dict[str, object], timeout: int):
+        request = urllib.request.Request(
+            url=url,
+            data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+            headers={**headers, "Accept": "text/event-stream"},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=timeout) as response:
+                for line in response:
+                    yield line
         except HTTPError as exc:
             raise RuntimeError(f"LLM request failed with HTTP {exc.code}") from exc
         except URLError as exc:

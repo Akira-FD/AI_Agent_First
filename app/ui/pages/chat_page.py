@@ -27,7 +27,26 @@ class ChatPage:
             raise RuntimeError("ChatPage requires an agent before sending messages.")
         self.add_message("user", content)
         response = self.agent.run(session_id=self.session_id, user_query=content)
-        self.add_message("assistant", response.answer)
+        self._apply_response(response)
+        return response
+
+    def stream_message(self, content: str):
+        if self.agent is None:
+            raise RuntimeError("ChatPage requires an agent before sending messages.")
+        self.add_message("user", content)
+        if hasattr(self.agent, "stream"):
+            for event in self.agent.stream(session_id=self.session_id, user_query=content):
+                if event.get("type") == "done":
+                    response = event["response"]
+                    self._apply_response(response)
+                yield event
+            return
+        response = self.agent.run(session_id=self.session_id, user_query=content)
+        yield {"type": "delta", "delta": response.answer}
+        self._apply_response(response)
+        yield {"type": "done", "response": response}
+
+    def _apply_response(self, response) -> None:
         self.sources = list(response.sources)
         self.tool_logs = list(response.tool_logs)
         self.summary = getattr(response, "summary", "")
@@ -40,4 +59,4 @@ class ChatPage:
         self.tool_actions = list(getattr(response, "tool_actions", []))
         self.recovery_action = getattr(response, "recovery_action", "")
         self.replan_steps = list(getattr(response, "replan_steps", []))
-        return response
+        self.add_message("assistant", response.answer)
