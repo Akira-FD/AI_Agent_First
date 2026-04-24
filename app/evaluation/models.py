@@ -33,6 +33,7 @@ class EvalResult:
     embedding_backend: str = "unknown"
     vector_store_backend: str = "unknown"
     reranker_backend: str = "unknown"
+    retrieval_stage_latency_ms: dict[str, int] = field(default_factory=dict)
     plan_route: str = ""
     plan_steps: list[str] = field(default_factory=list)
     node_trace: list[str] = field(default_factory=list)

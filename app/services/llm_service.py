@@ -23,6 +23,9 @@ class LLMAnswerResult:
     provider_status: str = "not_used"
     provider_error: str = ""
     provider_attempts: int = 0
+    first_token_latency_ms: int = 0
+    total_latency_ms: int = 0
+    provider_diagnostic: str = ""
 
 
 class RuleBasedLLMService:
@@ -36,11 +39,25 @@ class RuleBasedLLMService:
                 answer=f"已根据请求执行操作。{tool_message}\n\n建议：{summary or '暂无知识库上下文。'}",
                 answer_backend="fallback",
                 provider_status="not_used",
+                provider_diagnostic=_build_provider_diagnostic(
+                    provider_status="not_used",
+                    provider_attempts=0,
+                    first_token_latency_ms=0,
+                    total_latency_ms=0,
+                    provider_error="",
+                ),
             )
         return LLMAnswerResult(
             answer=f"根据知识库，针对“{user_query}”的建议如下：\n{summary or '暂无可用上下文，请先导入文档。'}",
             answer_backend="fallback",
             provider_status="not_used",
+            provider_diagnostic=_build_provider_diagnostic(
+                provider_status="not_used",
+                provider_attempts=0,
+                first_token_latency_ms=0,
+                total_latency_ms=0,
+                provider_error="",
+            ),
         )
 
     def generate_answer(self, user_query: str, context_text: str, tool_message: str | None = None) -> str:
@@ -127,6 +144,8 @@ class OpenAICompatibleLLMService:
         self._last_provider_status = "not_started"
         self._last_provider_error = ""
         self._last_provider_attempts = 0
+        self._last_first_token_latency_ms = 0
+        self._last_total_latency_ms = 0
 
     def backend_label(self) -> str:
         return f"openai-compatible:{self.model}"
@@ -139,6 +158,7 @@ class OpenAICompatibleLLMService:
         ).answer
 
     def generate_answer_result(self, user_query: str, context_text: str, tool_message: str | None = None) -> LLMAnswerResult:
+        started_at = time.monotonic()
         if not self.api_key:
             fallback_result = self.fallback.generate_answer_result(
                 user_query=user_query,
@@ -151,6 +171,15 @@ class OpenAICompatibleLLMService:
                 provider_status="missing_api_key",
                 provider_error="AI_AGENT_FIRST_LLM_API_KEY/OPENAI_API_KEY missing",
                 provider_attempts=0,
+                first_token_latency_ms=0,
+                total_latency_ms=0,
+                provider_diagnostic=_build_provider_diagnostic(
+                    provider_status="missing_api_key",
+                    provider_attempts=0,
+                    first_token_latency_ms=0,
+                    total_latency_ms=0,
+                    provider_error="AI_AGENT_FIRST_LLM_API_KEY/OPENAI_API_KEY missing",
+                ),
             )
 
         system_prompt = (
@@ -183,27 +212,50 @@ class OpenAICompatibleLLMService:
                 timeout=self.timeout_seconds,
             )
             content = self._extract_message_content(response)
+            total_latency_ms = _elapsed_ms(started_at)
             if content:
                 self._last_provider_status = "success"
                 self._last_provider_error = ""
+                self._last_first_token_latency_ms = total_latency_ms
+                self._last_total_latency_ms = total_latency_ms
                 return LLMAnswerResult(
                     answer=content,
                     answer_backend="remote",
                     provider_status="success",
                     provider_error="",
                     provider_attempts=self._last_provider_attempts,
+                    first_token_latency_ms=total_latency_ms,
+                    total_latency_ms=total_latency_ms,
+                    provider_diagnostic=_build_provider_diagnostic(
+                        provider_status="success",
+                        provider_attempts=self._last_provider_attempts,
+                        first_token_latency_ms=total_latency_ms,
+                        total_latency_ms=total_latency_ms,
+                        provider_error="",
+                    ),
                 )
             fallback_result = self.fallback.generate_answer_result(
                 user_query=user_query,
                 context_text=context_text,
                 tool_message=tool_message,
             )
+            self._last_first_token_latency_ms = 0
+            self._last_total_latency_ms = total_latency_ms
             return LLMAnswerResult(
                 answer=fallback_result.answer,
                 answer_backend="fallback",
                 provider_status="empty_response",
                 provider_error="provider returned empty content",
                 provider_attempts=self._last_provider_attempts,
+                first_token_latency_ms=0,
+                total_latency_ms=total_latency_ms,
+                provider_diagnostic=_build_provider_diagnostic(
+                    provider_status="empty_response",
+                    provider_attempts=self._last_provider_attempts,
+                    first_token_latency_ms=0,
+                    total_latency_ms=total_latency_ms,
+                    provider_error="provider returned empty content",
+                ),
             )
         except Exception:
             fallback_result = self.fallback.generate_answer_result(
@@ -211,15 +263,28 @@ class OpenAICompatibleLLMService:
                 context_text=context_text,
                 tool_message=tool_message,
             )
+            total_latency_ms = _elapsed_ms(started_at)
+            self._last_first_token_latency_ms = 0
+            self._last_total_latency_ms = total_latency_ms
             return LLMAnswerResult(
                 answer=fallback_result.answer,
                 answer_backend="fallback",
                 provider_status=self._last_provider_status,
                 provider_error=self._last_provider_error,
                 provider_attempts=self._last_provider_attempts,
+                first_token_latency_ms=0,
+                total_latency_ms=total_latency_ms,
+                provider_diagnostic=_build_provider_diagnostic(
+                    provider_status=self._last_provider_status,
+                    provider_attempts=self._last_provider_attempts,
+                    first_token_latency_ms=0,
+                    total_latency_ms=total_latency_ms,
+                    provider_error=self._last_provider_error,
+                ),
             )
 
     def stream_answer_result(self, user_query: str, context_text: str, tool_message: str | None = None):
+        started_at = time.monotonic()
         if not self.api_key:
             fallback_result = self.fallback.generate_answer_result(
                 user_query=user_query,
@@ -236,6 +301,15 @@ class OpenAICompatibleLLMService:
                     provider_status="missing_api_key",
                     provider_error="AI_AGENT_FIRST_LLM_API_KEY/OPENAI_API_KEY missing",
                     provider_attempts=0,
+                    first_token_latency_ms=0,
+                    total_latency_ms=0,
+                    provider_diagnostic=_build_provider_diagnostic(
+                        provider_status="missing_api_key",
+                        provider_attempts=0,
+                        first_token_latency_ms=0,
+                        total_latency_ms=0,
+                        provider_error="AI_AGENT_FIRST_LLM_API_KEY/OPENAI_API_KEY missing",
+                    ),
                 ),
             )
             return
@@ -264,6 +338,7 @@ class OpenAICompatibleLLMService:
             "Authorization": f"Bearer {self.api_key}",
         }
         collected_parts: list[str] = []
+        first_token_latency_ms = 0
         try:
             for delta in self._stream_request_with_retry(
                 url=f"{self.base_url}/chat/completions",
@@ -273,10 +348,15 @@ class OpenAICompatibleLLMService:
             ):
                 if not delta:
                     continue
+                if first_token_latency_ms == 0:
+                    first_token_latency_ms = _elapsed_ms(started_at)
                 collected_parts.append(delta)
                 yield LLMStreamEvent(type="delta", delta=delta)
             content = "".join(collected_parts).strip()
+            total_latency_ms = _elapsed_ms(started_at)
             if content:
+                self._last_first_token_latency_ms = first_token_latency_ms
+                self._last_total_latency_ms = total_latency_ms
                 yield LLMStreamEvent(
                     type="done",
                     result=LLMAnswerResult(
@@ -285,6 +365,15 @@ class OpenAICompatibleLLMService:
                         provider_status="success",
                         provider_error="",
                         provider_attempts=self._last_provider_attempts,
+                        first_token_latency_ms=first_token_latency_ms,
+                        total_latency_ms=total_latency_ms,
+                        provider_diagnostic=_build_provider_diagnostic(
+                            provider_status="success",
+                            provider_attempts=self._last_provider_attempts,
+                            first_token_latency_ms=first_token_latency_ms,
+                            total_latency_ms=total_latency_ms,
+                            provider_error="",
+                        ),
                     ),
                 )
                 return
@@ -293,6 +382,8 @@ class OpenAICompatibleLLMService:
                 context_text=context_text,
                 tool_message=tool_message,
             )
+            self._last_first_token_latency_ms = first_token_latency_ms
+            self._last_total_latency_ms = total_latency_ms
             yield LLMStreamEvent(
                 type="done",
                 result=LLMAnswerResult(
@@ -301,6 +392,15 @@ class OpenAICompatibleLLMService:
                     provider_status="empty_response",
                     provider_error="provider returned empty content",
                     provider_attempts=self._last_provider_attempts,
+                    first_token_latency_ms=first_token_latency_ms,
+                    total_latency_ms=total_latency_ms,
+                    provider_diagnostic=_build_provider_diagnostic(
+                        provider_status="empty_response",
+                        provider_attempts=self._last_provider_attempts,
+                        first_token_latency_ms=first_token_latency_ms,
+                        total_latency_ms=total_latency_ms,
+                        provider_error="provider returned empty content",
+                    ),
                 ),
             )
         except Exception:
@@ -309,6 +409,9 @@ class OpenAICompatibleLLMService:
                 context_text=context_text,
                 tool_message=tool_message,
             )
+            total_latency_ms = _elapsed_ms(started_at)
+            self._last_first_token_latency_ms = first_token_latency_ms
+            self._last_total_latency_ms = total_latency_ms
             if fallback_result.answer:
                 yield LLMStreamEvent(type="delta", delta=fallback_result.answer)
             yield LLMStreamEvent(
@@ -319,6 +422,15 @@ class OpenAICompatibleLLMService:
                     provider_status=self._last_provider_status,
                     provider_error=self._last_provider_error,
                     provider_attempts=self._last_provider_attempts,
+                    first_token_latency_ms=first_token_latency_ms,
+                    total_latency_ms=total_latency_ms,
+                    provider_diagnostic=_build_provider_diagnostic(
+                        provider_status=self._last_provider_status,
+                        provider_attempts=self._last_provider_attempts,
+                        first_token_latency_ms=first_token_latency_ms,
+                        total_latency_ms=total_latency_ms,
+                        provider_error=self._last_provider_error,
+                    ),
                 ),
             )
 
@@ -327,6 +439,8 @@ class OpenAICompatibleLLMService:
         self._last_provider_status = "not_started"
         self._last_provider_error = ""
         self._last_provider_attempts = 0
+        self._last_first_token_latency_ms = 0
+        self._last_total_latency_ms = 0
         for attempt in range(1, self.retry_attempts + 1):
             self._last_provider_attempts = attempt
             try:
@@ -349,6 +463,8 @@ class OpenAICompatibleLLMService:
         self._last_provider_status = "not_started"
         self._last_provider_error = ""
         self._last_provider_attempts = 0
+        self._last_first_token_latency_ms = 0
+        self._last_total_latency_ms = 0
         for attempt in range(1, self.retry_attempts + 1):
             self._last_provider_attempts = attempt
             try:
@@ -485,3 +601,28 @@ def build_llm_service(settings, requester=None):
             retry_backoff_seconds=getattr(settings, "llm_retry_backoff_seconds", 0.4),
         )
     return fallback
+
+
+def _elapsed_ms(started_at: float) -> int:
+    return max(0, int(round((time.monotonic() - started_at) * 1000)))
+
+
+def _build_provider_diagnostic(
+    *,
+    provider_status: str,
+    provider_attempts: int,
+    first_token_latency_ms: int,
+    total_latency_ms: int,
+    provider_error: str,
+) -> str:
+    parts = [
+        f"provider={provider_status}",
+        f"attempts={provider_attempts}",
+    ]
+    if first_token_latency_ms > 0:
+        parts.append(f"first_token={first_token_latency_ms}ms")
+    if total_latency_ms > 0:
+        parts.append(f"total={total_latency_ms}ms")
+    if provider_error:
+        parts.append(f"error={provider_error}")
+    return " | ".join(parts)

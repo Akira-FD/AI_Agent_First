@@ -155,6 +155,32 @@ class RealLLMIntegrationTests(unittest.TestCase):
         self.assertEqual(stream_requester.calls[0]["url"], "https://example.com/v1/chat/completions")
         self.assertTrue(stream_requester.calls[0]["payload"]["stream"])
 
+    def test_openai_compatible_service_exposes_stream_timing_telemetry(self) -> None:
+        stream_requester = FakeStreamRequester()
+        service = OpenAICompatibleLLMService(
+            api_key="test-key",
+            base_url="https://example.com/v1",
+            model="demo-model",
+            requester=FakeRequester(),
+            stream_requester=stream_requester,
+        )
+
+        with patch(
+            "app.services.llm_service.time.monotonic",
+            side_effect=[10.0, 10.12, 10.35],
+        ):
+            events = list(
+                service.stream_answer_result(
+                    user_query="Redis OOM 时先看什么？",
+                    context_text="建议先检查 maxmemory、slowlog 和连接数。",
+                )
+            )
+
+        result = events[-1].result
+        self.assertEqual(result.first_token_latency_ms, 120)
+        self.assertEqual(result.total_latency_ms, 350)
+        self.assertEqual(result.provider_diagnostic, "provider=success | attempts=1 | first_token=120ms | total=350ms")
+
     def test_openai_compatible_service_ignores_empty_sse_choices_and_finish_events(self) -> None:
         stream_requester = FakeStreamRequester(
             chunks=[
@@ -317,6 +343,29 @@ class RealLLMIntegrationTests(unittest.TestCase):
         self.assertEqual(result.provider_status, "timeout")
         self.assertEqual(result.provider_attempts, 2)
         self.assertIn("timed out", result.provider_error)
+
+    def test_answer_result_exposes_request_timing_and_diagnostic_summary(self) -> None:
+        requester = FakeRequester()
+        service = OpenAICompatibleLLMService(
+            api_key="test-key",
+            base_url="https://example.com/v1",
+            model="demo-model",
+            requester=requester,
+        )
+
+        with patch(
+            "app.services.llm_service.time.monotonic",
+            side_effect=[20.0, 20.42],
+        ):
+            result = service.generate_answer_result(
+                user_query="Redis OOM 时先看什么？",
+                context_text="建议先检查 maxmemory、slowlog 和连接数。",
+            )
+
+        self.assertEqual(result.answer_backend, "remote")
+        self.assertEqual(result.first_token_latency_ms, 420)
+        self.assertEqual(result.total_latency_ms, 420)
+        self.assertEqual(result.provider_diagnostic, "provider=success | attempts=1 | first_token=420ms | total=420ms")
 
     def test_answer_result_exposes_disconnect_diagnostics_after_retry_exhaustion(self) -> None:
         requester = SequencedRequester(

@@ -80,6 +80,7 @@ class AppSettings:
     embedding_backend: str
     reranker_backend: str
     bge_reranker_model: str
+    reranker_prefilter_limit: int
     milvus_enabled: bool
     milvus_uri: str
     milvus_collection: str
@@ -164,6 +165,9 @@ class AppSettings:
                 "BAAI/bge-reranker-v2-m3",
                 file_values,
                 persistent_values,
+            ),
+            reranker_prefilter_limit=int(
+                _get_setting("AI_AGENT_FIRST_RERANKER_PREFILTER_LIMIT", "6", file_values, persistent_values)
             ),
             milvus_enabled=_get_setting(
                 "AI_AGENT_FIRST_MILVUS_ENABLED",

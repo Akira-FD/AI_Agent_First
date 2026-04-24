@@ -29,6 +29,10 @@ class AgentResponse:
     provider_status: str = "not_used"
     provider_error: str = ""
     provider_attempts: int = 0
+    first_token_latency_ms: int = 0
+    total_latency_ms: int = 0
+    provider_diagnostic: str = ""
+    retrieval_stage_latency_ms: dict[str, int] = field(default_factory=dict)
     retrieval_backend: str = "unknown"
     embedding_backend: str = "unknown"
     reranker_backend: str = "unknown"
@@ -136,6 +140,7 @@ class MVPAgent:
         retrieval = run_retrieval(user_query, self.retriever)
         state.context_text = retrieval.context_text
         state.sources = retrieval.sources
+        state.retrieval_stage_latency_ms = dict(getattr(retrieval, "stage_latency_ms", {}) or {})
         state.mark("retrieve")
 
         plan = create_plan(state.intent)
@@ -188,6 +193,9 @@ class MVPAgent:
         state.provider_status = answer_result.provider_status
         state.provider_error = answer_result.provider_error
         state.provider_attempts = answer_result.provider_attempts
+        state.first_token_latency_ms = getattr(answer_result, "first_token_latency_ms", 0)
+        state.total_latency_ms = getattr(answer_result, "total_latency_ms", 0)
+        state.provider_diagnostic = getattr(answer_result, "provider_diagnostic", "")
         state.mark("answer")
 
         self.session_service.append_message(session_id, "assistant", state.final_answer)
@@ -213,6 +221,10 @@ class MVPAgent:
             provider_status=state.provider_status,
             provider_error=state.provider_error,
             provider_attempts=state.provider_attempts,
+            first_token_latency_ms=state.first_token_latency_ms,
+            total_latency_ms=state.total_latency_ms,
+            provider_diagnostic=state.provider_diagnostic,
+            retrieval_stage_latency_ms=state.retrieval_stage_latency_ms,
             retrieval_backend=self.retriever.vector_store.backend_name(),
             embedding_backend=self.retriever.embedding_provider.backend_name(),
             reranker_backend=self.retriever.reranker.backend_name(),

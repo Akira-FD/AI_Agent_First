@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import time
 
 from app.ui.pages.chat_page import ChatPage
 from app.ui.pages.docs_page import DocsPage
@@ -173,9 +174,15 @@ class MainWindow(QMainWindow):
         self._pending_provider_attempts = 0
         self._pending_plan_steps = []
         self._pending_replan_steps = []
+        self._pending_first_token_latency_ms = 0
+        self._pending_total_latency_ms = 0
+        self._pending_provider_diagnostic = ""
+        self._pending_retrieval_stage_latency_ms = {}
         self._ignore_current_response = False
         self._pending_retry_query = None
         self._last_query = ""
+        self._request_started_at = 0.0
+        self._first_visible_token_recorded = False
 
         self.setWindowTitle(settings.app_name)
         self._apply_theme()
@@ -292,6 +299,21 @@ class MainWindow(QMainWindow):
     def _build_side_panel(self):
         panel = QWidget()
         layout = QVBoxLayout(panel)
+        layout.addWidget(QLabel("请求指标"))
+        self.provider_metrics_panel = QTextBrowser()
+        self.provider_metrics_panel.setMaximumHeight(90)
+        self.provider_metrics_panel.setPlainText("首包延迟：暂无\n总耗时：暂无")
+        layout.addWidget(self.provider_metrics_panel)
+        layout.addWidget(QLabel("Provider 诊断"))
+        self.provider_diagnostics_panel = QTextBrowser()
+        self.provider_diagnostics_panel.setMaximumHeight(110)
+        self.provider_diagnostics_panel.setPlainText("暂无 provider 诊断")
+        layout.addWidget(self.provider_diagnostics_panel)
+        layout.addWidget(QLabel("RAG 阶段耗时"))
+        self.retrieval_stage_panel = QTextBrowser()
+        self.retrieval_stage_panel.setMaximumHeight(120)
+        self.retrieval_stage_panel.setPlainText("检索：暂无\n粗排：暂无\nBGE：暂无\n上下文构造：暂无")
+        layout.addWidget(self.retrieval_stage_panel)
         layout.addWidget(QLabel("当前会话摘要"))
         self.session_summary_panel = QTextBrowser()
         self.session_summary_panel.setPlainText("当前会话摘要：暂无")
@@ -333,11 +355,20 @@ class MainWindow(QMainWindow):
         self._pending_provider_status = "not_used"
         self._pending_provider_error = ""
         self._pending_provider_attempts = 0
+        self._pending_first_token_latency_ms = 0
+        self._pending_total_latency_ms = 0
+        self._pending_provider_diagnostic = ""
+        self._pending_retrieval_stage_latency_ms = {}
         self._pending_plan_steps = []
         self._pending_replan_steps = []
+        self._request_started_at = time.monotonic()
+        self._first_visible_token_recorded = False
         self.chat_history.append(f"用户：{query}")
         self._set_controls(send_enabled=False, cancel_enabled=True, retry_enabled=False)
         self.request_status.setText("状态：处理中...")
+        self.provider_metrics_panel.setPlainText("首包延迟：测量中...\n总耗时：进行中...")
+        self.provider_diagnostics_panel.setPlainText("provider=processing")
+        self.retrieval_stage_panel.setPlainText("检索：测量中...\n粗排：待执行\nBGE：待执行\n上下文构造：待执行")
         self._request_timer.start(self._request_timeout_ms)
 
         thread = QThread()
@@ -367,6 +398,10 @@ class MainWindow(QMainWindow):
         self._pending_provider_status = getattr(response, "provider_status", "not_used")
         self._pending_provider_error = getattr(response, "provider_error", "")
         self._pending_provider_attempts = getattr(response, "provider_attempts", 0)
+        self._pending_first_token_latency_ms = getattr(response, "first_token_latency_ms", 0)
+        self._pending_total_latency_ms = getattr(response, "total_latency_ms", 0)
+        self._pending_provider_diagnostic = getattr(response, "provider_diagnostic", "")
+        self._pending_retrieval_stage_latency_ms = dict(getattr(response, "retrieval_stage_latency_ms", {}) or {})
         self._pending_retrieval_backend = getattr(response, "retrieval_backend", describe_retrieval_backend(self.settings))
         self._pending_embedding_backend = getattr(response, "embedding_backend", describe_embedding_backend(self.settings))
         self._pending_reranker_backend = getattr(response, "reranker_backend", describe_reranker_backend(self.settings))
@@ -386,7 +421,9 @@ class MainWindow(QMainWindow):
             f"provider={self._pending_provider_status} | attempts={self._pending_provider_attempts}"
         )
         self._set_controls(send_enabled=False, cancel_enabled=True, retry_enabled=False)
-        self._stream_timer.start(self._stream_interval_ms)
+        self._append_stream_chunk()
+        if self._pending_stream_text:
+            self._stream_timer.start(self._stream_interval_ms)
 
     def _handle_stream_delta(self, delta: str) -> None:
         self._request_timer.stop()
@@ -400,7 +437,11 @@ class MainWindow(QMainWindow):
         if not delta:
             return
         self._pending_provider_deltas.append(delta)
-        if not self._provider_stream_timer.isActive():
+        if len(self._pending_provider_deltas) == 1 and not self._provider_stream_timer.isActive():
+            self._flush_provider_stream_delta()
+            if self._request_thread is not None and not self._provider_stream_timer.isActive():
+                self._provider_stream_timer.start(self._stream_interval_ms)
+        elif not self._provider_stream_timer.isActive():
             self._provider_stream_timer.start(self._stream_interval_ms)
 
     def _handle_stream_completed(self, response) -> None:
@@ -421,6 +462,10 @@ class MainWindow(QMainWindow):
         self._pending_provider_status = getattr(response, "provider_status", "not_used")
         self._pending_provider_error = getattr(response, "provider_error", "")
         self._pending_provider_attempts = getattr(response, "provider_attempts", 0)
+        self._pending_first_token_latency_ms = getattr(response, "first_token_latency_ms", 0)
+        self._pending_total_latency_ms = getattr(response, "total_latency_ms", 0)
+        self._pending_provider_diagnostic = getattr(response, "provider_diagnostic", "")
+        self._pending_retrieval_stage_latency_ms = dict(getattr(response, "retrieval_stage_latency_ms", {}) or {})
         self._pending_retrieval_backend = getattr(response, "retrieval_backend", describe_retrieval_backend(self.settings))
         self._pending_embedding_backend = getattr(response, "embedding_backend", describe_embedding_backend(self.settings))
         self._pending_reranker_backend = getattr(response, "reranker_backend", describe_reranker_backend(self.settings))
@@ -447,10 +492,7 @@ class MainWindow(QMainWindow):
                 self._finalize_provider_stream(response)
             return
         next_delta = self._pending_provider_deltas.pop(0)
-        cursor = self.chat_history.textCursor()
-        cursor.movePosition(QTextCursor.MoveOperation.End)
-        self.chat_history.setTextCursor(cursor)
-        self.chat_history.insertPlainText(next_delta)
+        self._append_chat_text(next_delta)
         if not self._pending_provider_deltas:
             self._provider_stream_timer.stop()
             if self._pending_provider_completed_response is not None:
@@ -462,6 +504,9 @@ class MainWindow(QMainWindow):
         self._request_timer.stop()
         self.chat_history.append(f"助手：请求失败，{error_message}")
         self.request_status.setText("状态：请求失败，可重试")
+        self.provider_metrics_panel.setPlainText("首包延迟：失败\n总耗时：失败")
+        self.provider_diagnostics_panel.setPlainText(f"provider=error | error={error_message}")
+        self.retrieval_stage_panel.setPlainText("检索：失败\n粗排：失败\nBGE：失败\n上下文构造：失败")
         self._set_controls(send_enabled=True, cancel_enabled=False, retry_enabled=bool(self._last_query))
 
     def _cleanup_request_worker(self) -> None:
@@ -483,14 +528,33 @@ class MainWindow(QMainWindow):
         if not self._pending_stream_text:
             self._finish_streaming_response()
             return
+        self._append_stream_chunk()
+
+    def _append_stream_chunk(self) -> None:
+        if not self._pending_stream_text:
+            self._finish_streaming_response()
+            return
         next_chunk = self._pending_stream_text[: self._stream_chunk_size]
         self._pending_stream_text = self._pending_stream_text[self._stream_chunk_size :]
+        self._append_chat_text(next_chunk)
+        if not self._pending_stream_text:
+            self._finish_streaming_response()
+
+    def _append_chat_text(self, text: str) -> None:
         cursor = self.chat_history.textCursor()
         cursor.movePosition(QTextCursor.MoveOperation.End)
         self.chat_history.setTextCursor(cursor)
-        self.chat_history.insertPlainText(next_chunk)
-        if not self._pending_stream_text:
-            self._finish_streaming_response()
+        self.chat_history.insertPlainText(text)
+        self._record_first_visible_token_if_needed()
+
+    def _record_first_visible_token_if_needed(self) -> None:
+        if self._first_visible_token_recorded or self._request_started_at <= 0:
+            return
+        self._first_visible_token_recorded = True
+        first_token_latency_ms = max(0, int(round((time.monotonic() - self._request_started_at) * 1000)))
+        if self._pending_first_token_latency_ms <= 0:
+            self._pending_first_token_latency_ms = first_token_latency_ms
+        self._update_provider_panels(total_in_progress=True)
 
     def _finish_streaming_response(self) -> None:
         self._stream_timer.stop()
@@ -500,6 +564,10 @@ class MainWindow(QMainWindow):
         provider_status = self._pending_provider_status
         provider_error = self._pending_provider_error
         provider_attempts = self._pending_provider_attempts
+        first_token_latency_ms = self._pending_first_token_latency_ms
+        total_latency_ms = self._pending_total_latency_ms
+        provider_diagnostic = self._pending_provider_diagnostic
+        retrieval_stage_latency_ms = dict(self._pending_retrieval_stage_latency_ms)
         retrieval_backend = getattr(self, "_pending_retrieval_backend", describe_retrieval_backend(self.settings))
         embedding_backend = getattr(self, "_pending_embedding_backend", describe_embedding_backend(self.settings))
         reranker_backend = getattr(self, "_pending_reranker_backend", describe_reranker_backend(self.settings))
@@ -519,6 +587,10 @@ class MainWindow(QMainWindow):
         self._pending_provider_status = "not_used"
         self._pending_provider_error = ""
         self._pending_provider_attempts = 0
+        self._pending_first_token_latency_ms = 0
+        self._pending_total_latency_ms = 0
+        self._pending_provider_diagnostic = ""
+        self._pending_retrieval_stage_latency_ms = {}
         self._pending_retrieval_backend = describe_retrieval_backend(self.settings)
         self._pending_embedding_backend = describe_embedding_backend(self.settings)
         self._pending_reranker_backend = describe_reranker_backend(self.settings)
@@ -528,17 +600,32 @@ class MainWindow(QMainWindow):
         self._pending_tool_actions = []
         self._pending_recovery_action = ""
         self._pending_replan_steps = []
+        self._request_started_at = 0.0
+        self._first_visible_token_recorded = False
         if self._ignore_current_response or response is None:
             self.request_status.setText("状态：已取消")
+            self.provider_metrics_panel.setPlainText("首包延迟：已取消\n总耗时：已取消")
+            self.provider_diagnostics_panel.setPlainText("provider=cancelled")
+            self.retrieval_stage_panel.setPlainText("检索：已取消\n粗排：已取消\nBGE：已取消\n上下文构造：已取消")
             self._set_controls(send_enabled=True, cancel_enabled=False, retry_enabled=bool(self._last_query))
             return
 
         self.chat_history.append("")
+        self._render_provider_panels(
+            first_token_latency_ms=first_token_latency_ms,
+            total_latency_ms=total_latency_ms,
+            provider_diagnostic=provider_diagnostic,
+        )
+        self._render_retrieval_stage_panel(retrieval_stage_latency_ms)
         status_text = (
             f"状态：已完成 | 回答来源：{answer_backend} | "
             f"provider={provider_status} | attempts={provider_attempts} | "
             f"retrieval={retrieval_backend} | embedding={embedding_backend} | reranker={reranker_backend}"
         )
+        if first_token_latency_ms > 0:
+            status_text += f" | first_token={first_token_latency_ms}ms"
+        if total_latency_ms > 0:
+            status_text += f" | total={total_latency_ms}ms"
         if streamed_from_provider:
             status_text += " | stream=provider"
         if plan_route:
@@ -564,6 +651,10 @@ class MainWindow(QMainWindow):
             return
         self._ignore_current_response = True
         self.request_status.setText("状态：请求超时，可重试")
+        elapsed_ms = max(0, int(round((time.monotonic() - self._request_started_at) * 1000))) if self._request_started_at else 0
+        self.provider_metrics_panel.setPlainText(f"首包延迟：未返回\n总耗时：{elapsed_ms} ms")
+        self.provider_diagnostics_panel.setPlainText("provider=timeout | client=timeout")
+        self.retrieval_stage_panel.setPlainText("检索：超时\n粗排：超时\nBGE：超时\n上下文构造：超时")
         self._set_controls(send_enabled=False, cancel_enabled=True, retry_enabled=bool(self._last_query))
 
     def cancel_current_request(self) -> None:
@@ -575,6 +666,9 @@ class MainWindow(QMainWindow):
             self._finish_streaming_response()
             return
         self.request_status.setText("状态：已取消")
+        self.provider_metrics_panel.setPlainText("首包延迟：已取消\n总耗时：已取消")
+        self.provider_diagnostics_panel.setPlainText("provider=cancelled")
+        self.retrieval_stage_panel.setPlainText("检索：已取消\n粗排：已取消\nBGE：已取消\n上下文构造：已取消")
         self._set_controls(send_enabled=False, cancel_enabled=False, retry_enabled=bool(self._last_query))
 
     def retry_last_query(self) -> None:
@@ -617,3 +711,42 @@ class MainWindow(QMainWindow):
         for log in response.tool_logs:
             self.tool_log_panel.add_log(log)
         self.tool_logs_panel.setPlainText(self.tool_log_panel.render_text())
+
+    def _update_provider_panels(self, *, total_in_progress: bool) -> None:
+        total_text = "进行中..." if total_in_progress else self._format_latency(self._pending_total_latency_ms)
+        first_token_text = self._format_latency(self._pending_first_token_latency_ms)
+        self.provider_metrics_panel.setPlainText(
+            f"首包延迟：{first_token_text}\n总耗时：{total_text}"
+        )
+        diagnostic_text = self._pending_provider_diagnostic or f"provider={self._pending_provider_status}"
+        self.provider_diagnostics_panel.setPlainText(diagnostic_text)
+
+    def _render_provider_panels(
+        self,
+        *,
+        first_token_latency_ms: int,
+        total_latency_ms: int,
+        provider_diagnostic: str,
+    ) -> None:
+        self.provider_metrics_panel.setPlainText(
+            f"首包延迟：{self._format_latency(first_token_latency_ms)}\n"
+            f"总耗时：{self._format_latency(total_latency_ms)}"
+        )
+        self.provider_diagnostics_panel.setPlainText(provider_diagnostic or "暂无 provider 诊断")
+
+    def _render_retrieval_stage_panel(self, stage_latency_ms: dict[str, int]) -> None:
+        self.retrieval_stage_panel.setPlainText(
+            "\n".join(
+                [
+                    f"检索：{self._format_latency(stage_latency_ms.get('retrieval', 0))}",
+                    f"粗排：{self._format_latency(stage_latency_ms.get('coarse_rerank', 0))}",
+                    f"BGE：{self._format_latency(stage_latency_ms.get('bge_rerank', 0))}",
+                    f"上下文构造：{self._format_latency(stage_latency_ms.get('context_build', 0))}",
+                ]
+            )
+        )
+
+    def _format_latency(self, latency_ms: int) -> str:
+        if latency_ms <= 0:
+            return "暂无"
+        return f"{latency_ms} ms"

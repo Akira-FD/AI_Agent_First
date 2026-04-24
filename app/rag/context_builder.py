@@ -9,6 +9,7 @@ from app.rag.vector_store import SearchMatch
 class RetrievalResult:
     context_text: str
     sources: list[dict[str, str | float]]
+    stage_latency_ms: dict[str, int] | None = None
 
 
 class ContextBuilder:

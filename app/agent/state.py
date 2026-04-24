@@ -28,6 +28,10 @@ class AgentState:
     provider_status: str = "not_used"
     provider_error: str = ""
     provider_attempts: int = 0
+    first_token_latency_ms: int = 0
+    total_latency_ms: int = 0
+    provider_diagnostic: str = ""
+    retrieval_stage_latency_ms: dict[str, int] = field(default_factory=dict)
     node_trace: list[str] = field(default_factory=list)
     retry_count: int = 0
     error: str = ""

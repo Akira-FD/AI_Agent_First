@@ -59,6 +59,7 @@ def grade_response(case: EvalCase, response) -> EvalResult:
             getattr(response, "retrieval_backend", "unknown"),
         ),
         reranker_backend=getattr(response, "reranker_backend", "unknown"),
+        retrieval_stage_latency_ms=dict(getattr(response, "retrieval_stage_latency_ms", {}) or {}),
         plan_route=getattr(response, "plan_route", ""),
         plan_steps=list(getattr(response, "plan_steps", [])),
         node_trace=list(getattr(response, "node_trace", [])),

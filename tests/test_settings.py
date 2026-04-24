@@ -150,12 +150,14 @@ class SettingsTests(unittest.TestCase):
             "AI_AGENT_FIRST_REMOTE_RETRIEVAL_URL": os.environ.get("AI_AGENT_FIRST_REMOTE_RETRIEVAL_URL"),
             "AI_AGENT_FIRST_RERANKER_BACKEND": os.environ.get("AI_AGENT_FIRST_RERANKER_BACKEND"),
             "AI_AGENT_FIRST_BGE_RERANKER_MODEL": os.environ.get("AI_AGENT_FIRST_BGE_RERANKER_MODEL"),
+            "AI_AGENT_FIRST_RERANKER_PREFILTER_LIMIT": os.environ.get("AI_AGENT_FIRST_RERANKER_PREFILTER_LIMIT"),
         }
         os.environ["AI_AGENT_FIRST_RETRIEVAL_BACKEND"] = "milvus-lite"
         os.environ["AI_AGENT_FIRST_EMBEDDING_BACKEND"] = "hash"
         os.environ["AI_AGENT_FIRST_REMOTE_RETRIEVAL_URL"] = "http://127.0.0.1:9000/retrieve"
         os.environ["AI_AGENT_FIRST_RERANKER_BACKEND"] = "bge"
         os.environ["AI_AGENT_FIRST_BGE_RERANKER_MODEL"] = "BAAI/bge-reranker-v2-m3"
+        os.environ["AI_AGENT_FIRST_RERANKER_PREFILTER_LIMIT"] = "6"
         try:
             settings = AppSettings.from_root(Path.cwd())
             self.assertEqual(settings.retrieval_backend, "milvus-lite")
@@ -163,6 +165,7 @@ class SettingsTests(unittest.TestCase):
             self.assertEqual(settings.remote_retrieval_url, "http://127.0.0.1:9000/retrieve")
             self.assertEqual(settings.reranker_backend, "bge")
             self.assertEqual(settings.bge_reranker_model, "BAAI/bge-reranker-v2-m3")
+            self.assertEqual(settings.reranker_prefilter_limit, 6)
         finally:
             for key, value in previous.items():
                 if value is None:

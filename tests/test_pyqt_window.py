@@ -172,8 +172,17 @@ class PyQtWindowTests(unittest.TestCase):
                         tool_logs=[],
                         answer_backend="remote",
                         provider_status="success",
+                        provider_diagnostic="provider=success | attempts=1 | first_token=180ms | total=640ms",
                         provider_error="",
                         provider_attempts=1,
+                        first_token_latency_ms=180,
+                        total_latency_ms=640,
+                        retrieval_stage_latency_ms={
+                            "retrieval": 42,
+                            "coarse_rerank": 8,
+                            "bge_rerank": 31,
+                            "context_build": 5,
+                        },
                     ),
                 }
 
@@ -214,6 +223,13 @@ class PyQtWindowTests(unittest.TestCase):
 
             self.assertIn("remote", window.request_status.text())
             self.assertIn("状态：已完成", window.request_status.text())
+            self.assertIn("首包延迟：180 ms", window.provider_metrics_panel.toPlainText())
+            self.assertIn("总耗时：640 ms", window.provider_metrics_panel.toPlainText())
+            self.assertIn("provider=success", window.provider_diagnostics_panel.toPlainText())
+            self.assertIn("检索：42 ms", window.retrieval_stage_panel.toPlainText())
+            self.assertIn("粗排：8 ms", window.retrieval_stage_panel.toPlainText())
+            self.assertIn("BGE：31 ms", window.retrieval_stage_panel.toPlainText())
+            self.assertIn("上下文构造：5 ms", window.retrieval_stage_panel.toPlainText())
 
     def test_main_window_can_cancel_request_and_ignore_late_response(self) -> None:
         os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -380,8 +396,11 @@ class PyQtWindowTests(unittest.TestCase):
                     tool_logs=[],
                     answer_backend="fallback",
                     provider_status="timeout",
+                    provider_diagnostic="provider=timeout | attempts=2 | total=1800ms | error=timed out",
                     provider_error="timed out",
                     provider_attempts=2,
+                    first_token_latency_ms=0,
+                    total_latency_ms=1800,
                 )
 
         app_instance = QApplication.instance() or QApplication([])
@@ -409,6 +428,71 @@ class PyQtWindowTests(unittest.TestCase):
             self.assertIn("fallback", window.request_status.text())
             self.assertIn("timeout", window.request_status.text())
             self.assertIn("attempts=2", window.request_status.text())
+            self.assertIn("总耗时：1800 ms", window.provider_metrics_panel.toPlainText())
+            self.assertIn("timed out", window.provider_diagnostics_panel.toPlainText())
+
+    def test_main_window_shows_live_first_token_timing_during_provider_stream(self) -> None:
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PyQt6.QtWidgets import QApplication
+
+        class StreamingChatPage:
+            def __init__(self) -> None:
+                self.messages = []
+
+            def stream_message(self, content: str):
+                self.messages.append({"role": "user", "content": content})
+                yield {"type": "delta", "delta": "先检查 Redis 状态，"}
+                time.sleep(0.02)
+                yield {"type": "delta", "delta": "再查看 timeout 日志。"}
+                yield {
+                    "type": "done",
+                    "response": SimpleNamespace(
+                        answer="先检查 Redis 状态，再查看 timeout 日志。",
+                        sources=[],
+                        tool_logs=[],
+                        answer_backend="remote",
+                        provider_status="success",
+                        provider_diagnostic="provider=success | attempts=1 | first_token=55ms | total=420ms",
+                        provider_error="",
+                        provider_attempts=1,
+                        first_token_latency_ms=55,
+                        total_latency_ms=420,
+                    ),
+                }
+
+        app_instance = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as tmpdir:
+            app = bootstrap_application(Path(tmpdir))
+            window = MainWindow(
+                agent=app.agent,
+                settings=app.settings,
+                document_service=app.document_service,
+                llm_service=app.llm_service,
+            )
+            window.chat_page = StreamingChatPage()
+            window._stream_interval_ms = 10
+
+            window.input_box.setPlainText("Redis timeout 怎么排查？")
+            started_at = time.monotonic()
+            window.handle_send()
+
+            deadline = time.monotonic() + 2.0
+            while time.monotonic() < deadline:
+                app_instance.processEvents()
+                time.sleep(0.01)
+                if "首包延迟：" in window.provider_metrics_panel.toPlainText():
+                    break
+
+            self.assertIn("首包延迟：", window.provider_metrics_panel.toPlainText())
+            elapsed_ms = (time.monotonic() - started_at) * 1000
+            self.assertLess(elapsed_ms, 250)
+
+            deadline = time.monotonic() + 2.0
+            while "timeout 日志。" not in window.chat_history.toPlainText():
+                if time.monotonic() > deadline:
+                    self.fail("Timed out waiting for provider stream completion after first-token telemetry.")
+                app_instance.processEvents()
+                time.sleep(0.01)
 
     def test_main_window_displays_current_session_summary(self) -> None:
         os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")

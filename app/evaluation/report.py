@@ -99,6 +99,12 @@ def _to_markdown(summary: dict[str, float | int], results: list[EvalResult]) -> 
             lines.append(f"  - Embedding backend: `{result.embedding_backend}`")
             lines.append(f"  - Vector store backend: `{result.vector_store_backend}`")
             lines.append(f"  - Reranker backend: `{result.reranker_backend}`")
+            if result.retrieval_stage_latency_ms:
+                lines.append(
+                    "  - Retrieval stage latency: `"
+                    + _format_stage_latency(result.retrieval_stage_latency_ms)
+                    + "`"
+                )
             if result.plan_route:
                 lines.append(f"  - Plan route: `{result.plan_route}`")
             if result.plan_steps:
@@ -129,3 +135,15 @@ def _to_markdown(summary: dict[str, float | int], results: list[EvalResult]) -> 
             lines.append(f"- `{result.id}` expected `{result.expected_source}`, got `{result.top_source}`")
     lines.append("")
     return "\n".join(lines)
+
+
+def _format_stage_latency(stage_latency_ms: dict[str, int]) -> str:
+    ordered_keys = ["retrieval", "coarse_rerank", "bge_rerank", "context_build"]
+    parts: list[str] = []
+    for key in ordered_keys:
+        if key in stage_latency_ms:
+            parts.append(f"{key}={stage_latency_ms[key]}ms")
+    for key, value in stage_latency_ms.items():
+        if key not in ordered_keys:
+            parts.append(f"{key}={value}ms")
+    return ", ".join(parts)

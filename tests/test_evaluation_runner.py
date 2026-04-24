@@ -275,6 +275,12 @@ class EvaluationRunnerTests(unittest.TestCase):
             tool_actions=[{"tool_name": "restart_mock_service", "tool_input": {"service_name": "redis"}}],
             recovery_action="retry_repaired_action",
             replan_steps=["retry_repaired_action", "restart_mock_service", "answer_with_tool_results"],
+            retrieval_stage_latency_ms={
+                "retrieval": 42,
+                "coarse_rerank": 8,
+                "bge_rerank": 31,
+                "context_build": 5,
+            },
         )
         with tempfile.TemporaryDirectory() as tmpdir:
             output_dir = Path(tmpdir)
@@ -301,10 +307,12 @@ class EvaluationRunnerTests(unittest.TestCase):
                 payload["results"][0]["replan_steps"],
                 ["retry_repaired_action", "restart_mock_service", "answer_with_tool_results"],
             )
+            self.assertEqual(payload["results"][0]["retrieval_stage_latency_ms"]["retrieval"], 42)
             self.assertIn("Retrieval backend: `remote`", markdown)
             self.assertIn("Embedding backend: `hash`", markdown)
             self.assertIn("Vector store backend: `remote`", markdown)
             self.assertIn("Reranker backend: `keyword-tech-weighted`", markdown)
+            self.assertIn("Retrieval stage latency: `retrieval=42ms, coarse_rerank=8ms, bge_rerank=31ms, context_build=5ms`", markdown)
             self.assertIn("Agent task success rate: 100.00%", markdown)
             self.assertIn("Plan route: `tool`", markdown)
             self.assertIn("Plan steps: `retrieve_context > restart_mock_service > answer_with_tool_results`", markdown)

@@ -1,0 +1,1028 @@
+{
+  "summary": {
+    "generated_at": "2026-04-24 23:53:24",
+    "question_count": 20,
+    "remote_success_count": 20,
+    "fallback_count": 0,
+    "tool_route_count": 1,
+    "runner_error_count": 0,
+    "avg_provider_first_token_ms": 3945.5,
+    "avg_provider_total_ms": 22540.5,
+    "avg_local_first_delta_ms": 9115.9,
+    "avg_local_total_ms": 27721.7,
+    "avg_perceived_gap_ms": 5170.4,
+    "avg_pre_llm_total_ms": 5159.2,
+    "avg_retrieval_ms": 210.9,
+    "avg_coarse_rerank_ms": 0.0,
+    "avg_bge_rerank_ms": 4948.2,
+    "avg_context_build_ms": 0.0,
+    "avg_chunk_count": 1041.1,
+    "stage_share_of_pre_llm": {
+      "retrieval": 0.0409,
+      "coarse_rerank": 0.0,
+      "bge_rerank": 0.9591,
+      "context_build": 0.0
+    },
+    "dominant_stage_counts": {
+      "retrieval": 0,
+      "coarse_rerank": 0,
+      "bge_rerank": 20,
+      "context_build": 0
+    }
+  },
+  "analysis": {
+    "slow_provider_first": [
+      {
+        "index": 1,
+        "question": "Redis OOM 时应该先检查哪些指标和配置？",
+        "route": "answer",
+        "provider_first_token_ms": 13598,
+        "provider_total_ms": 36490,
+        "local_first_delta_ms": 23416,
+        "pre_llm_total_ms": 9807,
+        "retrieval_stage_latency_ms": {
+          "retrieval": 218,
+          "coarse_rerank": 0,
+          "bge_rerank": 9589,
+          "context_build": 0
+        },
+        "dominant_pre_llm_stage": "bge_rerank"
+      },
+      {
+        "index": 15,
+        "question": "请先查询 redis 状态，再查 timeout 相关日志，最后总结可能根因。",
+        "route": "tool",
+        "provider_first_token_ms": 9916,
+        "provider_total_ms": 28651,
+        "local_first_delta_ms": 19606,
+        "pre_llm_total_ms": 9661,
+        "retrieval_stage_latency_ms": {
+          "retrieval": 211,
+          "coarse_rerank": 0,
+          "bge_rerank": 9450,
+          "context_build": 0
+        },
+        "dominant_pre_llm_stage": "bge_rerank"
+      },
+      {
+        "index": 19,
+        "question": "Kubernetes 节点 NotReady 时，运维上第一轮应该看哪些点？",
+        "route": "answer",
+        "provider_first_token_ms": 8092,
+        "provider_total_ms": 28817,
+        "local_first_delta_ms": 17760,
+        "pre_llm_total_ms": 9657,
+        "retrieval_stage_latency_ms": {
+          "retrieval": 213,
+          "coarse_rerank": 0,
+          "bge_rerank": 9444,
+          "context_build": 0
+        },
+        "dominant_pre_llm_stage": "bge_rerank"
+      },
+      {
+        "index": 8,
+        "question": "Docker 容器启动失败时，通常先看哪些信息？",
+        "route": "diagnose",
+        "provider_first_token_ms": 7128,
+        "provider_total_ms": 20002,
+        "local_first_delta_ms": 10081,
+        "pre_llm_total_ms": 2942,
+        "retrieval_stage_latency_ms": {
+          "retrieval": 208,
+          "coarse_rerank": 0,
+          "bge_rerank": 2734,
+          "context_build": 0
+        },
+        "dominant_pre_llm_stage": "bge_rerank"
+      },
+      {
+        "index": 3,
+        "question": "Kubernetes Pod 频繁重启时，第一轮排查通常怎么做？",
+        "route": "answer",
+        "provider_first_token_ms": 6507,
+        "provider_total_ms": 28686,
+        "local_first_delta_ms": 9570,
+        "pre_llm_total_ms": 3053,
+        "retrieval_stage_latency_ms": {
+          "retrieval": 204,
+          "coarse_rerank": 0,
+          "bge_rerank": 2849,
+          "context_build": 0
+        },
+        "dominant_pre_llm_stage": "bge_rerank"
+      }
+    ],
+    "slow_pre_llm": [
+      {
+        "index": 1,
+        "question": "Redis OOM 时应该先检查哪些指标和配置？",
+        "route": "answer",
+        "provider_first_token_ms": 13598,
+        "provider_total_ms": 36490,
+        "local_first_delta_ms": 23416,
+        "pre_llm_total_ms": 9807,
+        "retrieval_stage_latency_ms": {
+          "retrieval": 218,
+          "coarse_rerank": 0,
+          "bge_rerank": 9589,
+          "context_build": 0
+        },
+        "dominant_pre_llm_stage": "bge_rerank"
+      },
+      {
+        "index": 14,
+        "question": "如果怀疑 Kubernetes 集群 DNS 异常，应该怎么验证？",
+        "route": "answer",
+        "provider_first_token_ms": 1649,
+        "provider_total_ms": 20686,
+        "local_first_delta_ms": 11407,
+        "pre_llm_total_ms": 9748,
+        "retrieval_stage_latency_ms": {
+          "retrieval": 216,
+          "coarse_rerank": 0,
+          "bge_rerank": 9532,
+          "context_build": 0
+        },
+        "dominant_pre_llm_stage": "bge_rerank"
+      },
+      {
+        "index": 13,
+        "question": "应用日志里持续出现 timeout，如何区分是网络、数据库还是 Redis 问题？",
+        "route": "answer",
+        "provider_first_token_ms": 2698,
+        "provider_total_ms": 25239,
+        "local_first_delta_ms": 12417,
+        "pre_llm_total_ms": 9708,
+        "retrieval_stage_latency_ms": {
+          "retrieval": 209,
+          "coarse_rerank": 0,
+          "bge_rerank": 9499,
+          "context_build": 0
+        },
+        "dominant_pre_llm_stage": "bge_rerank"
+      },
+      {
+        "index": 5,
+        "question": "MySQL 出现 too many connections 时，应该先看什么？",
+        "route": "answer",
+        "provider_first_token_ms": 5397,
+        "provider_total_ms": 24152,
+        "local_first_delta_ms": 15102,
+        "pre_llm_total_ms": 9694,
+        "retrieval_stage_latency_ms": {
+          "retrieval": 208,
+          "coarse_rerank": 0,
+          "bge_rerank": 9486,
+          "context_build": 0
+        },
+        "dominant_pre_llm_stage": "bge_rerank"
+      },
+      {
+        "index": 15,
+        "question": "请先查询 redis 状态，再查 timeout 相关日志，最后总结可能根因。",
+        "route": "tool",
+        "provider_first_token_ms": 9916,
+        "provider_total_ms": 28651,
+        "local_first_delta_ms": 19606,
+        "pre_llm_total_ms": 9661,
+        "retrieval_stage_latency_ms": {
+          "retrieval": 211,
+          "coarse_rerank": 0,
+          "bge_rerank": 9450,
+          "context_build": 0
+        },
+        "dominant_pre_llm_stage": "bge_rerank"
+      }
+    ],
+    "slow_local_first": [
+      {
+        "index": 1,
+        "question": "Redis OOM 时应该先检查哪些指标和配置？",
+        "route": "answer",
+        "provider_first_token_ms": 13598,
+        "provider_total_ms": 36490,
+        "local_first_delta_ms": 23416,
+        "pre_llm_total_ms": 9807,
+        "retrieval_stage_latency_ms": {
+          "retrieval": 218,
+          "coarse_rerank": 0,
+          "bge_rerank": 9589,
+          "context_build": 0
+        },
+        "dominant_pre_llm_stage": "bge_rerank"
+      },
+      {
+        "index": 15,
+        "question": "请先查询 redis 状态，再查 timeout 相关日志，最后总结可能根因。",
+        "route": "tool",
+        "provider_first_token_ms": 9916,
+        "provider_total_ms": 28651,
+        "local_first_delta_ms": 19606,
+        "pre_llm_total_ms": 9661,
+        "retrieval_stage_latency_ms": {
+          "retrieval": 211,
+          "coarse_rerank": 0,
+          "bge_rerank": 9450,
+          "context_build": 0
+        },
+        "dominant_pre_llm_stage": "bge_rerank"
+      },
+      {
+        "index": 19,
+        "question": "Kubernetes 节点 NotReady 时，运维上第一轮应该看哪些点？",
+        "route": "answer",
+        "provider_first_token_ms": 8092,
+        "provider_total_ms": 28817,
+        "local_first_delta_ms": 17760,
+        "pre_llm_total_ms": 9657,
+        "retrieval_stage_latency_ms": {
+          "retrieval": 213,
+          "coarse_rerank": 0,
+          "bge_rerank": 9444,
+          "context_build": 0
+        },
+        "dominant_pre_llm_stage": "bge_rerank"
+      },
+      {
+        "index": 5,
+        "question": "MySQL 出现 too many connections 时，应该先看什么？",
+        "route": "answer",
+        "provider_first_token_ms": 5397,
+        "provider_total_ms": 24152,
+        "local_first_delta_ms": 15102,
+        "pre_llm_total_ms": 9694,
+        "retrieval_stage_latency_ms": {
+          "retrieval": 208,
+          "coarse_rerank": 0,
+          "bge_rerank": 9486,
+          "context_build": 0
+        },
+        "dominant_pre_llm_stage": "bge_rerank"
+      },
+      {
+        "index": 13,
+        "question": "应用日志里持续出现 timeout，如何区分是网络、数据库还是 Redis 问题？",
+        "route": "answer",
+        "provider_first_token_ms": 2698,
+        "provider_total_ms": 25239,
+        "local_first_delta_ms": 12417,
+        "pre_llm_total_ms": 9708,
+        "retrieval_stage_latency_ms": {
+          "retrieval": 209,
+          "coarse_rerank": 0,
+          "bge_rerank": 9499,
+          "context_build": 0
+        },
+        "dominant_pre_llm_stage": "bge_rerank"
+      }
+    ]
+  },
+  "results": [
+    {
+      "index": 1,
+      "question": "Redis OOM 时应该先检查哪些指标和配置？",
+      "status": "ok",
+      "intent": "knowledge",
+      "plan_route": "answer",
+      "plan_steps": [
+        "retrieve_context",
+        "answer_with_context"
+      ],
+      "tool_actions": [],
+      "answer_backend": "remote",
+      "provider_status": "success",
+      "provider_error": "",
+      "provider_attempts": 1,
+      "provider_diagnostic": "provider=success | attempts=1 | first_token=13598ms | total=36490ms",
+      "provider_first_token_ms": 13598,
+      "provider_total_ms": 36490,
+      "local_first_delta_ms": 23416,
+      "local_total_ms": 46319,
+      "perceived_gap_ms": 9818,
+      "chunk_count": 1404,
+      "retrieval_backend": "in-memory",
+      "embedding_backend": "hash",
+      "reranker_backend": "bge",
+      "retrieval_stage_latency_ms": {
+        "retrieval": 218,
+        "coarse_rerank": 0,
+        "bge_rerank": 9589,
+        "context_build": 0
+      },
+      "pre_llm_total_ms": 9807,
+      "dominant_pre_llm_stage": "bge_rerank",
+      "source_count": 3,
+      "answer_preview": "## 1) 结论\nRedis 出现 OOM（进程被杀/分配失败/写入被拒）时，**优先判断是哪一类“内存上限”触发**：  \n- **Redis 自身 maxmemory 撞顶**（你这里 `maxmemory 1GB` 且 `maxmemory-policy noeviction`，一旦接近上限会直接拒绝写入，业务常表现为大量写失败/超时）。  \n- **宿主机或容器/cgroup 内存上限撞顶**（即使 Redis 还没到 `max"
+    },
+    {
+      "index": 2,
+      "question": "MySQL 慢查询排查时，建议先看哪些日志和信息？",
+      "status": "ok",
+      "intent": "knowledge",
+      "plan_route": "answer",
+      "plan_steps": [
+        "retrieve_context",
+        "answer_with_context"
+      ],
+      "tool_actions": [],
+      "answer_backend": "remote",
+      "provider_status": "success",
+      "provider_error": "",
+      "provider_attempts": 1,
+      "provider_diagnostic": "provider=success | attempts=1 | first_token=1433ms | total=17330ms",
+      "provider_first_token_ms": 1433,
+      "provider_total_ms": 17330,
+      "local_first_delta_ms": 2192,
+      "local_total_ms": 18100,
+      "perceived_gap_ms": 759,
+      "chunk_count": 862,
+      "retrieval_backend": "in-memory",
+      "embedding_backend": "hash",
+      "reranker_backend": "bge",
+      "retrieval_stage_latency_ms": {
+        "retrieval": 209,
+        "coarse_rerank": 0,
+        "bge_rerank": 540,
+        "context_build": 0
+      },
+      "pre_llm_total_ms": 749,
+      "dominant_pre_llm_stage": "bge_rerank",
+      "source_count": 2,
+      "answer_preview": "1) 结论  \n排查 MySQL 慢查询，优先从“慢查询日志 + 执行现场（进程列表/锁等待）+ InnoDB 引擎状态 + 错误日志 + 关键监控指标”入手，先确认是否真的存在慢 SQL、是否被锁/资源瓶颈拖慢，再定位到具体语句与执行计划。\n\n2) 建议步骤（按优先级，尽量可直接执行）  \nA. 先确认慢查询日志是否开启、阈值是否合理  \n- 查看关键变量：  \n  - `SHOW VARIABLES LIKE 'slow_query"
+    },
+    {
+      "index": 3,
+      "question": "Kubernetes Pod 频繁重启时，第一轮排查通常怎么做？",
+      "status": "ok",
+      "intent": "knowledge",
+      "plan_route": "answer",
+      "plan_steps": [
+        "retrieve_context",
+        "answer_with_context"
+      ],
+      "tool_actions": [],
+      "answer_backend": "remote",
+      "provider_status": "success",
+      "provider_error": "",
+      "provider_attempts": 1,
+      "provider_diagnostic": "provider=success | attempts=1 | first_token=6507ms | total=28686ms",
+      "provider_first_token_ms": 6507,
+      "provider_total_ms": 28686,
+      "local_first_delta_ms": 9570,
+      "local_total_ms": 31759,
+      "perceived_gap_ms": 3063,
+      "chunk_count": 1295,
+      "retrieval_backend": "in-memory",
+      "embedding_backend": "hash",
+      "reranker_backend": "bge",
+      "retrieval_stage_latency_ms": {
+        "retrieval": 204,
+        "coarse_rerank": 0,
+        "bge_rerank": 2849,
+        "context_build": 0
+      },
+      "pre_llm_total_ms": 3053,
+      "dominant_pre_llm_stage": "bge_rerank",
+      "source_count": 5,
+      "answer_preview": "## 1) 结论\nPod 频繁重启（常见表现为 `CrashLoopBackOff`）第一轮排查的核心是：**先确认“为什么容器退出”（退出码/原因/最后日志）**，再判断是 **应用自身崩溃**、**探针/资源限制导致被杀**、还是 **节点/运行时/网络/存储层面问题**。\n\n---\n\n## 2) 建议步骤（按优先级从快到慢）\n\n### A. 先定位重启类型与退出原因（10 分钟内）\n1. **看状态、重启次数、在哪个容器重启**\n"
+    },
+    {
+      "index": 4,
+      "question": "Redis 出现连接超时，优先排查哪些方向？",
+      "status": "ok",
+      "intent": "knowledge",
+      "plan_route": "answer",
+      "plan_steps": [
+        "retrieve_context",
+        "answer_with_context"
+      ],
+      "tool_actions": [],
+      "answer_backend": "remote",
+      "provider_status": "success",
+      "provider_error": "",
+      "provider_attempts": 1,
+      "provider_diagnostic": "provider=success | attempts=1 | first_token=1704ms | total=18880ms",
+      "provider_first_token_ms": 1704,
+      "provider_total_ms": 18880,
+      "local_first_delta_ms": 4094,
+      "local_total_ms": 21281,
+      "perceived_gap_ms": 2390,
+      "chunk_count": 932,
+      "retrieval_backend": "in-memory",
+      "embedding_backend": "hash",
+      "reranker_backend": "bge",
+      "retrieval_stage_latency_ms": {
+        "retrieval": 210,
+        "coarse_rerank": 0,
+        "bge_rerank": 2170,
+        "context_build": 0
+      },
+      "pre_llm_total_ms": 2380,
+      "dominant_pre_llm_stage": "bge_rerank",
+      "source_count": 5,
+      "answer_preview": "## 1. 结论\nRedis 连接超时优先从三类方向排查：**服务是否在（进程/端口）**、**网络链路是否通（客户端到Redis）**、**Redis 是否被资源/阻塞拖慢（CPU/内存/连接数/磁盘/持久化/主从复制等）**。先用最短路径确认“能不能连上、连上后是否能快速响应”。\n\n## 2. 建议步骤（按优先级）\n### A. 先确认 Redis 是否存活、端口是否正常监听\n1) **检查进程/服务状态**：Redis 是否在运行"
+    },
+    {
+      "index": 5,
+      "question": "MySQL 出现 too many connections 时，应该先看什么？",
+      "status": "ok",
+      "intent": "knowledge",
+      "plan_route": "answer",
+      "plan_steps": [
+        "retrieve_context",
+        "answer_with_context"
+      ],
+      "tool_actions": [],
+      "answer_backend": "remote",
+      "provider_status": "success",
+      "provider_error": "",
+      "provider_attempts": 1,
+      "provider_diagnostic": "provider=success | attempts=1 | first_token=5397ms | total=24152ms",
+      "provider_first_token_ms": 5397,
+      "provider_total_ms": 24152,
+      "local_first_delta_ms": 15102,
+      "local_total_ms": 33867,
+      "perceived_gap_ms": 9705,
+      "chunk_count": 1120,
+      "retrieval_backend": "in-memory",
+      "embedding_backend": "hash",
+      "reranker_backend": "bge",
+      "retrieval_stage_latency_ms": {
+        "retrieval": 208,
+        "coarse_rerank": 0,
+        "bge_rerank": 9486,
+        "context_build": 0
+      },
+      "pre_llm_total_ms": 9694,
+      "dominant_pre_llm_stage": "bge_rerank",
+      "source_count": 3,
+      "answer_preview": "## 1) 结论  \nMySQL 报 **too many connections** 时，优先确认两件事：**连接数是否真的打满了（Threads_connected vs max_connections）**，以及 **这些连接都在干什么/来自哪里（processlist、来源 IP、是否大量 Sleep 或长查询）**。大多数根因是：应用连接泄漏/连接池配置不当、突发流量、慢查询/锁等待导致连接堆积，或 max_connectio"
+    },
+    {
+      "index": 6,
+      "question": "Nginx 502 Bad Gateway 常见根因有哪些，怎么快速定位？",
+      "status": "ok",
+      "intent": "knowledge",
+      "plan_route": "answer",
+      "plan_steps": [
+        "retrieve_context",
+        "answer_with_context"
+      ],
+      "tool_actions": [],
+      "answer_backend": "remote",
+      "provider_status": "success",
+      "provider_error": "",
+      "provider_attempts": 1,
+      "provider_diagnostic": "provider=success | attempts=1 | first_token=1733ms | total=21012ms",
+      "provider_first_token_ms": 1733,
+      "provider_total_ms": 21012,
+      "local_first_delta_ms": 6124,
+      "local_total_ms": 25414,
+      "perceived_gap_ms": 4391,
+      "chunk_count": 1053,
+      "retrieval_backend": "in-memory",
+      "embedding_backend": "hash",
+      "reranker_backend": "bge",
+      "retrieval_stage_latency_ms": {
+        "retrieval": 209,
+        "coarse_rerank": 0,
+        "bge_rerank": 4173,
+        "context_build": 0
+      },
+      "pre_llm_total_ms": 4382,
+      "dominant_pre_llm_stage": "bge_rerank",
+      "source_count": 5,
+      "answer_preview": "## 1) 结论\nNginx 出现 **502 Bad Gateway** 本质是：**Nginx 作为反向代理从上游（upstream：应用/网关/Ingress 后端 Pod）拿不到“有效响应”**。常见根因集中在三类：  \n1) **上游不可达/无可用实例**（服务没端口、Pod 不就绪、DNS/网络问题）  \n2) **上游响应异常或超时**（应用崩溃、连接被拒、read timeout、负载过高）  \n3) **代理配置不匹配"
+    },
+    {
+      "index": 7,
+      "question": "Linux 服务器磁盘空间突然飙满，第一步建议怎么查？",
+      "status": "ok",
+      "intent": "knowledge",
+      "plan_route": "answer",
+      "plan_steps": [
+        "retrieve_context",
+        "answer_with_context"
+      ],
+      "tool_actions": [],
+      "answer_backend": "remote",
+      "provider_status": "success",
+      "provider_error": "",
+      "provider_attempts": 1,
+      "provider_diagnostic": "provider=success | attempts=1 | first_token=1792ms | total=13912ms",
+      "provider_first_token_ms": 1792,
+      "provider_total_ms": 13912,
+      "local_first_delta_ms": 7318,
+      "local_total_ms": 19449,
+      "perceived_gap_ms": 5526,
+      "chunk_count": 659,
+      "retrieval_backend": "in-memory",
+      "embedding_backend": "hash",
+      "reranker_backend": "bge",
+      "retrieval_stage_latency_ms": {
+        "retrieval": 210,
+        "coarse_rerank": 0,
+        "bge_rerank": 5306,
+        "context_build": 0
+      },
+      "pre_llm_total_ms": 5516,
+      "dominant_pre_llm_stage": "bge_rerank",
+      "source_count": 5,
+      "answer_preview": "### 1) 结论  \n磁盘“突然飙满”的第一步：**先定位到底是哪个挂载点/目录在增长、增长来自文件还是已删除但仍被进程占用的文件**。优先用 `df + du + lsof` 三板斧快速缩小范围，再决定清理/止损动作。\n\n---\n\n### 2) 建议步骤（可直接执行）  \n\n**A. 确认爆满位置与文件系统类型**\n```bash\ndf -hT\ndf -hi\n```\n- 看：哪个挂载点 100%、是否 inode 用尽（`df -h"
+    },
+    {
+      "index": 8,
+      "question": "Docker 容器启动失败时，通常先看哪些信息？",
+      "status": "ok",
+      "intent": "troubleshoot",
+      "plan_route": "diagnose",
+      "plan_steps": [
+        "retrieve_context",
+        "diagnose_with_context",
+        "answer_with_context"
+      ],
+      "tool_actions": [],
+      "answer_backend": "remote",
+      "provider_status": "success",
+      "provider_error": "",
+      "provider_attempts": 1,
+      "provider_diagnostic": "provider=success | attempts=1 | first_token=7128ms | total=20002ms",
+      "provider_first_token_ms": 7128,
+      "provider_total_ms": 20002,
+      "local_first_delta_ms": 10081,
+      "local_total_ms": 22967,
+      "perceived_gap_ms": 2953,
+      "chunk_count": 842,
+      "retrieval_backend": "in-memory",
+      "embedding_backend": "hash",
+      "reranker_backend": "bge",
+      "retrieval_stage_latency_ms": {
+        "retrieval": 208,
+        "coarse_rerank": 0,
+        "bge_rerank": 2734,
+        "context_build": 0
+      },
+      "pre_llm_total_ms": 2942,
+      "dominant_pre_llm_stage": "bge_rerank",
+      "source_count": 5,
+      "answer_preview": "## 1) 结论\nDocker 容器启动失败，通常先看三类信息：**容器退出原因（ExitCode/OOM/信号）**、**容器标准输出日志（stdout/stderr）**、**Docker/宿主机侧的事件与资源状态（events/daemon log/CPU-内存-磁盘）**。这三类基本能快速定位是“应用自身报错”还是“运行环境/配置问题”。\n\n---\n\n## 2) 建议步骤（按优先级执行）\n1. **确认容器是否反复退出、退出码是"
+    },
+    {
+      "index": 9,
+      "question": "Kubernetes 中服务访问不通，应该按什么顺序排查？",
+      "status": "ok",
+      "intent": "knowledge",
+      "plan_route": "answer",
+      "plan_steps": [
+        "retrieve_context",
+        "answer_with_context"
+      ],
+      "tool_actions": [],
+      "answer_backend": "remote",
+      "provider_status": "success",
+      "provider_error": "",
+      "provider_attempts": 1,
+      "provider_diagnostic": "provider=success | attempts=1 | first_token=1584ms | total=33064ms",
+      "provider_first_token_ms": 1584,
+      "provider_total_ms": 33064,
+      "local_first_delta_ms": 4954,
+      "local_total_ms": 36445,
+      "perceived_gap_ms": 3370,
+      "chunk_count": 1711,
+      "retrieval_backend": "in-memory",
+      "embedding_backend": "hash",
+      "reranker_backend": "bge",
+      "retrieval_stage_latency_ms": {
+        "retrieval": 214,
+        "coarse_rerank": 0,
+        "bge_rerank": 3146,
+        "context_build": 0
+      },
+      "pre_llm_total_ms": 3360,
+      "dominant_pre_llm_stage": "bge_rerank",
+      "source_count": 5,
+      "answer_preview": "## 1) 结论\nKubernetes「服务访问不通」建议按“入口层 → Service/Endpoint 资源 → Pod 就绪与端口 → DNS → 网络路径/策略 → 节点与内核网络 → Ingress/LB → 控制面健康”自上而下排查。先用最短路径确认：**Service 是否有 Endpoint、Pod 是否 Ready、端口是否匹配**，通常能快速定位 80% 问题。\n\n---\n\n## 2) 建议步骤（按优先级顺序，可直接"
+    },
+    {
+      "index": 10,
+      "question": "Redis 主从延迟较大时，优先关注哪些指标？",
+      "status": "ok",
+      "intent": "knowledge",
+      "plan_route": "answer",
+      "plan_steps": [
+        "retrieve_context",
+        "answer_with_context"
+      ],
+      "tool_actions": [],
+      "answer_backend": "remote",
+      "provider_status": "success",
+      "provider_error": "",
+      "provider_attempts": 1,
+      "provider_diagnostic": "provider=success | attempts=1 | first_token=1638ms | total=14411ms",
+      "provider_first_token_ms": 1638,
+      "provider_total_ms": 14411,
+      "local_first_delta_ms": 4148,
+      "local_total_ms": 16932,
+      "perceived_gap_ms": 2510,
+      "chunk_count": 694,
+      "retrieval_backend": "in-memory",
+      "embedding_backend": "hash",
+      "reranker_backend": "bge",
+      "retrieval_stage_latency_ms": {
+        "retrieval": 212,
+        "coarse_rerank": 0,
+        "bge_rerank": 2289,
+        "context_build": 0
+      },
+      "pre_llm_total_ms": 2501,
+      "dominant_pre_llm_stage": "bge_rerank",
+      "source_count": 5,
+      "answer_preview": "## 1) 结论\nRedis 主从延迟（replication lag）较大时，优先盯住能直接解释“主库写入压力/网络与IO瓶颈/复制链路阻塞/从库回放能力”的指标：**复制偏移差、复制积压区(backlog)命中情况、主从网络与连接状态、主库写入与阻塞情况、主从两端 CPU/内存/磁盘 IO、从库回放与持久化耗时**。\n\n---\n\n## 2) 建议步骤（按优先级排查）\n1. **先量化延迟与是否在扩大**\n   - 主库：`INFO "
+    },
+    {
+      "index": 11,
+      "question": "MySQL 主从同步异常时，建议先检查什么？",
+      "status": "ok",
+      "intent": "knowledge",
+      "plan_route": "answer",
+      "plan_steps": [
+        "retrieve_context",
+        "answer_with_context"
+      ],
+      "tool_actions": [],
+      "answer_backend": "remote",
+      "provider_status": "success",
+      "provider_error": "",
+      "provider_attempts": 1,
+      "provider_diagnostic": "provider=success | attempts=1 | first_token=2359ms | total=12279ms",
+      "provider_first_token_ms": 2359,
+      "provider_total_ms": 12279,
+      "local_first_delta_ms": 3095,
+      "local_total_ms": 13026,
+      "perceived_gap_ms": 736,
+      "chunk_count": 544,
+      "retrieval_backend": "in-memory",
+      "embedding_backend": "hash",
+      "reranker_backend": "bge",
+      "retrieval_stage_latency_ms": {
+        "retrieval": 208,
+        "coarse_rerank": 0,
+        "bge_rerank": 518,
+        "context_build": 0
+      },
+      "pre_llm_total_ms": 726,
+      "dominant_pre_llm_stage": "bge_rerank",
+      "source_count": 2,
+      "answer_preview": "1) 结论  \nMySQL 主从同步异常时，建议先从“复制线程状态 + 主从位点/GTID一致性 + 网络与权限”三块做快速体检，优先确认从库 I/O/SQL 线程是否在跑、卡在哪个错误，以及主从复制位点是否匹配。\n\n2) 建议步骤（按优先级）  \n1. 看从库复制线程是否正常  \n   - 在从库执行：`SHOW SLAVE STATUS\\G`（或 MySQL 8.0：`SHOW REPLICA STATUS\\G`）  \n   - 重"
+    },
+    {
+      "index": 12,
+      "question": "线上 CPU 飙高但负载来源不明时，第一轮排查步骤是什么？",
+      "status": "ok",
+      "intent": "knowledge",
+      "plan_route": "answer",
+      "plan_steps": [
+        "retrieve_context",
+        "answer_with_context"
+      ],
+      "tool_actions": [],
+      "answer_backend": "remote",
+      "provider_status": "success",
+      "provider_error": "",
+      "provider_attempts": 1,
+      "provider_diagnostic": "provider=success | attempts=1 | first_token=3262ms | total=22594ms",
+      "provider_first_token_ms": 3262,
+      "provider_total_ms": 22594,
+      "local_first_delta_ms": 7579,
+      "local_total_ms": 26921,
+      "perceived_gap_ms": 4317,
+      "chunk_count": 1045,
+      "retrieval_backend": "in-memory",
+      "embedding_backend": "hash",
+      "reranker_backend": "bge",
+      "retrieval_stage_latency_ms": {
+        "retrieval": 207,
+        "coarse_rerank": 0,
+        "bge_rerank": 4100,
+        "context_build": 0
+      },
+      "pre_llm_total_ms": 4307,
+      "dominant_pre_llm_stage": "bge_rerank",
+      "source_count": 5,
+      "answer_preview": "### 1. 结论\n线上出现 **CPU 飙高但来源不明** 时，第一轮目标是：**先确认是“哪台机器/哪个进程/哪个容器/哪类内核或 K8s 组件”在吃 CPU**，并快速判断是否与 **kubelet/网络 conntrack/CronJob 频繁创建销毁** 等典型场景相关；在未定位前避免盲目重启或扩容掩盖问题。\n\n---\n\n### 2. 建议步骤（第一轮可执行清单）\n按“从宏观到微观、从宿主机到容器、从 CPU 到内核/网络”的"
+    },
+    {
+      "index": 13,
+      "question": "应用日志里持续出现 timeout，如何区分是网络、数据库还是 Redis 问题？",
+      "status": "ok",
+      "intent": "knowledge",
+      "plan_route": "answer",
+      "plan_steps": [
+        "retrieve_context",
+        "answer_with_context"
+      ],
+      "tool_actions": [],
+      "answer_backend": "remote",
+      "provider_status": "success",
+      "provider_error": "",
+      "provider_attempts": 1,
+      "provider_diagnostic": "provider=success | attempts=1 | first_token=2698ms | total=25239ms",
+      "provider_first_token_ms": 2698,
+      "provider_total_ms": 25239,
+      "local_first_delta_ms": 12417,
+      "local_total_ms": 34968,
+      "perceived_gap_ms": 9719,
+      "chunk_count": 1222,
+      "retrieval_backend": "in-memory",
+      "embedding_backend": "hash",
+      "reranker_backend": "bge",
+      "retrieval_stage_latency_ms": {
+        "retrieval": 209,
+        "coarse_rerank": 0,
+        "bge_rerank": 9499,
+        "context_build": 0
+      },
+      "pre_llm_total_ms": 9708,
+      "dominant_pre_llm_stage": "bge_rerank",
+      "source_count": 2,
+      "answer_preview": "## 1. 结论\n应用日志里的 **timeout** 要区分“网络 / 数据库 / Redis”三类，核心思路是：**把超时拆成链路三段看证据**——  \n1) **连接建连是否慢/失败（网络或端口层）**；2) **请求到达后服务端是否在忙（DB/Redis 服务端性能或锁）**；3) **客户端连接池/超时参数是否过小（应用侧）**。  \n在没有更多日志/监控的情况下，优先用 **同机快速探测 + 服务端慢查询/延迟指标** 来定"
+    },
+    {
+      "index": 14,
+      "question": "如果怀疑 Kubernetes 集群 DNS 异常，应该怎么验证？",
+      "status": "ok",
+      "intent": "knowledge",
+      "plan_route": "answer",
+      "plan_steps": [
+        "retrieve_context",
+        "answer_with_context"
+      ],
+      "tool_actions": [],
+      "answer_backend": "remote",
+      "provider_status": "success",
+      "provider_error": "",
+      "provider_attempts": 1,
+      "provider_diagnostic": "provider=success | attempts=1 | first_token=1649ms | total=20686ms",
+      "provider_first_token_ms": 1649,
+      "provider_total_ms": 20686,
+      "local_first_delta_ms": 11407,
+      "local_total_ms": 30455,
+      "perceived_gap_ms": 9758,
+      "chunk_count": 1033,
+      "retrieval_backend": "in-memory",
+      "embedding_backend": "hash",
+      "reranker_backend": "bge",
+      "retrieval_stage_latency_ms": {
+        "retrieval": 216,
+        "coarse_rerank": 0,
+        "bge_rerank": 9532,
+        "context_build": 0
+      },
+      "pre_llm_total_ms": 9748,
+      "dominant_pre_llm_stage": "bge_rerank",
+      "source_count": 4,
+      "answer_preview": "1. 结论  \n怀疑集群 DNS 异常时，应从“Pod 内解析是否失败/变慢 → CoreDNS/kube-dns 组件是否健康 → Service/Endpoint 是否正确 → 节点 kubelet 的 cluster-dns/cluster-domain 配置是否一致 → 网络(CNI)与到 DNS Service 的连通性”这一链路逐段验证，快速定位是配置、组件、Service/Endpoint 还是网络问题。\n\n2. 建议步骤"
+    },
+    {
+      "index": 15,
+      "question": "请先查询 redis 状态，再查 timeout 相关日志，最后总结可能根因。",
+      "status": "ok",
+      "intent": "execute",
+      "plan_route": "tool",
+      "plan_steps": [
+        "retrieve_context",
+        "check_service_status",
+        "search_error_logs",
+        "get_incident_summary",
+        "answer_with_tool_results"
+      ],
+      "tool_actions": [
+        {
+          "tool_name": "check_service_status",
+          "tool_input": {
+            "service_name": "redis"
+          }
+        },
+        {
+          "tool_name": "search_error_logs",
+          "tool_input": {
+            "keyword": "timeout"
+          }
+        },
+        {
+          "tool_name": "get_incident_summary",
+          "tool_input": {
+            "service_name": "redis",
+            "keyword": "timeout"
+          }
+        }
+      ],
+      "answer_backend": "remote",
+      "provider_status": "success",
+      "provider_error": "",
+      "provider_attempts": 1,
+      "provider_diagnostic": "provider=success | attempts=1 | first_token=9916ms | total=28651ms",
+      "provider_first_token_ms": 9916,
+      "provider_total_ms": 28651,
+      "local_first_delta_ms": 19606,
+      "local_total_ms": 38352,
+      "perceived_gap_ms": 9690,
+      "chunk_count": 1122,
+      "retrieval_backend": "in-memory",
+      "embedding_backend": "hash",
+      "reranker_backend": "bge",
+      "retrieval_stage_latency_ms": {
+        "retrieval": 211,
+        "coarse_rerank": 0,
+        "bge_rerank": 9450,
+        "context_build": 0
+      },
+      "pre_llm_total_ms": 9661,
+      "dominant_pre_llm_stage": "bge_rerank",
+      "source_count": 3,
+      "answer_preview": "## 1) 结论\n- Redis 服务当前状态为 **running**，说明进程在，但**仍可能存在间歇性超时**（例如短暂卡顿、网络抖动、瞬时负载、或曾发生重启/崩溃后恢复）。\n- 结合配置片段可见 `timeout 0`（服务端**不主动断开空闲连接**），因此日志里的 **timeout 更可能来自客户端/中间网络设备/连接建立或请求处理超时**，而不是 Redis 的空闲连接超时机制触发。\n- 知识库中提到 **RedisSe"
+    },
+    {
+      "index": 16,
+      "question": "请先检查 mysql 连接状态，再查看慢查询线索，最后给出排查建议。",
+      "status": "ok",
+      "intent": "knowledge",
+      "plan_route": "answer",
+      "plan_steps": [
+        "retrieve_context",
+        "answer_with_context"
+      ],
+      "tool_actions": [],
+      "answer_backend": "remote",
+      "provider_status": "success",
+      "provider_error": "",
+      "provider_attempts": 1,
+      "provider_diagnostic": "provider=success | attempts=1 | first_token=2130ms | total=22925ms",
+      "provider_first_token_ms": 2130,
+      "provider_total_ms": 22925,
+      "local_first_delta_ms": 2914,
+      "local_total_ms": 23719,
+      "perceived_gap_ms": 784,
+      "chunk_count": 1106,
+      "retrieval_backend": "in-memory",
+      "embedding_backend": "hash",
+      "reranker_backend": "bge",
+      "retrieval_stage_latency_ms": {
+        "retrieval": 215,
+        "coarse_rerank": 0,
+        "bge_rerank": 559,
+        "context_build": 0
+      },
+      "pre_llm_total_ms": 774,
+      "dominant_pre_llm_stage": "bge_rerank",
+      "source_count": 2,
+      "answer_preview": "1. 结论  \n- 目前没有提供任何 MySQL 检查结果/工具输出，无法确认连接是否正常、是否存在慢查询。需要先按步骤补齐连接与慢查询证据，再进入针对性定位。  \n\n2. 建议步骤（按“连接状态 → 慢查询线索 → 综合建议”执行）  \n\nA. 先检查 MySQL 连接状态（确认“能连、连接数健康、无阻塞/雪崩”）  \n1) 基础连通性  \n- 从应用机或运维机执行：`mysql -h <host> -P <port> -u <use"
+    },
+    {
+      "index": 17,
+      "question": "请帮我判断 Redis maxmemory 配置不合理可能带来的现象与风险。",
+      "status": "ok",
+      "intent": "knowledge",
+      "plan_route": "answer",
+      "plan_steps": [
+        "retrieve_context",
+        "answer_with_context"
+      ],
+      "tool_actions": [],
+      "answer_backend": "remote",
+      "provider_status": "success",
+      "provider_error": "",
+      "provider_attempts": 1,
+      "provider_diagnostic": "provider=success | attempts=1 | first_token=1609ms | total=21461ms",
+      "provider_first_token_ms": 1609,
+      "provider_total_ms": 21461,
+      "local_first_delta_ms": 10760,
+      "local_total_ms": 30622,
+      "perceived_gap_ms": 9151,
+      "chunk_count": 1029,
+      "retrieval_backend": "in-memory",
+      "embedding_backend": "hash",
+      "reranker_backend": "bge",
+      "retrieval_stage_latency_ms": {
+        "retrieval": 211,
+        "coarse_rerank": 0,
+        "bge_rerank": 8930,
+        "context_build": 0
+      },
+      "pre_llm_total_ms": 9141,
+      "dominant_pre_llm_stage": "bge_rerank",
+      "source_count": 5,
+      "answer_preview": "### 1. 结论  \nRedis 的 `maxmemory` 配置不合理，常见会带来两类问题：  \n- **maxmemory 设得过小/策略为 `noeviction`**：一旦达到内存上限，Redis 会开始**拒绝写入**（返回 OOM），业务表现为写失败、缓存更新失败、队列/会话/计数器等功能异常。  \n- **maxmemory 设得过大或忽略系统可用内存**：Redis 进程实际 RSS 可能远高于 `used_memor"
+    },
+    {
+      "index": 18,
+      "question": "MySQL aborted connection 一般和哪些配置或网络问题有关？",
+      "status": "ok",
+      "intent": "knowledge",
+      "plan_route": "answer",
+      "plan_steps": [
+        "retrieve_context",
+        "answer_with_context"
+      ],
+      "tool_actions": [],
+      "answer_backend": "remote",
+      "provider_status": "success",
+      "provider_error": "",
+      "provider_attempts": 1,
+      "provider_diagnostic": "provider=success | attempts=1 | first_token=2469ms | total=20571ms",
+      "provider_first_token_ms": 2469,
+      "provider_total_ms": 20571,
+      "local_first_delta_ms": 6782,
+      "local_total_ms": 24895,
+      "perceived_gap_ms": 4313,
+      "chunk_count": 987,
+      "retrieval_backend": "in-memory",
+      "embedding_backend": "hash",
+      "reranker_backend": "bge",
+      "retrieval_stage_latency_ms": {
+        "retrieval": 210,
+        "coarse_rerank": 0,
+        "bge_rerank": 4092,
+        "context_build": 0
+      },
+      "pre_llm_total_ms": 4302,
+      "dominant_pre_llm_stage": "bge_rerank",
+      "source_count": 5,
+      "answer_preview": "## 1) 结论\nMySQL 日志里的 **“Aborted connection”** 通常不是单一原因，常见与以下几类问题相关：\n\n- **连接空闲/超时类配置不匹配**：客户端或中间网络（LB/NAT/防火墙）比 MySQL 更早断开，或 MySQL 因超时主动回收连接，导致 MySQL 记录“aborted”。\n- **网络链路不稳定或被中间设备强制重置**：出现 RST、超时、连接被本机软件中止等（在端口转发/隧道/代理场景更"
+    },
+    {
+      "index": 19,
+      "question": "Kubernetes 节点 NotReady 时，运维上第一轮应该看哪些点？",
+      "status": "ok",
+      "intent": "knowledge",
+      "plan_route": "answer",
+      "plan_steps": [
+        "retrieve_context",
+        "answer_with_context"
+      ],
+      "tool_actions": [],
+      "answer_backend": "remote",
+      "provider_status": "success",
+      "provider_error": "",
+      "provider_attempts": 1,
+      "provider_diagnostic": "provider=success | attempts=1 | first_token=8092ms | total=28817ms",
+      "provider_first_token_ms": 8092,
+      "provider_total_ms": 28817,
+      "local_first_delta_ms": 17760,
+      "local_total_ms": 38496,
+      "perceived_gap_ms": 9668,
+      "chunk_count": 1218,
+      "retrieval_backend": "in-memory",
+      "embedding_backend": "hash",
+      "reranker_backend": "bge",
+      "retrieval_stage_latency_ms": {
+        "retrieval": 213,
+        "coarse_rerank": 0,
+        "bge_rerank": 9444,
+        "context_build": 0
+      },
+      "pre_llm_total_ms": 9657,
+      "dominant_pre_llm_stage": "bge_rerank",
+      "source_count": 2,
+      "answer_preview": "## 1) 结论\nKubernetes 节点变为 **NotReady** 时，第一轮运维要先判定：**是“节点确实不可达/故障”还是“Kubelet/网络/容器运行时等组件异常导致心跳丢失”**。另外要确认：**Pod 不一定会立刻迁走**——通常会经历一段“容忍时间/驱逐超时”（常见默认约 5 分钟），且还可能被 **PDB、资源不足、调度约束、使用本地盘等因素**阻止迁移。\n\n---\n\n## 2) 建议步骤（第一轮排查清单，按优先"
+    },
+    {
+      "index": 20,
+      "question": "如果用户反馈接口整体变慢，但没有明显报错，建议怎样做系统级排查？",
+      "status": "ok",
+      "intent": "troubleshoot",
+      "plan_route": "diagnose",
+      "plan_steps": [
+        "retrieve_context",
+        "diagnose_with_context",
+        "answer_with_context"
+      ],
+      "tool_actions": [],
+      "answer_backend": "remote",
+      "provider_status": "success",
+      "provider_error": "",
+      "provider_attempts": 1,
+      "provider_diagnostic": "provider=success | attempts=1 | first_token=2212ms | total=19649ms",
+      "provider_first_token_ms": 2212,
+      "provider_total_ms": 19649,
+      "local_first_delta_ms": 2998,
+      "local_total_ms": 20446,
+      "perceived_gap_ms": 786,
+      "chunk_count": 944,
+      "retrieval_backend": "in-memory",
+      "embedding_backend": "hash",
+      "reranker_backend": "bge",
+      "retrieval_stage_latency_ms": {
+        "retrieval": 217,
+        "coarse_rerank": 0,
+        "bge_rerank": 559,
+        "context_build": 0
+      },
+      "pre_llm_total_ms": 776,
+      "dominant_pre_llm_stage": "bge_rerank",
+      "source_count": 2,
+      "answer_preview": "1) 结论  \n接口“整体变慢但无明显报错”通常是系统资源瓶颈（CPU/内存/磁盘/网络）、下游依赖（数据库/Redis/第三方）性能退化、线程/连接池耗尽或 GC 抖动导致的“慢而不挂”。建议按“入口→应用→依赖→基础设施”的链路做系统级排查，并优先确认 Redis 等关键依赖的进程/端口/资源占用是否异常。\n\n2) 建议步骤（可执行）  \nA. 先确认影响面与时间窗口（10 分钟内完成）  \n- 明确：是否全接口变慢还是部分接口；是"
+    }
+  ]
+}

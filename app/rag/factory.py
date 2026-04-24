@@ -18,6 +18,7 @@ def build_retriever(settings, repository, client=None, requester=None, reranker_
     return Retriever(
         repository=repository,
         top_k=settings.retrieval_top_k,
+        prefilter_limit=getattr(settings, "reranker_prefilter_limit", 6),
         vector_store=vector_store,
         embedding_provider=embedding_provider,
         reranker=reranker,
