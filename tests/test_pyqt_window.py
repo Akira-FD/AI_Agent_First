@@ -4,13 +4,217 @@ import time
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import patch
 
 from app.main import bootstrap_application
 from app.rag.ingest_pipeline import IngestPipeline
-from app.ui.main_window import MainWindow
+from app.ui.main_window import MainWindow, launch_pyqt_app
 
 
 class PyQtWindowTests(unittest.TestCase):
+    def test_launch_pyqt_app_centers_window_and_uses_large_desktop_size(self) -> None:
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PyQt6.QtWidgets import QApplication
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            app = bootstrap_application(Path(tmpdir))
+            app_instance = QApplication.instance() or QApplication([])
+
+            with patch.object(app_instance, "exec", return_value=0):
+                with patch.object(app_instance, "primaryScreen", return_value=None):
+                    with patch.object(MainWindow, "show"), patch.object(MainWindow, "center_on_screen", autospec=True) as center_on_screen:
+                        result = launch_pyqt_app(
+                            app.agent,
+                            app.settings,
+                            app.document_service,
+                            app.llm_service,
+                        )
+
+            launched_window = center_on_screen.call_args[0][0] if center_on_screen.call_args else None
+            self.assertEqual(result, 0)
+            self.assertIsInstance(launched_window, MainWindow)
+            self.assertGreaterEqual(launched_window.width(), launched_window.minimumWidth())
+            self.assertGreaterEqual(launched_window.height(), launched_window.minimumHeight())
+
+    def test_main_window_uses_stable_dashboard_shell_styles(self) -> None:
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PyQt6.QtWidgets import QApplication
+
+        app_instance = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as tmpdir:
+            app = bootstrap_application(Path(tmpdir))
+            window = MainWindow(
+                agent=app.agent,
+                settings=app.settings,
+                document_service=app.document_service,
+                llm_service=app.llm_service,
+            )
+
+            self.assertGreaterEqual(window.minimumWidth(), 1200)
+            self.assertGreaterEqual(window.minimumHeight(), 760)
+            self.assertEqual(window.send_button.objectName(), "PrimaryButton")
+            self.assertEqual(window.cancel_button.objectName(), "SecondaryButton")
+            self.assertEqual(window.retry_button.objectName(), "GhostButton")
+            self.assertEqual(window.snapshot_button.objectName(), "GhostButton")
+            self.assertEqual(window.demo_state_button.objectName(), "SecondaryButton")
+            self.assertIn("QFrame#HeroPanel", window.styleSheet())
+            self.assertIn("QFrame#SurfaceCard", window.styleSheet())
+            self.assertIn("QLabel {", window.styleSheet())
+            self.assertIn("background: transparent;", window.styleSheet())
+            app_instance.processEvents()
+
+    def test_main_window_centers_itself_within_available_screen(self) -> None:
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PyQt6.QtWidgets import QApplication
+
+        app_instance = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as tmpdir:
+            app = bootstrap_application(Path(tmpdir))
+            window = MainWindow(
+                agent=app.agent,
+                settings=app.settings,
+                document_service=app.document_service,
+                llm_service=app.llm_service,
+            )
+
+            window.resize(1440, 900)
+            window.center_on_screen()
+            app_instance.processEvents()
+
+            screen = window.screen() or app_instance.primaryScreen()
+            screen_center = screen.availableGeometry().center()
+            frame_center = window.frameGeometry().center()
+
+            self.assertLessEqual(abs(frame_center.x() - screen_center.x()), 2)
+            self.assertLessEqual(abs(frame_center.y() - screen_center.y()), 2)
+
+    def test_main_window_applies_large_startup_geometry_for_desktop_screen(self) -> None:
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PyQt6.QtWidgets import QApplication
+
+        class FakeScreen:
+            def availableGeometry(self):
+                from PyQt6.QtCore import QRect
+
+                return QRect(0, 0, 1920, 1080)
+
+        app_instance = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as tmpdir:
+            app = bootstrap_application(Path(tmpdir))
+            window = MainWindow(
+                agent=app.agent,
+                settings=app.settings,
+                document_service=app.document_service,
+                llm_service=app.llm_service,
+            )
+
+            window.apply_startup_geometry(FakeScreen())
+            app_instance.processEvents()
+
+            self.assertGreaterEqual(window.width(), 1440)
+            self.assertGreaterEqual(window.height(), 880)
+
+    def test_main_window_keeps_right_diagnostics_panel_visible_in_default_layout(self) -> None:
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PyQt6.QtWidgets import QApplication
+
+        app_instance = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as tmpdir:
+            app = bootstrap_application(Path(tmpdir))
+            window = MainWindow(
+                agent=app.agent,
+                settings=app.settings,
+                document_service=app.document_service,
+                llm_service=app.llm_service,
+            )
+            window.show()
+            app_instance.processEvents()
+
+            sizes = window.workspace_splitter.sizes()
+
+            self.assertEqual(len(sizes), 3)
+            self.assertGreater(sizes[2], 260)
+            self.assertGreaterEqual(window.workspace_splitter.widget(2).minimumWidth(), 320)
+            self.assertTrue(window.side_scroll_area.widgetResizable())
+
+    def test_main_window_renders_compact_knowledge_base_summary_instead_of_full_file_list(self) -> None:
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PyQt6.QtWidgets import QApplication
+
+        app_instance = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as tmpdir:
+            app = bootstrap_application(Path(tmpdir))
+            (app.settings.docs_dir / "redis-guide.md").write_text("# Redis\n\n## timeout\n\n检查连接池。", encoding="utf-8")
+            (app.settings.docs_dir / "mysql-tuning.md").write_text("# MySQL\n\n## 索引\n\n检查慢查询。", encoding="utf-8")
+            IngestPipeline(settings=app.settings, repository=app.repository).ingest_directory(app.settings.docs_dir)
+            window = MainWindow(
+                agent=app.agent,
+                settings=app.settings,
+                document_service=app.document_service,
+                llm_service=app.llm_service,
+            )
+            app_instance.processEvents()
+
+            self.assertLessEqual(window.workspace_splitter.widget(0).minimumWidth(), 220)
+            self.assertLessEqual(window.docs_summary_panel.maximumHeight(), 280)
+            self.assertIn("知识库摘要", window.docs_summary_panel.toPlainText())
+            self.assertIn("覆盖领域", window.docs_summary_panel.toPlainText())
+            self.assertIn("核心主题", window.docs_summary_panel.toPlainText())
+            self.assertIn("Redis", window.docs_summary_panel.toPlainText())
+            self.assertIn("MySQL", window.docs_summary_panel.toPlainText())
+            self.assertNotIn("redis-guide.md", window.docs_summary_panel.toPlainText())
+
+    def test_main_window_can_load_demo_state_and_export_snapshot(self) -> None:
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PyQt6.QtWidgets import QApplication
+
+        app_instance = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as tmpdir:
+            app = bootstrap_application(Path(tmpdir))
+            window = MainWindow(
+                agent=app.agent,
+                settings=app.settings,
+                document_service=app.document_service,
+                llm_service=app.llm_service,
+            )
+            output = Path(tmpdir) / "desktop-demo.png"
+
+            window.load_demo_state()
+            window.show()
+            app_instance.processEvents()
+
+            exported = window.export_snapshot(output)
+
+            self.assertTrue(exported)
+            self.assertTrue(output.exists())
+            self.assertGreater(output.stat().st_size, 0)
+            self.assertIn("provider=http_429", window.provider_diagnostics_panel.toPlainText())
+            self.assertIn("Redis", window.sources_panel.toPlainText())
+            self.assertIn("restart_mock_service", window.tool_logs_panel.toPlainText())
+
+    def test_main_window_can_export_current_snapshot_via_helper(self) -> None:
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PyQt6.QtWidgets import QApplication
+
+        app_instance = QApplication.instance() or QApplication([])
+        with tempfile.TemporaryDirectory() as tmpdir:
+            app = bootstrap_application(Path(tmpdir))
+            window = MainWindow(
+                agent=app.agent,
+                settings=app.settings,
+                document_service=app.document_service,
+                llm_service=app.llm_service,
+            )
+            output = Path(tmpdir) / "manual-ui-export.png"
+            window.show()
+            app_instance.processEvents()
+
+            exported = window.export_current_snapshot(output)
+
+            self.assertEqual(exported, output)
+            self.assertTrue(output.exists())
+            self.assertGreater(output.stat().st_size, 0)
+
     def test_main_window_can_send_message_and_render_response(self) -> None:
         os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
         from PyQt6.QtWidgets import QApplication

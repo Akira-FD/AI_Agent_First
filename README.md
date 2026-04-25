@@ -2,15 +2,15 @@
 
 本仓库是基于两份架构文档生成的第一版本地 MVP 骨架代码。
 
-当前骨架已包含：
+当前实现已包含：
 
 - `Markdown -> chunk -> SQLite` 的最小文档入库链路
 - 基于关键词重叠的本地检索与上下文组装
 - 一版可运行的 `MVPAgent`，支持知识问答与模拟工具调用
-- recent messages + summary 的会话记忆服务，并将会话摘要持久化到 SQLite
+- recent messages + summary 的会话记忆服务，并将会话摘要持久化到 SQLite，同时参与回答上下文构造
 - 已接入 OpenAI 兼容协议的大语言模型调用链路，未配置时自动回退到本地规则回答
 - 已支持 OpenAI 兼容协议下的 SSE 流式输出，桌面端可优先使用 provider 级流式渲染
-- 桌面端 UI 的占位骨架
+- 桌面端 UI，支持知识库摘要、会话摘要、来源引用、工具日志、Provider 诊断与阶段耗时展示
 - `scripts/ingest_docs.py` 与 `scripts/run_demo.py` 两个脚本入口
 
 项目当前架构、能力边界与真实测试实例见：
@@ -67,21 +67,25 @@ python scripts/validate_runtime.py
 
 该脚本会输出当前文档目录、SQLite、检索后端、LLM backend、远程模型配置状态，以及是否支持 SSE 流式输出。
 
-## Milvus 向量检索
+## Milvus / Milvus Lite 向量检索
 
-项目现在已经支持“可选启用”的 Milvus 向量检索骨架：
+项目现在已经支持“可选启用”的 Milvus / Milvus Lite 向量检索：
 
 ```bash
 set AI_AGENT_FIRST_MILVUS_ENABLED=true
 set AI_AGENT_FIRST_MILVUS_URI=http://localhost:19530
 set AI_AGENT_FIRST_MILVUS_COLLECTION=ai_agent_first_chunks
 set AI_AGENT_FIRST_MILVUS_DIMENSION=96
+set AI_AGENT_FIRST_RETRIEVAL_BACKEND=milvus-lite
+set AI_AGENT_FIRST_MILVUS_LITE_PATH=data/milvus/ai_agent_first_milvus_lite.db
 ```
 
 说明：
 
 - 未启用 Milvus，或当前环境未安装 `pymilvus`，或 Milvus 服务不可达时，系统会自动回退到当前内存检索实现。
+- 单机环境推荐优先使用 `milvus-lite`，无需本地 Docker Milvus。
 - 启用后，`scripts/ingest_docs.py` 会在写入 SQLite 元数据的同时尝试写入 Milvus collection。
+- 桌面端启动时也会复用当前激活的 `vector_store` 同步文档，避免 SQLite 与向量索引状态不一致。
 - 当前第一版接入使用本地 hash dense embedding 生成固定维度向量，后续可以继续替换为真实 embedding 模型。
 
 ## 桌面端
@@ -98,6 +102,6 @@ python -m pip install PyQt6
 python scripts/run_desktop.py
 ```
 
-界面包含左侧文档列表、中间聊天区、右侧来源引用和工具日志区。默认会读取 `data/docs/` 下的 Markdown 文档并入库。
+界面包含左侧知识库摘要、中间聊天区、右侧来源引用、工具日志、Provider 诊断、RAG 阶段耗时和当前会话摘要。默认会读取 `data/docs/` 下的 Markdown 文档并入库。
 
 如果已经配置真实模型，桌面端顶部会显示当前后端，例如 `openai-compatible:gpt-4.1-mini`；未配置时会显示本地 fallback。

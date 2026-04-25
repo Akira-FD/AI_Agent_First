@@ -32,7 +32,7 @@ def bootstrap_application(root: Path | None = None) -> BootstrappedApplication:
     workspace_root = (root or Path(__file__).resolve().parents[1]).resolve()
     settings = AppSettings.from_root(workspace_root)
     repository = SQLiteRepository(settings.sqlite_path)
-    session_service = SessionService()
+    session_service = SessionService(recent_limit=settings.recent_message_limit)
     document_service = DocumentService(repository)
     llm_service = build_llm_service(settings)
     tool_registry = ToolRegistry.with_defaults()

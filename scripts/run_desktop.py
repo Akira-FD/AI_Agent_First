@@ -14,7 +14,11 @@ from app.ui.main_window import launch_pyqt_app
 
 def main() -> None:
     app = bootstrap_application(ROOT)
-    IngestPipeline(settings=app.settings, repository=app.repository).ingest_directory(app.settings.docs_dir)
+    IngestPipeline(
+        settings=app.settings,
+        repository=app.repository,
+        vector_indexer=app.vector_store,
+    ).ingest_directory(app.settings.docs_dir)
     launch_pyqt_app(app.agent, app.settings, app.document_service, app.llm_service)
 
 

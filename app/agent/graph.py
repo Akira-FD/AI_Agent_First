@@ -76,6 +76,7 @@ class MVPAgent:
 
     def stream(self, session_id: str, user_query: str, tool_actions: list[ToolAction] | None = None):
         state = self._prepare_state(session_id=session_id, user_query=user_query, tool_actions=tool_actions)
+        answer_context = self._build_answer_context(session_id=session_id, state=state)
         final_result = None
         backend_label = ""
         if hasattr(self.llm_service, "backend_label"):
@@ -83,7 +84,7 @@ class MVPAgent:
         if hasattr(self.llm_service, "stream_answer_result") and backend_label.startswith("openai-compatible:"):
             for event in self.llm_service.stream_answer_result(
                 user_query=user_query,
-                context_text=state.context_text,
+                context_text=answer_context,
                 tool_message=state.tool_message or None,
             ):
                 if event.type == "delta":
@@ -95,7 +96,7 @@ class MVPAgent:
             answer_result = build_answer(
                 llm_service=self.llm_service,
                 user_query=user_query,
-                context_text=state.context_text,
+                context_text=answer_context,
                 tool_message=state.tool_message or None,
             )
             final_result = answer_result
@@ -109,10 +110,11 @@ class MVPAgent:
 
     def _run_internal(self, session_id: str, user_query: str, tool_actions: list[ToolAction] | None = None) -> AgentResponse:
         state = self._prepare_state(session_id=session_id, user_query=user_query, tool_actions=tool_actions)
+        answer_context = self._build_answer_context(session_id=session_id, state=state)
         answer_result = build_answer(
             llm_service=self.llm_service,
             user_query=user_query,
-            context_text=state.context_text,
+            context_text=answer_context,
             tool_message=state.tool_message or None,
         )
         return self._finalize_state(
@@ -260,6 +262,29 @@ class MVPAgent:
             status=status,
         )
         return result
+
+    def _build_answer_context(self, session_id: str, state: AgentState) -> str:
+        parts: list[str] = []
+        summary = self.session_service.get_summary(session_id).strip()
+        if summary:
+            parts.append(f"会话摘要：\n{summary}")
+
+        recent_messages = self.session_service.get_recent_messages(session_id)
+        if recent_messages:
+            formatted_messages = []
+            for message in recent_messages[-self.session_service.recent_limit :]:
+                role = "用户" if message.get("role") == "user" else "助手"
+                content = str(message.get("content", "")).strip()
+                if content:
+                    formatted_messages.append(f"{role}：{content}")
+            if formatted_messages:
+                parts.append("最近对话：\n" + "\n".join(formatted_messages))
+
+        context_text = state.context_text.strip()
+        if context_text:
+            parts.append(f"知识库上下文：\n{context_text}")
+
+        return "\n\n".join(parts).strip()
 
 
 def _append_tool_message(existing: str, message: str) -> str:
