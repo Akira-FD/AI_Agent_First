@@ -28,14 +28,14 @@ class BootstrappedApplication:
     ui_shell: DesktopAppShell
 
 
-def bootstrap_application(root: Path | None = None) -> BootstrappedApplication:
+def bootstrap_application(root: Path | None = None, *, enable_real_tools: bool = False) -> BootstrappedApplication:
     workspace_root = (root or Path(__file__).resolve().parents[1]).resolve()
     settings = AppSettings.from_root(workspace_root)
     repository = SQLiteRepository(settings.sqlite_path)
     session_service = SessionService(recent_limit=settings.recent_message_limit)
     document_service = DocumentService(repository)
     llm_service = build_llm_service(settings)
-    tool_registry = ToolRegistry.with_defaults()
+    tool_registry = ToolRegistry.with_defaults(settings=settings if enable_real_tools else None)
     retriever = build_retriever(settings=settings, repository=repository)
     vector_store = retriever.vector_store
     agent = MVPAgent(
@@ -72,7 +72,7 @@ def main() -> None:
     parser.add_argument("--ui", action="store_true", help="Launch the PyQt6 desktop UI.")
     args = parser.parse_args()
 
-    app = bootstrap_application()
+    app = bootstrap_application(enable_real_tools=args.ui)
     if args.ui:
         launch_pyqt_app(app.agent, app.settings, app.document_service, app.llm_service)
         return

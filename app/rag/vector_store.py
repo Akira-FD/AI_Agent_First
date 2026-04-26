@@ -6,7 +6,7 @@ import json
 import urllib.request
 
 from app.models.document import DocumentChunk
-from app.rag.embedding_service import EmbeddingProvider, HashEmbeddingProvider, SimpleEmbeddingService
+from app.rag.embedding_service import EmbeddingProvider, HashEmbeddingProvider
 
 
 @dataclass
@@ -21,6 +21,9 @@ class VectorStore:
 
     def upsert_chunks(self, chunks: Iterable[DocumentChunk]) -> int:
         raise NotImplementedError
+
+    def finalize_ingest(self) -> None:
+        return None
 
     def search(self, query: str, chunks: Iterable[DocumentChunk], top_k: int) -> list[SearchMatch]:
         raise NotImplementedError
@@ -49,6 +52,10 @@ class InMemoryVectorStore(VectorStore):
 
 
 class MilvusVectorStore(VectorStore):
+    PRIMARY_FIELD_NAME = "chunk_id"
+    VECTOR_FIELD_NAME = "vector"
+    PRIMARY_FIELD_MAX_LENGTH = 512
+
     def __init__(
         self,
         client,
@@ -72,13 +79,47 @@ class MilvusVectorStore(VectorStore):
 
     def _ensure_collection(self) -> None:
         if hasattr(self.client, "has_collection") and self.client.has_collection(collection_name=self.collection_name):
-            return
+            if self._collection_schema_is_compatible():
+                return
+            self._recreate_empty_incompatible_collection()
         if hasattr(self.client, "create_collection"):
             self.client.create_collection(
                 collection_name=self.collection_name,
                 dimension=self.dimension,
+                primary_field_name=self.PRIMARY_FIELD_NAME,
+                id_type="string",
+                vector_field_name=self.VECTOR_FIELD_NAME,
                 metric_type="COSINE",
+                auto_id=False,
+                max_length=self.PRIMARY_FIELD_MAX_LENGTH,
             )
+
+    def _collection_schema_is_compatible(self) -> bool:
+        if not hasattr(self.client, "describe_collection"):
+            return True
+        schema = self.client.describe_collection(self.collection_name)
+        primary_field = next((field for field in schema.get("fields", []) if field.get("is_primary")), None)
+        if primary_field is None:
+            return False
+        primary_name = str(primary_field.get("name", "")).strip().lower()
+        primary_type = str(primary_field.get("type", "")).strip().lower()
+        vector_field_present = any(
+            str(field.get("name", "")).strip().lower() == self.VECTOR_FIELD_NAME for field in schema.get("fields", [])
+        )
+        return (
+            primary_name == self.PRIMARY_FIELD_NAME
+            and vector_field_present
+            and any(token in primary_type for token in ("string", "varchar"))
+        )
+
+    def _recreate_empty_incompatible_collection(self) -> None:
+        if not hasattr(self.client, "get_collection_stats") or not hasattr(self.client, "drop_collection"):
+            return
+        stats = self.client.get_collection_stats(self.collection_name)
+        row_count = int(stats.get("row_count", 0) or 0)
+        if row_count != 0:
+            return
+        self.client.drop_collection(self.collection_name)
 
     def upsert_chunks(self, chunks: Iterable[DocumentChunk]) -> int:
         payload = []
@@ -101,8 +142,16 @@ class MilvusVectorStore(VectorStore):
         self.client.upsert(collection_name=self.collection_name, data=payload)
         return len(payload)
 
+    def finalize_ingest(self) -> None:
+        if hasattr(self.client, "flush"):
+            self.client.flush(self.collection_name)
+        if hasattr(self.client, "load_collection"):
+            self.client.load_collection(self.collection_name)
+
     def search(self, query: str, chunks: Iterable[DocumentChunk], top_k: int) -> list[SearchMatch]:
         chunk_by_id = {chunk.chunk_id: chunk for chunk in chunks}
+        if hasattr(self.client, "load_collection"):
+            self.client.load_collection(self.collection_name)
         results = self.client.search(
             collection_name=self.collection_name,
             data=[self.embedding_provider.embed_dense(query)],

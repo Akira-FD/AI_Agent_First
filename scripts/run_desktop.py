@@ -13,7 +13,7 @@ from app.ui.main_window import launch_pyqt_app
 
 
 def main() -> None:
-    app = bootstrap_application(ROOT)
+    app = bootstrap_application(ROOT, enable_real_tools=True)
     IngestPipeline(
         settings=app.settings,
         repository=app.repository,

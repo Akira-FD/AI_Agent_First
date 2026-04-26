@@ -25,10 +25,14 @@ SAMPLE_DOC = """# Redis 故障排查
 class RecordingVectorIndexer:
     def __init__(self) -> None:
         self.indexed_chunks = []
+        self.finalized = 0
 
     def upsert_chunks(self, chunks):
         self.indexed_chunks.extend(chunks)
         return len(chunks)
+
+    def finalize_ingest(self) -> None:
+        self.finalized += 1
 
 
 class IngestPipelineTests(unittest.TestCase):
@@ -113,6 +117,7 @@ class IngestPipelineTests(unittest.TestCase):
 
             self.assertEqual(result.indexed_chunk_count, result.chunk_count)
             self.assertEqual(len(indexer.indexed_chunks), result.chunk_count)
+            self.assertEqual(indexer.finalized, 1)
 
 
 if __name__ == "__main__":

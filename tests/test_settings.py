@@ -159,13 +159,45 @@ class SettingsTests(unittest.TestCase):
         os.environ["AI_AGENT_FIRST_BGE_RERANKER_MODEL"] = "BAAI/bge-reranker-v2-m3"
         os.environ["AI_AGENT_FIRST_RERANKER_PREFILTER_LIMIT"] = "6"
         try:
-            settings = AppSettings.from_root(Path.cwd())
-            self.assertEqual(settings.retrieval_backend, "milvus-lite")
-            self.assertEqual(settings.embedding_backend, "hash")
-            self.assertEqual(settings.remote_retrieval_url, "http://127.0.0.1:9000/retrieve")
-            self.assertEqual(settings.reranker_backend, "bge")
-            self.assertEqual(settings.bge_reranker_model, "BAAI/bge-reranker-v2-m3")
-            self.assertEqual(settings.reranker_prefilter_limit, 6)
+            with tempfile.TemporaryDirectory() as tmpdir:
+                settings = AppSettings.from_root(Path(tmpdir))
+                self.assertEqual(settings.retrieval_backend, "milvus-lite")
+                self.assertEqual(settings.embedding_backend, "hash")
+                self.assertEqual(settings.remote_retrieval_url, "http://127.0.0.1:9000/retrieve")
+                self.assertEqual(settings.reranker_backend, "bge")
+                self.assertEqual(settings.bge_reranker_model, "BAAI/bge-reranker-v2-m3")
+                self.assertEqual(settings.reranker_prefilter_limit, 6)
+        finally:
+            for key, value in previous.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
+    def test_reads_bge_latency_tuning_configuration_from_environment(self) -> None:
+        previous = {
+            "AI_AGENT_FIRST_BGE_RERANKER_TEXT_MAX_CHARS": os.environ.get("AI_AGENT_FIRST_BGE_RERANKER_TEXT_MAX_CHARS"),
+            "AI_AGENT_FIRST_BGE_RERANKER_BATCH_SIZE": os.environ.get("AI_AGENT_FIRST_BGE_RERANKER_BATCH_SIZE"),
+            "AI_AGENT_FIRST_BGE_RERANKER_QUERY_MAX_LENGTH": os.environ.get("AI_AGENT_FIRST_BGE_RERANKER_QUERY_MAX_LENGTH"),
+            "AI_AGENT_FIRST_BGE_RERANKER_MAX_LENGTH": os.environ.get("AI_AGENT_FIRST_BGE_RERANKER_MAX_LENGTH"),
+            "AI_AGENT_FIRST_BGE_RERANKER_USE_FP16": os.environ.get("AI_AGENT_FIRST_BGE_RERANKER_USE_FP16"),
+            "AI_AGENT_FIRST_BGE_RERANKER_DEVICES": os.environ.get("AI_AGENT_FIRST_BGE_RERANKER_DEVICES"),
+        }
+        os.environ["AI_AGENT_FIRST_BGE_RERANKER_TEXT_MAX_CHARS"] = "900"
+        os.environ["AI_AGENT_FIRST_BGE_RERANKER_BATCH_SIZE"] = "12"
+        os.environ["AI_AGENT_FIRST_BGE_RERANKER_QUERY_MAX_LENGTH"] = "48"
+        os.environ["AI_AGENT_FIRST_BGE_RERANKER_MAX_LENGTH"] = "160"
+        os.environ["AI_AGENT_FIRST_BGE_RERANKER_USE_FP16"] = "false"
+        os.environ["AI_AGENT_FIRST_BGE_RERANKER_DEVICES"] = "cpu"
+        try:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                settings = AppSettings.from_root(Path(tmpdir))
+                self.assertEqual(settings.bge_reranker_text_max_chars, 900)
+                self.assertEqual(settings.bge_reranker_batch_size, 12)
+                self.assertEqual(settings.bge_reranker_query_max_length, 48)
+                self.assertEqual(settings.bge_reranker_max_length, 160)
+                self.assertFalse(settings.bge_reranker_use_fp16)
+                self.assertEqual(settings.bge_reranker_devices, "cpu")
         finally:
             for key, value in previous.items():
                 if value is None:

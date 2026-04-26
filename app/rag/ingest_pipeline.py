@@ -60,6 +60,8 @@ class IngestPipeline:
                 indexed_chunk_count += self.vector_indexer.upsert_chunks(chunks)
             document_count += 1
             chunk_count += len(chunks)
+        if self.vector_indexer is not None and hasattr(self.vector_indexer, "finalize_ingest"):
+            self.vector_indexer.finalize_ingest()
         return IngestResult(
             document_count=document_count,
             chunk_count=chunk_count,

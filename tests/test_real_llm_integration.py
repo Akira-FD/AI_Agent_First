@@ -155,6 +155,31 @@ class RealLLMIntegrationTests(unittest.TestCase):
         self.assertEqual(stream_requester.calls[0]["url"], "https://example.com/v1/chat/completions")
         self.assertTrue(stream_requester.calls[0]["payload"]["stream"])
 
+    def test_openai_compatible_service_compacts_large_context_before_request(self) -> None:
+        requester = FakeRequester()
+        service = OpenAICompatibleLLMService(
+            api_key="test-key",
+            base_url="https://example.com/v1",
+            model="demo-model",
+            requester=requester,
+            context_max_chars=120,
+        )
+
+        service.generate_answer(
+            user_query="Redis OOM 时先看什么？",
+            context_text=(
+                "知识库上下文：\n"
+                "[Redis > Provenance] GitHub Provenance should not be forwarded verbatim.\n"
+                "[Redis > Timeout] 先检查 maxmemory、slowlog、连接数和内存碎片率。\n"
+                "[Redis > Timeout] " + ("timeout line " * 40)
+            ),
+        )
+
+        prompt_text = requester.calls[0]["payload"]["messages"][1]["content"]
+        self.assertLessEqual(len(prompt_text), 420)
+        self.assertIn("maxmemory", prompt_text)
+        self.assertNotIn("GitHub Provenance", prompt_text)
+
     def test_openai_compatible_service_exposes_stream_timing_telemetry(self) -> None:
         stream_requester = FakeStreamRequester()
         service = OpenAICompatibleLLMService(
