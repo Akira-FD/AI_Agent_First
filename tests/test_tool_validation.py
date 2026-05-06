@@ -33,8 +33,10 @@ class ToolValidationTests(unittest.TestCase):
 
         self.assertFalse(result.success)
         self.assertEqual(result.code, "VALIDATION_ERROR")
+        self.assertEqual(result.error_code, "VALIDATION_ERROR")
         self.assertTrue(result.retryable)
         self.assertEqual(result.data["missing_fields"], ["service_name"])
+        self.assertIn("missing_fields", result.diagnostics)
 
 
 if __name__ == "__main__":

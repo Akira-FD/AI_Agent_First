@@ -2,6 +2,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from langgraph.graph.state import CompiledStateGraph
+
 from app.agent.graph import MVPAgent
 from app.agent.state import AgentState
 from app.agent.nodes.tool_router_node import ToolAction, route_tools
@@ -494,6 +496,32 @@ class ToolsAndAgentTests(unittest.TestCase):
             ["check_service_status", "search_error_logs"],
         )
         self.assertEqual(tracking_tool.calls, [{"keyword": "timeout"}])
+
+    def test_agent_builds_real_langgraph_state_graph(self) -> None:
+        self.assertTrue(hasattr(self.agent, "_compiled_graph"))
+        self.assertIsInstance(self.agent._compiled_graph, CompiledStateGraph)
+        self.assertTrue(callable(getattr(self.agent._compiled_graph, "invoke", None)))
+
+    def test_agent_exposes_langgraph_definition_with_expected_nodes(self) -> None:
+        graph = self.agent._graph
+
+        expected_nodes = {
+            "load_memory",
+            "persist_user_message",
+            "intent",
+            "retrieve",
+            "plan",
+            "tool_router",
+            "tool_exec",
+            "observation",
+            "recovery",
+            "replan",
+            "answer",
+            "persist_assistant_message",
+            "summary",
+        }
+
+        self.assertTrue(expected_nodes.issubset(set(graph.nodes.keys())))
 
 
 if __name__ == "__main__":

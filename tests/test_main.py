@@ -36,6 +36,21 @@ class MainBootstrapTests(unittest.TestCase):
                 else:
                     os.environ[key] = value
 
+    def test_bootstrap_applies_recent_message_limit_from_settings(self) -> None:
+        previous = os.environ.get("AI_AGENT_FIRST_RECENT_MESSAGE_LIMIT")
+        os.environ["AI_AGENT_FIRST_RECENT_MESSAGE_LIMIT"] = "3"
+        try:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                app = bootstrap_application(Path(tmpdir))
+
+                self.assertEqual(app.settings.recent_message_limit, 3)
+                self.assertEqual(app.session_service.recent_limit, 3)
+        finally:
+            if previous is None:
+                os.environ.pop("AI_AGENT_FIRST_RECENT_MESSAGE_LIMIT", None)
+            else:
+                os.environ["AI_AGENT_FIRST_RECENT_MESSAGE_LIMIT"] = previous
+
 
 if __name__ == "__main__":
     unittest.main()

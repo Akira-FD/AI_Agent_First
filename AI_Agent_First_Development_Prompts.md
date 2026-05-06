@@ -1,7 +1,7 @@
 # AI_Agent_First 项目执行提示词清单
 
 > 用途：基于 [AI_Agent_First_MVP_Architecture.md](C:\Users\JXW\Documents\Codex\2026-04-22-codex-skills-github-skills\AI_Agent_First\AI_Agent_First_MVP_Architecture.md) 的方案，为后续在 `AI_Agent_First` 目录中逐步开发项目提供一套可直接复制到 Codex 终端的执行提示词。  
-> 原则：优先使用已安装的 6 个开发用 skill，把“规划 -> 实现 -> 调试 -> CI -> Review”完整串起来。
+> 原则：优先使用已安装的开发类 skill，并在桌面端 UI 优化阶段配合新增的 4 个设计/截图 skill，把“规划 -> 实现 -> 调试 -> 验收 -> Review”完整串起来。
 
 ---
 
@@ -30,7 +30,7 @@
 项目目录：C:\Users\JXW\Documents\Codex\2026-04-22-codex-skills-github-skills\AI_Agent_First
 参考文档：C:\Users\JXW\Documents\Codex\2026-04-22-codex-skills-github-skills\AI_Agent_First\AI_Agent_First_MVP_Architecture.md
 任务：为 AI_Agent_First 单机 MVP 项目生成第一阶段开发计划。
-要求：结合架构文档，拆解项目骨架、RAG、LangGraph Agent、Redis 会话、PyQt6 UI、SQLite 持久化的开发顺序；输出范围、步骤、测试验证和风险点，不要直接修改代码。
+要求：结合架构文档，拆解项目骨架、RAG、自定义 Agent 编排、会话记忆、PyQt6 UI、SQLite 持久化的开发顺序；输出范围、步骤、测试验证和风险点，不要直接修改代码。
 ```
 
 ### 2.2 搭建项目骨架
@@ -50,7 +50,7 @@
 项目目录：C:\Users\JXW\Documents\Codex\2026-04-22-codex-skills-github-skills\AI_Agent_First
 参考文档：C:\Users\JXW\Documents\Codex\2026-04-22-codex-skills-github-skills\AI_Agent_First\AI_Agent_First_MVP_Architecture.md
 任务：实现 settings.py、基础配置加载和项目启动入口。
-要求：先为配置加载写失败测试，再实现最小可运行版本；确保后续可以接入 Redis、SQLite、Milvus 和模型配置。
+要求：先为配置加载写失败测试，再实现最小可运行版本；确保后续可以接入 SQLite、Milvus / Milvus Lite 和模型配置，并为后续 Redis 扩展预留接口。
 ```
 
 ---
@@ -102,13 +102,13 @@
 
 ## 4. Agent 开发阶段
 
-### 4.1 设计 LangGraph 状态与节点
+### 4.1 设计 Agent 状态与节点
 
 ```text
 请使用 create-plan。
 项目目录：C:\Users\JXW\Documents\Codex\2026-04-22-codex-skills-github-skills\AI_Agent_First
 参考文档：C:\Users\JXW\Documents\Codex\2026-04-22-codex-skills-github-skills\AI_Agent_First\AI_Agent_First_MVP_Architecture.md
-任务：为 LangGraph Agent 设计第一版状态对象和节点交互流程。
+任务：为当前自定义 Agent 编排设计第一版状态对象和节点交互流程。
 要求：结合架构文档中的 AgentState、intent/retrieve/plan/tool/answer/summary 节点，输出精简但可执行的开发计划，不要直接修改代码。
 ```
 
@@ -157,7 +157,7 @@
 
 ## 5. 会话记忆与持久化阶段
 
-### 5.1 实现 Redis 会话记忆
+### 5.1 实现会话记忆
 
 ```text
 请使用 test-driven-development。
@@ -184,7 +184,7 @@
 项目目录：C:\Users\JXW\Documents\Codex\2026-04-22-codex-skills-github-skills\AI_Agent_First
 参考文档：C:\Users\JXW\Documents\Codex\2026-04-22-codex-skills-github-skills\AI_Agent_First\AI_Agent_First_MVP_Architecture.md
 问题现象：多轮对话后响应变慢，token 消耗过高。
-已知信息：recent messages 已接入 Redis，但摘要压缩策略还不稳定。
+已知信息：recent messages 已接入 SessionService，但摘要压缩策略还不稳定。
 要求：从消息保留策略、摘要粒度、context 拼接方式三个角度系统分析，并提出可执行的优化方案。
 ```
 
@@ -231,6 +231,72 @@
 问题现象：发送问题后 UI 会卡住，工具执行期间界面无响应。
 已知信息：LLM 调用、检索和工具执行目前可能运行在主线程。
 要求：排查线程模型、signal/slot 使用、后台任务分发方式，并给出修复方案。
+```
+
+### 6.5 使用桌面端 UI / 设计辅助 Skill
+
+这 4 个 skill 适合在 Codex 桌面端 Windows 环境下配合当前 PyQt 项目使用：
+
+- `figma-create-design-system-rules`：先沉淀当前项目的桌面端设计规则，统一字体、间距、色彩、圆角、卡片层级和状态色。
+- `figma-generate-design`：基于已有页面结构，生成更完整的桌面端界面方案或局部改版方案。
+- `figma-implement-design`：把 Figma 中确认过的界面方案转成项目里的实际 UI 代码。
+- `screenshot`：对当前客户端界面做验收截图，检查布局抖动、滚动区溢出、面板对齐和消息渲染效果。
+
+推荐调用顺序：
+
+1. 先用 `figma-create-design-system-rules` 固定桌面端风格规则。
+2. 再用 `figma-generate-design` 生成页面或局部模块方案。
+3. 方案确认后，用 `figma-implement-design` 落到 PyQt 界面实现。
+4. 每次较大改动后，用 `screenshot` 做前后对比验收。
+
+使用规范：
+
+- 优先服务当前桌面端 PyQt 客户端，不要把重点偏到 Web 或移动端。
+- 先解决窗口尺寸抖动、长回答导致布局变化、消息区滚动体验，再做装饰性美化。
+- 优先优化聊天主区、来源区、工具日志区、会话摘要区和遥测信息区的可读性。
+- 没有明确收益时，不额外引入图片化素材，优先使用代码可维护的配色、字体、边框和布局方案。
+- 每次 UI 大改前后都建议保留截图，重点观察窗口是否跳变、控件是否被挤压、流式输出时是否稳定。
+
+可直接复制的提示词模板如下。
+
+#### 6.5.1 先建立桌面端设计规则
+
+```text
+请使用 figma-create-design-system-rules。
+项目目录：C:\Users\JXW\Documents\Codex\2026-04-22-codex-skills-github-skills\AI_Agent_First
+参考文档：C:\Users\JXW\Documents\Codex\2026-04-22-codex-skills-github-skills\AI_Agent_First\AI_Agent_First_MVP_Architecture.md
+任务：为当前 AI_Agent_First 桌面端客户端生成一套可执行的设计系统规则。
+要求：面向 Codex Desktop Windows + PyQt 聊天客户端；重点约束字体层级、消息气泡、侧栏、卡片、按钮、日志面板、状态标签、遥测信息和颜色变量；优先保证长回答场景下布局稳定，不直接修改业务代码。
+```
+
+#### 6.5.2 生成桌面端界面方案
+
+```text
+请使用 figma-generate-design。
+项目目录：C:\Users\JXW\Documents\Codex\2026-04-22-codex-skills-github-skills\AI_Agent_First
+参考文档：C:\Users\JXW\Documents\Codex\2026-04-22-codex-skills-github-skills\AI_Agent_First\AI_Agent_First_MVP_Architecture.md
+任务：为当前桌面端客户端生成一版更完整的 UI 方案。
+要求：保留消息区、来源区、工具日志区、会话摘要区、输入区和状态栏；突出 SSE 流式输出、首包延迟、总耗时和 provider 诊断信息的展示；界面偏桌面工作台风格，不要做成移动端卡片流。
+```
+
+#### 6.5.3 把设计方案落成代码
+
+```text
+请使用 figma-implement-design。
+项目目录：C:\Users\JXW\Documents\Codex\2026-04-22-codex-skills-github-skills\AI_Agent_First
+参考文档：C:\Users\JXW\Documents\Codex\2026-04-22-codex-skills-github-skills\AI_Agent_First\AI_Agent_First_MVP_Architecture.md
+任务：根据确认后的 Figma 方案优化当前 PyQt 客户端界面实现。
+要求：尽量复用现有窗口结构与组件职责，不重写无关模块；重点修正布局抖动、空间分配、状态信息展示和消息可读性；改完后说明具体修改点与验证方式。
+```
+
+#### 6.5.4 用截图进行界面验收
+
+```text
+请使用 screenshot。
+项目目录：C:\Users\JXW\Documents\Codex\2026-04-22-codex-skills-github-skills\AI_Agent_First
+参考文档：C:\Users\JXW\Documents\Codex\2026-04-22-codex-skills-github-skills\AI_Agent_First\AI_Agent_First_MVP_Architecture.md
+任务：对当前桌面端客户端做界面验收截图并给出问题清单。
+要求：重点检查窗口尺寸是否随回答变化、消息区是否溢出、面板是否对齐、滚动是否自然、遥测区和工具日志区是否清晰；输出截图观察结论和下一步修正建议，不改业务逻辑。
 ```
 
 ---

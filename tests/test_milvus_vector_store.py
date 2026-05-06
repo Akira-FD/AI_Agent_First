@@ -11,13 +11,76 @@ class FakeMilvusClient:
         self.created = []
         self.inserted = []
         self.search_requests = []
+        self.collection_schemas: dict[str, dict] = {}
+        self.collection_stats: dict[str, dict] = {}
+        self.dropped = []
+        self.flushed = []
+        self.loaded = []
 
     def has_collection(self, collection_name: str) -> bool:
         return collection_name in self.collections
 
-    def create_collection(self, collection_name: str, dimension: int, metric_type: str = "COSINE") -> None:
-        self.created.append((collection_name, dimension, metric_type))
+    def create_collection(
+        self,
+        collection_name: str,
+        dimension: int,
+        primary_field_name: str = "id",
+        id_type: str = "int",
+        vector_field_name: str = "vector",
+        metric_type: str = "COSINE",
+        auto_id: bool = False,
+        max_length: int | None = None,
+    ) -> None:
+        self.created.append(
+            {
+                "collection_name": collection_name,
+                "dimension": dimension,
+                "primary_field_name": primary_field_name,
+                "id_type": id_type,
+                "vector_field_name": vector_field_name,
+                "metric_type": metric_type,
+                "auto_id": auto_id,
+                "max_length": max_length,
+            }
+        )
         self.collections[collection_name] = []
+        self.collection_schemas[collection_name] = {
+            "collection_name": collection_name,
+            "auto_id": auto_id,
+            "fields": [
+                {
+                    "name": primary_field_name,
+                    "type": id_type,
+                    "is_primary": True,
+                    "params": {"max_length": max_length} if max_length is not None else {},
+                },
+                {
+                    "name": vector_field_name,
+                    "type": "float_vector",
+                    "is_primary": False,
+                },
+            ],
+        }
+        self.collection_stats[collection_name] = {"row_count": 0}
+
+    def describe_collection(self, collection_name: str) -> dict:
+        return self.collection_schemas[collection_name]
+
+    def get_collection_stats(self, collection_name: str) -> dict:
+        return self.collection_stats.get(collection_name, {"row_count": len(self.collections.get(collection_name, []))})
+
+    def drop_collection(self, collection_name: str) -> None:
+        self.dropped.append(collection_name)
+        self.collections.pop(collection_name, None)
+        self.collection_schemas.pop(collection_name, None)
+        self.collection_stats.pop(collection_name, None)
+
+    def flush(self, collection_name: str) -> None:
+        self.flushed.append(collection_name)
+        self.collection_stats[collection_name] = {"row_count": len(self.collections.get(collection_name, []))}
+
+    def load_collection(self, collection_name: str) -> None:
+        self.loaded.append(collection_name)
 
     def upsert(self, collection_name: str, data: list[dict]) -> None:
         self.inserted.extend(data)
@@ -86,9 +149,24 @@ class MilvusVectorStoreTests(unittest.TestCase):
         matches = store.search("Redis OOM 怎么排查", chunks=[chunk], top_k=1)
 
         self.assertEqual(indexed_count, 1)
-        self.assertEqual(client.created, [("ai_agent_first_chunks", 12, "COSINE")])
+        self.assertEqual(
+            client.created,
+            [
+                {
+                    "collection_name": "ai_agent_first_chunks",
+                    "dimension": 12,
+                    "primary_field_name": "chunk_id",
+                    "id_type": "string",
+                    "vector_field_name": "vector",
+                    "metric_type": "COSINE",
+                    "auto_id": False,
+                    "max_length": 512,
+                }
+            ],
+        )
         self.assertEqual(client.inserted[0]["chunk_id"], "chunk-1")
         self.assertEqual(len(client.inserted[0]["vector"]), 12)
+        self.assertEqual(client.loaded, ["ai_agent_first_chunks"])
         self.assertEqual(matches[0].chunk.chunk_id, "chunk-1")
         self.assertGreater(matches[0].score, 0)
 
@@ -120,6 +198,56 @@ class MilvusVectorStoreTests(unittest.TestCase):
 
         self.assertEqual(store.__class__.__name__, "MilvusVectorStore")
         self.assertEqual(store.backend_name(), "milvus-lite")
+
+    def test_milvus_vector_store_recreates_incompatible_empty_collection(self) -> None:
+        client = FakeMilvusClient()
+        client.collections["ai_agent_first_chunks"] = []
+        client.collection_schemas["ai_agent_first_chunks"] = {
+            "collection_name": "ai_agent_first_chunks",
+            "auto_id": False,
+            "fields": [
+                {"name": "id", "type": "int", "is_primary": True},
+                {"name": "vector", "type": "float_vector", "is_primary": False},
+            ],
+        }
+        client.collection_stats["ai_agent_first_chunks"] = {"row_count": 0}
+
+        MilvusVectorStore(
+            client=client,
+            collection_name="ai_agent_first_chunks",
+            embedding_service=HashEmbeddingService(dimension=12),
+            dimension=12,
+        )
+
+        self.assertEqual(client.dropped, ["ai_agent_first_chunks"])
+        self.assertEqual(client.created[0]["primary_field_name"], "chunk_id")
+        self.assertEqual(client.created[0]["id_type"], "string")
+        self.assertEqual(client.created[0]["max_length"], 512)
+
+    def test_milvus_vector_store_finalizes_ingest_with_single_flush_and_load(self) -> None:
+        client = FakeMilvusClient()
+        chunk = DocumentChunk(
+            doc_id="doc-1",
+            chunk_id="chunk-1",
+            title="Redis OOM",
+            section_path=["Redis", "OOM"],
+            content="检查 maxmemory 和 slowlog。",
+            source="redis.md",
+            order=1,
+            token_count=8,
+        )
+        store = MilvusVectorStore(
+            client=client,
+            collection_name="ai_agent_first_chunks",
+            embedding_service=HashEmbeddingService(dimension=12),
+            dimension=12,
+        )
+
+        store.upsert_chunks([chunk])
+        store.finalize_ingest()
+
+        self.assertEqual(client.flushed, ["ai_agent_first_chunks"])
+        self.assertEqual(client.loaded, ["ai_agent_first_chunks"])
 
 
 if __name__ == "__main__":

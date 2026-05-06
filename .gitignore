@@ -21,6 +21,9 @@ data/models/
 data/milvus/
 data/sqlite/*.db
 data/sqlite/*.db-*
+results/*.png
+scripts/run_desktop_hidden.vbs
+app copy/
 
 # IDE and OS files
 .idea/

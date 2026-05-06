@@ -60,6 +60,11 @@ def _get_setting(name: str, default: str, file_values: dict[str, str], persisten
     return os.getenv(name, persistent_values.get(name, default))
 
 
+def _parse_csv(raw_value: str) -> tuple[str, ...]:
+    items = [item.strip() for item in raw_value.split(",")]
+    return tuple(item for item in items if item)
+
+
 @dataclass(frozen=True)
 class AppSettings:
     root_dir: Path
@@ -76,10 +81,18 @@ class AppSettings:
     llm_timeout_seconds: int
     llm_retry_attempts: int
     llm_retry_backoff_seconds: float
+    llm_context_max_chars: int
     retrieval_backend: str
     embedding_backend: str
     reranker_backend: str
     bge_reranker_model: str
+    bge_reranker_text_max_chars: int
+    bge_reranker_batch_size: int
+    bge_reranker_query_max_length: int
+    bge_reranker_max_length: int
+    bge_reranker_use_fp16: bool | None
+    bge_reranker_devices: str
+    bge_reranker_score_cache_size: int
     reranker_prefilter_limit: int
     milvus_enabled: bool
     milvus_uri: str
@@ -87,6 +100,11 @@ class AppSettings:
     milvus_dimension: int
     milvus_lite_path: Path
     remote_retrieval_url: str
+    real_tools_enabled: bool
+    tool_restart_enabled: bool
+    tool_allowed_services: tuple[str, ...]
+    tool_log_dirs: tuple[Path, ...]
+    tool_command_timeout_seconds: int
 
     @classmethod
     def from_root(cls, root_dir: Path) -> "AppSettings":
@@ -95,9 +113,10 @@ class AppSettings:
         data_dir = root_dir / "data"
         docs_dir = data_dir / "docs"
         cache_dir = data_dir / "cache"
+        logs_dir = data_dir / "logs"
         sqlite_dir = data_dir / "sqlite"
         milvus_dir = data_dir / "milvus"
-        for path in (data_dir, docs_dir, cache_dir, sqlite_dir, milvus_dir):
+        for path in (data_dir, docs_dir, cache_dir, logs_dir, sqlite_dir, milvus_dir):
             path.mkdir(parents=True, exist_ok=True)
         milvus_lite_value = _get_setting(
             "AI_AGENT_FIRST_MILVUS_LITE_PATH",
@@ -109,6 +128,20 @@ class AppSettings:
         if not milvus_lite_path.is_absolute():
             milvus_lite_path = (root_dir / milvus_lite_path).resolve()
         milvus_lite_path.parent.mkdir(parents=True, exist_ok=True)
+        tool_log_dirs_value = _parse_csv(
+            _get_setting(
+                "AI_AGENT_FIRST_TOOL_LOG_DIRS",
+                str(logs_dir),
+                file_values,
+                persistent_values,
+            )
+        )
+        resolved_tool_log_dirs: list[Path] = []
+        for raw_path in tool_log_dirs_value:
+            path = Path(raw_path)
+            if not path.is_absolute():
+                path = (root_dir / path).resolve()
+            resolved_tool_log_dirs.append(path)
         return cls(
             root_dir=root_dir,
             app_name="AI Agent First",
@@ -142,6 +175,9 @@ class AppSettings:
             llm_retry_backoff_seconds=float(
                 _get_setting("AI_AGENT_FIRST_LLM_RETRY_BACKOFF_SECONDS", "0.4", file_values, persistent_values)
             ),
+            llm_context_max_chars=int(
+                _get_setting("AI_AGENT_FIRST_LLM_CONTEXT_MAX_CHARS", "1400", file_values, persistent_values)
+            ),
             retrieval_backend=_get_setting(
                 "AI_AGENT_FIRST_RETRIEVAL_BACKEND",
                 "in-memory",
@@ -165,6 +201,30 @@ class AppSettings:
                 "BAAI/bge-reranker-v2-m3",
                 file_values,
                 persistent_values,
+            ),
+            bge_reranker_text_max_chars=int(
+                _get_setting("AI_AGENT_FIRST_BGE_RERANKER_TEXT_MAX_CHARS", "900", file_values, persistent_values)
+            ),
+            bge_reranker_batch_size=int(
+                _get_setting("AI_AGENT_FIRST_BGE_RERANKER_BATCH_SIZE", "12", file_values, persistent_values)
+            ),
+            bge_reranker_query_max_length=int(
+                _get_setting("AI_AGENT_FIRST_BGE_RERANKER_QUERY_MAX_LENGTH", "48", file_values, persistent_values)
+            ),
+            bge_reranker_max_length=int(
+                _get_setting("AI_AGENT_FIRST_BGE_RERANKER_MAX_LENGTH", "160", file_values, persistent_values)
+            ),
+            bge_reranker_use_fp16=_parse_optional_bool(
+                _get_setting("AI_AGENT_FIRST_BGE_RERANKER_USE_FP16", "", file_values, persistent_values)
+            ),
+            bge_reranker_devices=_get_setting(
+                "AI_AGENT_FIRST_BGE_RERANKER_DEVICES",
+                "",
+                file_values,
+                persistent_values,
+            ),
+            bge_reranker_score_cache_size=int(
+                _get_setting("AI_AGENT_FIRST_BGE_RERANKER_SCORE_CACHE_SIZE", "256", file_values, persistent_values)
             ),
             reranker_prefilter_limit=int(
                 _get_setting("AI_AGENT_FIRST_RERANKER_PREFILTER_LIMIT", "6", file_values, persistent_values)
@@ -198,4 +258,41 @@ class AppSettings:
                 file_values,
                 persistent_values,
             ),
+            real_tools_enabled=_get_setting(
+                "AI_AGENT_FIRST_REAL_TOOLS_ENABLED",
+                "false",
+                file_values,
+                persistent_values,
+            ).lower()
+            in {"1", "true", "yes", "on"},
+            tool_restart_enabled=_get_setting(
+                "AI_AGENT_FIRST_TOOL_RESTART_ENABLED",
+                "false",
+                file_values,
+                persistent_values,
+            ).lower()
+            in {"1", "true", "yes", "on"},
+            tool_allowed_services=_parse_csv(
+                _get_setting(
+                    "AI_AGENT_FIRST_TOOL_ALLOWED_SERVICES",
+                    "redis,mysql,nginx,elasticsearch,prometheus,kubernetes",
+                    file_values,
+                    persistent_values,
+                )
+            ),
+            tool_log_dirs=tuple(resolved_tool_log_dirs),
+            tool_command_timeout_seconds=int(
+                _get_setting("AI_AGENT_FIRST_TOOL_COMMAND_TIMEOUT_SECONDS", "5", file_values, persistent_values)
+            ),
         )
+
+
+def _parse_optional_bool(raw_value: str) -> bool | None:
+    value = raw_value.strip().lower()
+    if not value:
+        return None
+    if value in {"1", "true", "yes", "on"}:
+        return True
+    if value in {"0", "false", "no", "off"}:
+        return False
+    return None

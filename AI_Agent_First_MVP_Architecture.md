@@ -3,7 +3,8 @@
 ## 单机最小落地版架构与实现方案
 
 > 目标：先实现一个单机可运行、可演示、可写入简历的 MVP 版本。  
-> 技术栈：`Python + LangGraph + LangChain + RAG + Redis + PyQt6 + SQLite + Milvus`
+> 当前实现技术栈：`Python + 自定义 Agent 编排 + RAG + PyQt6 + SQLite + OpenAI-Compatible LLM + Milvus Lite/Milvus`
+> 当前仓库的会话链路由 `SessionService + SQLite summary` 承担，`LangGraph/LangChain/Redis` 仍可作为后续增强方向。
 
 ---
 
@@ -32,9 +33,9 @@
 ```mermaid
 flowchart TD
     A["PyQt6 桌面端"] --> B["应用服务层"]
-    B --> C["LangGraph Agent 编排"]
+    B --> C["自定义 Agent 编排"]
     B --> D["RAG 检索服务"]
-    B --> E["Redis 会话状态"]
+    B --> E["会话记忆服务"]
     B --> F["SQLite 元数据"]
 
     D --> G["Markdown 文档解析"]
@@ -68,9 +69,9 @@ flowchart TD
 - 本地 Markdown 技术文档导入
 - Milvus 向量检索
 - BGE-Reranker 精排
-- LangGraph 多节点 Agent
+- 自定义多节点 Agent 编排
 - 本地模拟运维工具调用
-- Redis 会话记忆
+- recent messages + summary 会话记忆
 - PyQt6 桌面演示界面
 - SQLite 持久化会话与文档元数据
 
@@ -213,7 +214,7 @@ data/docs/
 
 职责：
 
-- Redis 保存最近若干轮消息
+- SessionService 保存最近若干轮消息
 - 保存会话摘要
 - 降低长对话 token 成本
 
@@ -226,6 +227,32 @@ data/docs/
 - 展示引用来源
 - 展示工具执行过程
 - 切换会话
+
+### 6.6 Codex 桌面端 UI 设计辅助 Skill 规范
+
+为了让当前 MVP 在 Codex 桌面端 Windows 环境下更高效地完成 UI 迭代，可以把新增的 4 个 skill 纳入桌面端开发闭环。它们不替代 PyQt 代码实现本身，而是作为“规则制定 -> 方案生成 -> 代码落地 -> 截图验收”的辅助工具。
+
+对应关系如下：
+
+- `figma-create-design-system-rules`：用于沉淀当前项目的桌面端设计规则，统一聊天窗口、侧栏、按钮、面板、状态标签和信息层级。
+- `figma-generate-design`：用于生成或重构桌面端页面方案，适合在现有产品结构上做可视化整理与体验增强。
+- `figma-implement-design`：用于把已确认的 Figma 方案转成项目中的实际 UI 代码实现。
+- `screenshot`：用于真实界面验收，观察流式输出、长回答、日志展开、来源卡片和状态栏在运行过程中的稳定性。
+
+推荐工作流：
+
+1. 先定义桌面端设计规则，避免后续多次返工。
+2. 再生成聊天页、日志区、来源区、状态栏等关键区域的整体方案。
+3. 方案确认后落到 PyQt 代码中，保持现有业务链路不被破坏。
+4. 用截图做验收，记录窗口抖动、溢出、对齐和滚动问题，再进行下一轮修正。
+
+使用边界与规范：
+
+- 明确以桌面端客户端为中心，不为 Web 或移动端额外设计复杂适配层。
+- 优先保证 SSE 流式输出、长回答渲染、会话摘要展示、provider 诊断区和遥测区的稳定可读。
+- 优先修复窗口大小变化、控件挤压、消息区回流和滚动异常，再做视觉层的润色。
+- 能用样式、布局和组件层级解决的问题，尽量不要引入额外图片资源，减少后续维护成本。
+- 截图验收时，应重点观察消息区、来源区、工具日志区、摘要区、状态栏和输入区之间的空间分配是否稳定。
 
 ---
 
@@ -253,7 +280,7 @@ sequenceDiagram
     participant VS as Milvus
     participant RR as Reranker
     participant LLM as 大模型
-    participant RE as Redis
+    participant RE as SessionService / SQLite
 
     U->>UI: 提问
     UI->>AG: 发送输入
@@ -292,9 +319,9 @@ flowchart TD
 |---|---|---|
 | P0 | Markdown 文档导入 | 没有知识库，RAG 无法工作 |
 | P0 | Milvus 检索 + Rerank | 决定问答质量 |
-| P0 | LangGraph 基础 Agent | 决定是否能展示自动化链路 |
+| P0 | Agent 编排基础链路 | 决定是否能展示自动化链路 |
 | P0 | PyQt6 聊天主界面 | 决定是否能完整演示 |
-| P1 | Redis 会话记忆 | 支撑多轮对话和成本优化 |
+| P1 | recent messages + summary 会话记忆 | 支撑多轮对话和成本优化 |
 | P1 | 本地模拟运维工具 | 用于演示 Tool Calling 与 ReAct |
 | P2 | 摘要压缩 | 用于体现长对话优化亮点 |
 | P2 | 引用来源高亮 | 增强演示效果和可信度 |
@@ -328,7 +355,7 @@ flowchart TD
 | 数据类型 | 技术 |
 |---|---|
 | 向量数据 | Milvus |
-| 会话状态 | Redis |
+| 会话状态 | SessionService（内存） + SQLite Summary |
 | 文档元数据/聊天记录 | SQLite |
 
 ---
@@ -483,7 +510,7 @@ def retrieve(query: str):
 
 ---
 
-## 13. LangGraph Agent 设计
+## 13. Agent 编排设计
 
 ### 13.1 节点划分
 
@@ -500,15 +527,13 @@ def retrieve(query: str):
 ### 13.2 Graph 代码骨架
 
 ```python
-from langgraph.graph import StateGraph, END
+from dataclasses import dataclass
 
 
-def build_graph():
-    graph = StateGraph(AgentState)
-
-    graph.add_node("intent", intent_node)
-    graph.add_node("retrieve", retrieve_node)
-    graph.add_node("plan", plan_node)
+def run_agent(state: AgentState):
+    state = intent_node(state)
+    state = retrieve_node(state)
+    state = plan_node(state)
     graph.add_node("tool_router", tool_router_node)
     graph.add_node("tool_exec", tool_exec_node)
     graph.add_node("answer", answer_node)
@@ -582,15 +607,15 @@ def validate_tool_input(raw_args: dict):
 
 ---
 
-## 15. Redis 会话记忆设计
+## 15. 会话记忆设计
 
-### 15.1 Redis 中保存什么
+### 15.1 当前实现中保存什么
 
 | Key | 作用 |
 |---|---|
-| `session:{id}:messages` | 最近几轮对话 |
-| `session:{id}:summary` | 历史摘要 |
-| `session:{id}:tool_history` | 工具调用历史 |
+| `SessionService.messages[session_id]` | 最近几轮对话 |
+| `SessionService.summaries[session_id]` | 当前进程内历史摘要 |
+| `chat_sessions.summary` | SQLite 中可恢复的摘要 |
 
 ### 15.2 策略
 
@@ -598,26 +623,27 @@ def validate_tool_input(raw_args: dict):
 - 更早消息压缩成摘要
 - 摘要内容包含：用户目标、已完成步骤、关键结论、未解决问题
 
-### 15.3 核心代码示例
+### 15.3 当前核心代码示例
 
 ```python
-import json
-
-
 class SessionService:
-    def __init__(self, redis_client):
-        self.redis = redis_client
+    def __init__(self, recent_limit: int = 8):
+        self.recent_limit = recent_limit
+        self._messages = {}
+        self._summaries = {}
 
     def append_message(self, session_id: str, role: str, content: str):
-        key = f"session:{session_id}:messages"
-        self.redis.rpush(key, json.dumps({"role": role, "content": content}, ensure_ascii=False))
-        self.redis.ltrim(key, -10, -1)
+        self._messages.setdefault(session_id, []).append({"role": role, "content": content})
+        self._messages[session_id] = self._messages[session_id][-self.recent_limit :]
 
     def get_recent_messages(self, session_id: str):
-        key = f"session:{session_id}:messages"
-        items = self.redis.lrange(key, 0, -1)
-        return [json.loads(i) for i in items]
+        return list(self._messages.get(session_id, []))
 ```
+
+### 15.4 后续扩展方向
+
+- 若后续需要跨进程共享会话状态，可将 `SessionService` 替换为 Redis adapter。
+- 当前实现已经把接口收敛在 `app/services/session_service.py`，迁移成本较低。
 
 ---
 
@@ -725,7 +751,7 @@ flowchart LR
 
 ### 第五阶段：增强演示效果
 
-1. Redis 会话记忆
+1. 会话记忆服务
 2. 摘要压缩
 3. 日志统计面板
 4. Demo 脚本
@@ -810,8 +836,8 @@ flowchart LR
 
 1. 这是一个面向企业研发和运维知识场景的智能自动化平台
 2. 核心能力是用 RAG 提升技术文档问答准确率
-3. 用 LangGraph 构建多步推理 Agent，实现知识检索到运维工具调用闭环
-4. 用 Redis 做多轮会话状态管理，并通过摘要压缩降低上下文成本
+3. 用自定义多节点 Agent 编排实现知识检索到运维工具调用闭环
+4. 用 SessionService + SQLite Summary 做多轮会话状态管理，并通过摘要压缩降低上下文成本
 5. 当前版本是单机可演示 MVP，但架构已预留企业级扩展空间
 
 ---
@@ -823,9 +849,9 @@ flowchart LR
 | `app/config/settings.py` | 统一配置 |
 | `app/rag/chunker.py` | 文档切块 |
 | `app/rag/retriever.py` | 检索逻辑 |
-| `app/agent/graph.py` | LangGraph 编排 |
+| `app/agent/graph.py` | Agent 编排 |
 | `app/tools/ops_tools.py` | 本地工具模拟 |
-| `app/services/session_service.py` | Redis 会话管理 |
+| `app/services/session_service.py` | 会话记忆管理 |
 | `app/ui/main_window.py` | PyQt6 主界面 |
 | `scripts/ingest_docs.py` | 文档入库脚本 |
 
@@ -861,6 +887,6 @@ MVP 跑通后，再逐步升级：
 
 这个单机 MVP 的核心不是“做一个聊天窗口”，而是验证一条完整的企业知识自动化链路：
 
-**文档解析 -> 检索增强 -> LangGraph Agent 推理 -> 工具调用 -> 会话记忆 -> 桌面端可视化展示**
+**文档解析 -> 检索增强 -> Agent 编排推理 -> 工具调用 -> 会话记忆 -> 桌面端可视化展示**
 
 只要这条链路打通，这个项目就已经具备了很强的演示价值、简历价值和后续扩展价值。

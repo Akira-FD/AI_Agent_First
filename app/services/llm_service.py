@@ -131,6 +131,7 @@ class OpenAICompatibleLLMService:
         fallback: RuleBasedLLMService | None = None,
         retry_attempts: int = 2,
         retry_backoff_seconds: float = 0.4,
+        context_max_chars: int = 1400,
     ) -> None:
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
@@ -141,6 +142,9 @@ class OpenAICompatibleLLMService:
         self.fallback = fallback or RuleBasedLLMService()
         self.retry_attempts = max(1, retry_attempts)
         self.retry_backoff_seconds = max(0.0, retry_backoff_seconds)
+        self.context_max_chars = max(200, context_max_chars)
+        self.context_line_max_chars = 180
+        self.tool_message_max_chars = 360
         self._last_provider_status = "not_started"
         self._last_provider_error = ""
         self._last_provider_attempts = 0
@@ -182,22 +186,13 @@ class OpenAICompatibleLLMService:
                 ),
             )
 
-        system_prompt = (
-            "你是一个企业研发与运维知识助手。请结合给定上下文，输出简洁、可执行、中文回答。"
-            "优先总结关键检查步骤、风险点和建议，不要原样抄录 provenance、长日志或大段配置。"
-        )
-        user_prompt = (
-            f"用户问题：{user_query}\n\n"
-            f"工具执行结果：{tool_message or '无'}\n\n"
-            f"知识库上下文：\n{context_text or '暂无上下文'}\n\n"
-            "请输出：1. 结论 2. 建议步骤 3. 如有必要给出风险提醒。"
-        )
         payload = {
             "model": self.model,
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
+            "messages": self._build_messages(
+                user_query=user_query,
+                context_text=context_text,
+                tool_message=tool_message,
+            ),
             "temperature": 0.2,
         }
         headers = {
@@ -314,22 +309,13 @@ class OpenAICompatibleLLMService:
             )
             return
 
-        system_prompt = (
-            "你是一个企业研发与运维知识助手。请结合给定上下文，输出简洁、可执行、中文回答。"
-            "优先总结关键检查步骤、风险点和建议，不要原样抄录 provenance、长日志或大段配置。"
-        )
-        user_prompt = (
-            f"用户问题：{user_query}\n\n"
-            f"工具执行结果：{tool_message or '无'}\n\n"
-            f"知识库上下文：\n{context_text or '暂无上下文'}\n\n"
-            "请输出：1. 结论 2. 建议步骤 3. 如有必要给出风险提醒。"
-        )
         payload = {
             "model": self.model,
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
+            "messages": self._build_messages(
+                user_query=user_query,
+                context_text=context_text,
+                tool_message=tool_message,
+            ),
             "temperature": 0.2,
             "stream": True,
         }
@@ -530,6 +516,106 @@ class OpenAICompatibleLLMService:
             return ""
         return content.strip()
 
+    def _build_messages(self, *, user_query: str, context_text: str, tool_message: str | None) -> list[dict[str, str]]:
+        system_prompt = (
+            "你是企业研发与运维知识助手。请基于上下文，用中文给出简洁、可执行回答。"
+            "优先输出结论、步骤和风险提醒，不要大段复述原文。"
+        )
+        prompt_parts = [f"问题：{user_query.strip()}"]
+        compact_tool_message = self._compact_tool_message(tool_message or "")
+        if compact_tool_message:
+            prompt_parts.append(f"工具结果：\n{compact_tool_message}")
+        compact_context = self._compact_context_text(context_text)
+        prompt_parts.append(f"参考上下文：\n{compact_context or '暂无上下文'}")
+        prompt_parts.append("回答格式：先给结论，再给 3 到 5 条步骤，最后补充风险提醒。")
+        return [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": "\n\n".join(prompt_parts)},
+        ]
+
+    def _compact_tool_message(self, tool_message: str) -> str:
+        return self._compact_text_block(
+            tool_message,
+            max_chars=self.tool_message_max_chars,
+            drop_provenance=False,
+        )
+
+    def _compact_context_text(self, context_text: str) -> str:
+        return self._compact_text_block(
+            context_text,
+            max_chars=self.context_max_chars,
+            drop_provenance=True,
+        )
+
+    def _compact_text_block(self, text: str, *, max_chars: int, drop_provenance: bool) -> str:
+        if not text.strip():
+            return ""
+        prioritized: list[str] = []
+        secondary: list[str] = []
+        seen: set[str] = set()
+        for raw_line in text.splitlines():
+            line = raw_line.strip()
+            if not line:
+                continue
+            if drop_provenance and self._should_drop_context_line(line):
+                continue
+            compact = re.sub(r"\s+", " ", line)
+            compact = re.sub(r"^\[[^\]]+\]\s*", "", compact)
+            if len(compact) > self.context_line_max_chars:
+                compact = compact[: self.context_line_max_chars - 3].rstrip() + "..."
+            if compact in seen:
+                continue
+            seen.add(compact)
+            if self._is_priority_line(compact):
+                prioritized.append(compact)
+            else:
+                secondary.append(compact)
+
+        selected_lines: list[str] = []
+        used_chars = 0
+        for line in prioritized + secondary:
+            projected = used_chars + len(line) + (1 if selected_lines else 0)
+            if projected > max_chars:
+                break
+            selected_lines.append(line)
+            used_chars = projected
+        if selected_lines:
+            return "\n".join(selected_lines)
+        compact = re.sub(r"\s+", " ", text.strip())
+        if len(compact) <= max_chars:
+            return compact
+        return compact[: max_chars - 3].rstrip() + "..."
+
+    def _should_drop_context_line(self, line: str) -> bool:
+        lowered = line.lower()
+        return (
+            "github provenance" in lowered
+            or lowered.startswith("- repository:")
+            or lowered.startswith("- issue:")
+            or lowered.startswith("- url:")
+            or line.startswith("```")
+        )
+
+    def _is_priority_line(self, line: str) -> bool:
+        lowered = line.lower()
+        priority_keywords = (
+            "建议",
+            "检查",
+            "先看",
+            "结论",
+            "风险",
+            "maxmemory",
+            "slowlog",
+            "wait_timeout",
+            "error log",
+            "kubectl",
+            "oom",
+            "timeout",
+            "慢查询",
+            "连接",
+        )
+        return any(keyword in lowered for keyword in priority_keywords)
+
     def _is_retryable_error(self, exc: Exception) -> bool:
         if self._classify_provider_error(exc) in {"timeout", "disconnect", "http_5xx"}:
             return True
@@ -599,6 +685,7 @@ def build_llm_service(settings, requester=None):
             fallback=fallback,
             retry_attempts=getattr(settings, "llm_retry_attempts", 2),
             retry_backoff_seconds=getattr(settings, "llm_retry_backoff_seconds", 0.4),
+            context_max_chars=getattr(settings, "llm_context_max_chars", 1400),
         )
     return fallback
 

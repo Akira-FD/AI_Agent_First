@@ -5,6 +5,7 @@ from pathlib import Path
 from app.main import bootstrap_application
 from app.rag.ingest_pipeline import IngestPipeline
 from app.ui.pages.chat_page import ChatPage
+from app.ui.widgets.message_bubble import MessageBubble
 from app.ui.pages.docs_page import DocsPage
 from app.ui.widgets.source_card import SourceCard
 from app.ui.widgets.tool_log_panel import ToolLogPanel
@@ -82,6 +83,25 @@ class UIBehaviorTests(unittest.TestCase):
             self.assertEqual(documents[0]["source"], "redis.md")
             self.assertGreater(documents[0]["chunk_count"], 0)
 
+    def test_docs_page_builds_compact_knowledge_base_summary(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            app = bootstrap_application(Path(tmpdir))
+            (app.settings.docs_dir / "redis-guide.md").write_text("# Redis\n\n## timeout\n\n检查连接池。", encoding="utf-8")
+            (app.settings.docs_dir / "mysql-tuning.md").write_text("# MySQL\n\n## 索引\n\n检查慢查询。", encoding="utf-8")
+            (app.settings.docs_dir / "kubernetes-runbook.md").write_text("# Kubernetes\n\n## Deployment\n\n检查副本。", encoding="utf-8")
+            IngestPipeline(settings=app.settings, repository=app.repository).ingest_directory(app.settings.docs_dir)
+
+            docs_page = DocsPage(document_service=app.document_service)
+            docs_page.refresh()
+            summary = docs_page.build_summary()
+
+            self.assertEqual(summary["document_count"], 3)
+            self.assertGreaterEqual(summary["chunk_count"], 3)
+            self.assertIn("Redis", summary["key_topics"])
+            self.assertIn("MySQL", summary["key_topics"])
+            self.assertIn("Kubernetes", summary["key_topics"])
+            self.assertTrue(summary["category_labels"])
+
     def test_source_card_and_tool_log_panel_render_display_text(self) -> None:
         source = SourceCard(
             {
@@ -97,6 +117,27 @@ class UIBehaviorTests(unittest.TestCase):
 
         self.assertIn("Redis > 重启", source.render_text())
         self.assertIn("restart_mock_service", panel.render_text())
+
+    def test_message_source_and_tool_widgets_render_rich_html(self) -> None:
+        bubble = MessageBubble("assistant", "请先检查 <Redis> 连接。")
+        source = SourceCard(
+            {
+                "title": "重启",
+                "source": "redis.md",
+                "section_path": "Redis > 重启",
+                "score": 3.2,
+                "excerpt": "重启前先检查状态。",
+            }
+        )
+        panel = ToolLogPanel()
+        panel.add_log({"tool_name": "restart_mock_service", "status": "success", "message": "ok"})
+
+        self.assertIn("assistant-bubble", bubble.render_html())
+        self.assertIn("&lt;Redis&gt;", bubble.render_html())
+        self.assertIn("source-card", source.render_html())
+        self.assertIn("score-pill", source.render_html())
+        self.assertIn("tool-log-card", panel.render_html())
+        self.assertIn("status-pill", panel.render_html())
 
 
 if __name__ == "__main__":
