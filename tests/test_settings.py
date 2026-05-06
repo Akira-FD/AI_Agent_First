@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from app.config.settings import AppSettings, _read_windows_persistent_env
+from app.config.settings import AppSettings
 
 
 class SettingsTests(unittest.TestCase):
@@ -74,22 +74,29 @@ class SettingsTests(unittest.TestCase):
         os.environ["AI_AGENT_FIRST_LLM_BASE_URL"] = "https://api.openai.com/v1"
         os.environ["AI_AGENT_FIRST_LLM_MODEL"] = "gpt-4.1-mini"
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            root = Path(tmpdir)
-            (root / ".env").write_text(
-                "\n".join(
-                    [
-                        "AI_AGENT_FIRST_LLM_BASE_URL=https://api1.oai1.online/v1",
-                        "AI_AGENT_FIRST_LLM_MODEL=gpt-5.2",
-                    ]
-                ),
-                encoding="utf-8",
-            )
+        try:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                root = Path(tmpdir)
+                (root / ".env").write_text(
+                    "\n".join(
+                        [
+                            "AI_AGENT_FIRST_LLM_BASE_URL=https://api1.oai1.online/v1",
+                            "AI_AGENT_FIRST_LLM_MODEL=gpt-5.2",
+                        ]
+                    ),
+                    encoding="utf-8",
+                )
 
-            settings = AppSettings.from_root(root)
+                settings = AppSettings.from_root(root)
 
-            self.assertEqual(settings.llm_base_url, "https://api1.oai1.online/v1")
-            self.assertEqual(settings.llm_model, "gpt-5.2")
+                self.assertEqual(settings.llm_base_url, "https://api1.oai1.online/v1")
+                self.assertEqual(settings.llm_model, "gpt-5.2")
+        finally:
+            for key, value in previous.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
 
     def test_reads_retry_configuration_from_environment(self) -> None:
         previous = {

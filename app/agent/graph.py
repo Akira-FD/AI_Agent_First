@@ -1,7 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from dataclasses import asdict
+from dataclasses import dataclass, field
+
+from langgraph.graph import END, START, StateGraph
 
 from app.agent.nodes.answer_node import build_answer
 from app.agent.nodes.intent_node import detect_intent
@@ -70,51 +72,15 @@ class MVPAgent:
             vector_store=vector_store,
         )
         self.summary_service = SummaryService(session_service)
+        self._graph = self._build_graph()
+        self._compiled_graph = self._graph.compile()
 
     def run(self, session_id: str, user_query: str, tool_actions: list[ToolAction] | None = None) -> AgentResponse:
-        return self._run_internal(session_id=session_id, user_query=user_query, tool_actions=tool_actions)
-
-    def stream(self, session_id: str, user_query: str, tool_actions: list[ToolAction] | None = None):
-        state = self._prepare_state(session_id=session_id, user_query=user_query, tool_actions=tool_actions)
-        answer_context = self._build_answer_context(session_id=session_id, state=state)
-        final_result = None
-        backend_label = ""
-        if hasattr(self.llm_service, "backend_label"):
-            backend_label = str(self.llm_service.backend_label())
-        if hasattr(self.llm_service, "stream_answer_result") and backend_label.startswith("openai-compatible:"):
-            for event in self.llm_service.stream_answer_result(
-                user_query=user_query,
-                context_text=answer_context,
-                tool_message=state.tool_message or None,
-            ):
-                if event.type == "delta":
-                    yield {"type": "delta", "delta": event.delta}
-                elif event.type == "done":
-                    final_result = event.result
-                    break
-        if final_result is None:
-            answer_result = build_answer(
-                llm_service=self.llm_service,
-                user_query=user_query,
-                context_text=answer_context,
-                tool_message=state.tool_message or None,
-            )
-            final_result = answer_result
-        response = self._finalize_state(
-            session_id=session_id,
-            user_query=user_query,
-            state=state,
-            answer_result=final_result,
-        )
-        yield {"type": "done", "response": response}
-
-    def _run_internal(self, session_id: str, user_query: str, tool_actions: list[ToolAction] | None = None) -> AgentResponse:
-        state = self._prepare_state(session_id=session_id, user_query=user_query, tool_actions=tool_actions)
-        answer_context = self._build_answer_context(session_id=session_id, state=state)
+        state = self._invoke_graph(session_id=session_id, user_query=user_query, tool_actions=tool_actions)
         answer_result = build_answer(
             llm_service=self.llm_service,
             user_query=user_query,
-            context_text=answer_context,
+            context_text=state.answer_context_text,
             tool_message=state.tool_message or None,
         )
         return self._finalize_state(
@@ -124,70 +90,282 @@ class MVPAgent:
             answer_result=answer_result,
         )
 
-    def _prepare_state(self, session_id: str, user_query: str, tool_actions: list[ToolAction] | None = None) -> AgentState:
-        state = AgentState(session_id=session_id, user_query=user_query)
+    def stream(self, session_id: str, user_query: str, tool_actions: list[ToolAction] | None = None):
+        state = self._invoke_graph(session_id=session_id, user_query=user_query, tool_actions=tool_actions)
+        final_result = None
+        backend_label = ""
+        if hasattr(self.llm_service, "backend_label"):
+            backend_label = str(self.llm_service.backend_label())
+        if hasattr(self.llm_service, "stream_answer_result") and backend_label.startswith("openai-compatible:"):
+            for event in self.llm_service.stream_answer_result(
+                user_query=user_query,
+                context_text=state.answer_context_text,
+                tool_message=state.tool_message or None,
+            ):
+                if event.type == "delta":
+                    yield {"type": "delta", "delta": event.delta}
+                elif event.type == "done":
+                    final_result = event.result
+                    break
+        if final_result is None:
+            final_result = build_answer(
+                llm_service=self.llm_service,
+                user_query=user_query,
+                context_text=state.answer_context_text,
+                tool_message=state.tool_message or None,
+            )
+        response = self._finalize_state(
+            session_id=session_id,
+            user_query=user_query,
+            state=state,
+            answer_result=final_result,
+        )
+        yield {"type": "done", "response": response}
 
+    def _invoke_graph(self, *, session_id: str, user_query: str, tool_actions: list[ToolAction] | None) -> AgentState:
+        initial_state = AgentState(session_id=session_id, user_query=user_query)
+        if tool_actions:
+            initial_state.pending_tool_actions = [
+                {"tool_name": action.tool_name, "tool_input": dict(action.tool_input)}
+                for action in tool_actions
+            ]
+        final_state = self._compiled_graph.invoke(initial_state)
+        if isinstance(final_state, AgentState):
+            return final_state
+        if isinstance(final_state, dict):
+            return AgentState(**final_state)
+        raise TypeError(f"Unsupported graph state: {type(final_state)!r}")
+
+    def _build_graph(self):
+        graph = StateGraph(AgentState)
+        graph.add_node("load_memory", self._node_load_memory)
+        graph.add_node("persist_user_message", self._node_persist_user_message)
+        graph.add_node("intent", self._node_intent)
+        graph.add_node("retrieve", self._node_retrieve)
+        graph.add_node("plan", self._node_plan)
+        graph.add_node("tool_router", self._node_tool_router)
+        graph.add_node("tool_exec", self._node_tool_exec)
+        graph.add_node("observation", self._node_observation)
+        graph.add_node("recovery", self._node_recovery)
+        graph.add_node("replan", self._node_replan)
+        graph.add_node("answer", self._node_answer)
+        graph.add_node("persist_assistant_message", self._node_persist_assistant_message)
+        graph.add_node("summary", self._node_summary)
+
+        graph.add_edge(START, "load_memory")
+        graph.add_edge("load_memory", "persist_user_message")
+        graph.add_edge("persist_user_message", "intent")
+        graph.add_edge("intent", "retrieve")
+        graph.add_edge("retrieve", "plan")
+        graph.add_conditional_edges(
+            "plan",
+            self._route_after_plan,
+            {
+                "tool_router": "tool_router",
+                "answer": "answer",
+            },
+        )
+        graph.add_edge("tool_router", "tool_exec")
+        graph.add_conditional_edges(
+            "tool_exec",
+            self._route_after_tool_exec,
+            {
+                "tool_exec": "tool_exec",
+                "observation": "observation",
+                "answer": "answer",
+            },
+        )
+        graph.add_edge("observation", "recovery")
+        graph.add_edge("recovery", "replan")
+        graph.add_conditional_edges(
+            "replan",
+            self._route_after_replan,
+            {
+                "tool_exec": "tool_exec",
+                "answer": "answer",
+            },
+        )
+        graph.add_edge("answer", "persist_assistant_message")
+        graph.add_edge("persist_assistant_message", "summary")
+        graph.add_edge("summary", END)
+        return graph
+
+    def _node_load_memory(self, state: AgentState) -> AgentState:
         state.mark("load_memory")
-        existing_summary = self.repository.get_session_summary(session_id)
-        if existing_summary and not self.session_service.get_summary(session_id):
-            self.session_service.set_summary(session_id, existing_summary)
+        existing_summary = self.repository.get_session_summary(state.session_id)
+        if existing_summary and not self.session_service.get_summary(state.session_id):
+            self.session_service.set_summary(state.session_id, existing_summary)
+        return state
 
-        self.session_service.append_message(session_id, "user", user_query)
-        self.repository.save_chat_message(session_id, "user", user_query)
+    def _node_persist_user_message(self, state: AgentState) -> AgentState:
+        self.session_service.append_message(state.session_id, "user", state.user_query)
+        self.repository.save_chat_message(state.session_id, "user", state.user_query)
         state.mark("persist_user_message")
+        return state
 
-        state.intent = detect_intent(user_query)
+    def _node_intent(self, state: AgentState) -> AgentState:
+        state.intent = detect_intent(state.user_query)
         state.mark("intent")
+        return state
 
-        retrieval = run_retrieval(user_query, self.retriever)
+    def _node_retrieve(self, state: AgentState) -> AgentState:
+        retrieval = run_retrieval(state.user_query, self.retriever)
         state.context_text = retrieval.context_text
         state.sources = retrieval.sources
         state.retrieval_stage_latency_ms = dict(getattr(retrieval, "stage_latency_ms", {}) or {})
         state.mark("retrieve")
+        return state
 
+    def _node_plan(self, state: AgentState) -> AgentState:
         plan = create_plan(state.intent)
         state.plan_route = plan.route
         state.plan_steps = list(plan.steps or [])
-        if tool_actions:
+        state.should_call_tool = bool(plan.should_call_tool or state.pending_tool_actions)
+        if state.pending_tool_actions:
             state.plan_route = "tool"
         state.mark("plan")
-        if plan.should_call_tool or tool_actions:
-            actions = tool_actions or route_tools(user_query)
-            tool_plan = create_tool_plan(actions)
-            state.plan_route = tool_plan.route
-            state.plan_steps = list(tool_plan.steps or [])
-            state.tool_actions = [
-                {"tool_name": action.tool_name, "tool_input": action.tool_input}
-                for action in actions
-            ]
-            first_action = actions[0]
-            state.selected_tool = first_action.tool_name
-            state.tool_input = first_action.tool_input
-            state.mark("tool_router")
-            for index, action in enumerate(actions):
-                result = self._execute_action(session_id, state, action)
-                if not result.success:
-                    state.observations.extend(observe_tool_result(result))
-                    state.mark("observation")
-                    state.recovery_action = choose_recovery_action(result)
-                    state.mark("recovery")
-                    remaining_actions = actions[index + 1 :]
-                    state.recovery_action = choose_replan_action(action, state.recovery_action, remaining_actions, result)
-                    repaired_action = build_repaired_action(action.tool_name, result)
-                    replan_target = repaired_action
-                    if state.recovery_action == "fallback_to_remaining_actions" and remaining_actions:
-                        replan_target = remaining_actions[0]
-                    state.replan_steps = build_replan_steps(state.recovery_action, replan_target)
-                    if state.replan_steps:
-                        state.mark("replan")
-                    if repaired_action is not None:
-                        self._execute_action(session_id, state, repaired_action)
-                        continue
-                    if state.recovery_action == "fallback_to_remaining_actions":
-                        continue
-                    if state.recovery_action in {"degrade_to_answer", "retry_later"}:
-                        break
         return state
+
+    def _node_tool_router(self, state: AgentState) -> AgentState:
+        actions = state.pending_tool_actions or [
+            {"tool_name": action.tool_name, "tool_input": dict(action.tool_input)}
+            for action in route_tools(state.user_query)
+        ]
+        state.pending_tool_actions = list(actions)
+        tool_plan = create_tool_plan(
+            [ToolAction(action["tool_name"], dict(action["tool_input"])) for action in state.pending_tool_actions]
+        )
+        state.plan_route = tool_plan.route
+        state.plan_steps = list(tool_plan.steps or [])
+        state.tool_actions = [
+            {"tool_name": action["tool_name"], "tool_input": dict(action["tool_input"])}
+            for action in state.pending_tool_actions
+        ]
+        if state.pending_tool_actions:
+            first_action = state.pending_tool_actions[0]
+            state.selected_tool = str(first_action["tool_name"])
+            state.tool_input = dict(first_action["tool_input"])
+        state.current_action_index = 0
+        state.current_action = {}
+        state.mark("tool_router")
+        return state
+
+    def _node_tool_exec(self, state: AgentState) -> AgentState:
+        if state.current_action_index >= len(state.pending_tool_actions):
+            state.last_tool_success = True
+            return state
+        action_payload = state.pending_tool_actions[state.current_action_index]
+        action = ToolAction(
+            tool_name=str(action_payload["tool_name"]),
+            tool_input={str(key): str(value) for key, value in dict(action_payload["tool_input"]).items()},
+        )
+        state.current_action = {"tool_name": action.tool_name, "tool_input": dict(action.tool_input)}
+        result = execute_tool(action.tool_name, action.tool_input, self.tool_registry)
+        state.tool_output = asdict(result)
+        state.tool_message = _append_tool_message(state.tool_message, result.message)
+        status = "success" if result.success else "failed"
+        state.tool_logs.append(
+            {
+                "tool_name": action.tool_name,
+                "status": status,
+                "message": result.message,
+            }
+        )
+        state.observations.append(result.message)
+        state.last_tool_success = result.success
+        state.mark("tool_exec")
+        self.repository.save_tool_log(
+            session_id=state.session_id,
+            tool_name=action.tool_name,
+            input_payload=action.tool_input,
+            output_payload=asdict(result),
+            status=status,
+        )
+        if result.success:
+            state.current_action_index += 1
+        return state
+
+    def _node_observation(self, state: AgentState) -> AgentState:
+        state.observations.extend(observe_tool_result(self._tool_result_from_state(state)))
+        state.mark("observation")
+        return state
+
+    def _node_recovery(self, state: AgentState) -> AgentState:
+        result = self._tool_result_from_state(state)
+        state.recovery_action = choose_recovery_action(result)
+        state.mark("recovery")
+        return state
+
+    def _node_replan(self, state: AgentState) -> AgentState:
+        current_action = ToolAction(
+            tool_name=str(state.current_action.get("tool_name", "")),
+            tool_input={str(key): str(value) for key, value in dict(state.current_action.get("tool_input", {})).items()},
+        )
+        result = self._tool_result_from_state(state)
+        remaining_actions = [
+            ToolAction(
+                tool_name=str(action["tool_name"]),
+                tool_input={str(key): str(value) for key, value in dict(action["tool_input"]).items()},
+            )
+            for action in state.pending_tool_actions[state.current_action_index + 1 :]
+        ]
+        state.recovery_action = choose_replan_action(current_action, state.recovery_action, remaining_actions, result)
+        repaired_action = build_repaired_action(current_action.tool_name, result)
+        replan_target = repaired_action
+        if state.recovery_action == "fallback_to_remaining_actions" and remaining_actions:
+            replan_target = remaining_actions[0]
+        state.replan_steps = build_replan_steps(state.recovery_action, replan_target)
+        if state.replan_steps:
+            state.mark("replan")
+        if repaired_action is not None:
+            state.pending_tool_actions[state.current_action_index] = {
+                "tool_name": repaired_action.tool_name,
+                "tool_input": dict(repaired_action.tool_input),
+            }
+        elif state.recovery_action == "fallback_to_remaining_actions":
+            state.current_action_index += 1
+        else:
+            state.current_action_index = len(state.pending_tool_actions)
+        return state
+
+    def _node_answer(self, state: AgentState) -> AgentState:
+        state.answer_context_text = self._build_answer_context(state.session_id, state)
+        state.mark("answer")
+        return state
+
+    def _node_persist_assistant_message(self, state: AgentState) -> AgentState:
+        self.session_service.append_message(state.session_id, "assistant", state.final_answer)
+        self.repository.save_chat_message(state.session_id, "assistant", state.final_answer)
+        state.mark("persist_assistant_message")
+        return state
+
+    def _node_summary(self, state: AgentState) -> AgentState:
+        summary = update_summary(
+            self.summary_service,
+            session_id=state.session_id,
+            answer=state.final_answer,
+            user_query=state.user_query,
+        )
+        state.summary = summary
+        state.mark("summary")
+        self.repository.save_session_summary(state.session_id, state.summary)
+        return state
+
+    def _route_after_plan(self, state: AgentState) -> str:
+        return "tool_router" if state.should_call_tool else "answer"
+
+    def _route_after_tool_exec(self, state: AgentState) -> str:
+        if state.current_action_index >= len(state.pending_tool_actions):
+            return "answer"
+        if state.last_tool_success:
+            return "tool_exec"
+        return "observation"
+
+    def _route_after_replan(self, state: AgentState) -> str:
+        if state.recovery_action in {"retry_repaired_action", "fallback_to_remaining_actions"}:
+            if state.current_action_index < len(state.pending_tool_actions):
+                return "tool_exec"
+        return "answer"
 
     def _finalize_state(self, session_id: str, user_query: str, state: AgentState, answer_result) -> AgentResponse:
         state.final_answer = answer_result.answer
@@ -198,21 +376,6 @@ class MVPAgent:
         state.first_token_latency_ms = getattr(answer_result, "first_token_latency_ms", 0)
         state.total_latency_ms = getattr(answer_result, "total_latency_ms", 0)
         state.provider_diagnostic = getattr(answer_result, "provider_diagnostic", "")
-        state.mark("answer")
-
-        self.session_service.append_message(session_id, "assistant", state.final_answer)
-        self.repository.save_chat_message(session_id, "assistant", state.final_answer)
-        state.mark("persist_assistant_message")
-
-        summary = update_summary(
-            self.summary_service,
-            session_id=session_id,
-            answer=state.final_answer,
-            user_query=user_query,
-        )
-        state.summary = summary
-        state.mark("summary")
-        self.repository.save_session_summary(session_id, state.summary)
         return AgentResponse(
             intent=state.intent,
             answer=state.final_answer,
@@ -240,29 +403,6 @@ class MVPAgent:
             tool_actions=state.tool_actions,
         )
 
-    def _execute_action(self, session_id: str, state: AgentState, action: ToolAction):
-        result = execute_tool(action.tool_name, action.tool_input, self.tool_registry)
-        state.tool_output = asdict(result)
-        state.tool_message = _append_tool_message(state.tool_message, result.message)
-        status = "success" if result.success else "failed"
-        state.tool_logs.append(
-            {
-                "tool_name": action.tool_name,
-                "status": status,
-                "message": result.message,
-            }
-        )
-        state.observations.append(result.message)
-        state.mark("tool_exec")
-        self.repository.save_tool_log(
-            session_id=session_id,
-            tool_name=action.tool_name,
-            input_payload=action.tool_input,
-            output_payload=asdict(result),
-            status=status,
-        )
-        return result
-
     def _build_answer_context(self, session_id: str, state: AgentState) -> str:
         parts: list[str] = []
         summary = self.session_service.get_summary(session_id).strip()
@@ -285,6 +425,14 @@ class MVPAgent:
             parts.append(f"知识库上下文：\n{context_text}")
 
         return "\n\n".join(parts).strip()
+
+    def _tool_result_from_state(self, state: AgentState):
+        payload = dict(state.tool_output)
+        payload.setdefault("error_code", payload.get("code", ""))
+        payload.setdefault("diagnostics", {})
+        from app.models.tool_result import ToolResult
+
+        return ToolResult(**payload)
 
 
 def _append_tool_message(existing: str, message: str) -> str:

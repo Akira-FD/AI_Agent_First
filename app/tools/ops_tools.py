@@ -20,9 +20,11 @@ def validation_error_result(error: dict[str, object]) -> ToolResult:
     return ToolResult(
         success=False,
         code="VALIDATION_ERROR",
+        error_code="VALIDATION_ERROR",
         message="工具参数校验失败，请根据结构化错误修正参数。",
         data=error,
         retryable=True,
+        diagnostics=error,
     )
 
 
@@ -117,9 +119,16 @@ class CheckServiceStatusTool:
             return ToolResult(
                 success=False,
                 code="SERVICE_NOT_ALLOWED",
+                error_code="SERVICE_NOT_ALLOWED",
                 message=f"服务 {service_name} 不在受控状态检查白名单中。",
                 data={"service_name": service_name, "mode": "real"},
                 retryable=False,
+                diagnostics={
+                    "adapter": "service_status",
+                    "mode": "real",
+                    "service_name": service_name,
+                    "allowed_services": sorted(self.runtime.allowed_services),
+                },
             )
         try:
             command = _build_service_status_command(service_name)
@@ -129,9 +138,19 @@ class CheckServiceStatusTool:
                 return ToolResult(
                     success=False,
                     code="SERVICE_LOOKUP_FAILED",
+                    error_code="SERVICE_LOOKUP_FAILED",
                     message=f"受控状态检查失败：{details}",
                     data={"service_name": service_name, "mode": "real"},
                     retryable=False,
+                    diagnostics={
+                        "adapter": "service_status",
+                        "mode": "real",
+                        "service_name": service_name,
+                        "returncode": result.returncode,
+                        "stderr": result.stderr,
+                        "stdout": result.stdout,
+                        "timeout_seconds": self.runtime.command_timeout_seconds,
+                    },
                 )
             service_info = _parse_service_json(result.stdout, service_name)
             status = str(service_info.get("Status", "unknown"))
@@ -148,14 +167,30 @@ class CheckServiceStatusTool:
                     "status": status,
                     "mode": "real",
                 },
+                diagnostics={
+                    "adapter": "service_status",
+                    "mode": "real",
+                    "service_name": service_name,
+                    "matched_name": matched_name,
+                    "command": command,
+                    "timeout_seconds": self.runtime.command_timeout_seconds,
+                },
             )
         except Exception as exc:
             return ToolResult(
                 success=False,
                 code="SERVICE_LOOKUP_FAILED",
+                error_code="SERVICE_LOOKUP_FAILED",
                 message=f"受控状态检查失败：{exc}",
                 data={"service_name": service_name, "mode": "real"},
                 retryable=False,
+                diagnostics={
+                    "adapter": "service_status",
+                    "mode": "real",
+                    "service_name": service_name,
+                    "exception": str(exc),
+                    "timeout_seconds": self.runtime.command_timeout_seconds,
+                },
             )
 
 
@@ -209,6 +244,7 @@ class SearchErrorLogsTool:
         return ToolResult(
             success=True,
             code="OK" if matches else "NO_MATCHES",
+            error_code="OK" if matches else "NO_MATCHES",
             message=(
                 f"已在受控日志目录中找到 {len(matches)} 条与 {keyword} 相关的真实日志。"
                 if matches
@@ -220,6 +256,13 @@ class SearchErrorLogsTool:
                 "scanned_files": scanned_files,
                 "matches": matches,
                 "mode": "real",
+            },
+            diagnostics={
+                "adapter": "log_search",
+                "mode": "real",
+                "keyword": keyword,
+                "scanned_files": scanned_files,
+                "log_dirs": [str(path) for path in self.runtime.log_dirs],
             },
         )
 
@@ -245,21 +288,36 @@ class RestartMockServiceTool:
             return ToolResult(
                 success=False,
                 code="SERVICE_NOT_ALLOWED",
+                error_code="SERVICE_NOT_ALLOWED",
                 message=f"服务 {service_name} 不在受控重启白名单中。",
                 data={"service_name": service_name, "mode": "real"},
                 retryable=False,
+                diagnostics={
+                    "adapter": "service_restart",
+                    "mode": "real",
+                    "service_name": service_name,
+                    "allowed_services": sorted(self.runtime.allowed_services),
+                },
             )
         if not self.runtime.restart_enabled:
             command_preview = " ".join(_build_restart_service_command(service_name))
             return ToolResult(
                 success=True,
                 code="DRY_RUN",
+                error_code="DRY_RUN",
                 message=f"受控重启未开启，未实际执行。建议人工确认后执行：{command_preview}",
                 data={
                     "service_name": service_name,
                     "status": "dry_run",
                     "mode": "dry_run",
                     "suggested_command": command_preview,
+                },
+                diagnostics={
+                    "adapter": "service_restart",
+                    "mode": "dry_run",
+                    "service_name": service_name,
+                    "suggested_command": command_preview,
+                    "timeout_seconds": self.runtime.command_timeout_seconds,
                 },
             )
         try:
@@ -270,9 +328,19 @@ class RestartMockServiceTool:
                 return ToolResult(
                     success=False,
                     code="RESTART_FAILED",
+                    error_code="RESTART_FAILED",
                     message=f"受控重启失败：{details}",
                     data={"service_name": service_name, "mode": "real"},
                     retryable=False,
+                    diagnostics={
+                        "adapter": "service_restart",
+                        "mode": "real",
+                        "service_name": service_name,
+                        "returncode": result.returncode,
+                        "stderr": result.stderr,
+                        "stdout": result.stdout,
+                        "timeout_seconds": self.runtime.command_timeout_seconds,
+                    },
                 )
             service_info = _parse_service_json(result.stdout, service_name)
             status = str(service_info.get("Status", "unknown"))
@@ -289,14 +357,30 @@ class RestartMockServiceTool:
                     "status": status,
                     "mode": "real",
                 },
+                diagnostics={
+                    "adapter": "service_restart",
+                    "mode": "real",
+                    "service_name": service_name,
+                    "matched_name": matched_name,
+                    "command": command,
+                    "timeout_seconds": self.runtime.command_timeout_seconds,
+                },
             )
         except Exception as exc:
             return ToolResult(
                 success=False,
                 code="RESTART_FAILED",
+                error_code="RESTART_FAILED",
                 message=f"受控重启失败：{exc}",
                 data={"service_name": service_name, "mode": "real"},
                 retryable=False,
+                diagnostics={
+                    "adapter": "service_restart",
+                    "mode": "real",
+                    "service_name": service_name,
+                    "exception": str(exc),
+                    "timeout_seconds": self.runtime.command_timeout_seconds,
+                },
             )
 
 
@@ -317,8 +401,16 @@ class GetIncidentSummaryTool:
         return ToolResult(
             success=True,
             code="OK",
+            error_code="OK",
             message=f"事件 {incident_id} 摘要已生成。",
             data={"incident_id": incident_id, "summary": summary, "service_name": service_name, "keyword": keyword},
+            diagnostics={
+                "adapter": "incident_summary",
+                "mode": "mock",
+                "incident_id": incident_id,
+                "service_name": service_name,
+                "keyword": keyword,
+            },
         )
 
 
@@ -378,8 +470,10 @@ def _mock_status_result(service_name: str) -> ToolResult:
     return ToolResult(
         success=True,
         code="OK",
+        error_code="OK",
         message=f"服务 {service_name} 当前状态为 running。",
         data={"service_name": service_name, "status": "running", "mode": "mock"},
+        diagnostics={"adapter": "service_status", "mode": "mock", "service_name": service_name},
     )
 
 
@@ -387,8 +481,10 @@ def _mock_log_result(keyword: str) -> ToolResult:
     return ToolResult(
         success=True,
         code="OK",
+        error_code="OK",
         message=f"已找到与 {keyword} 相关的 2 条模拟日志。",
         data={"keyword": keyword, "hits": 2, "mode": "mock"},
+        diagnostics={"adapter": "log_search", "mode": "mock", "keyword": keyword},
     )
 
 
@@ -396,6 +492,8 @@ def _mock_restart_result(service_name: str) -> ToolResult:
     return ToolResult(
         success=True,
         code="OK",
+        error_code="OK",
         message=f"已执行模拟工具，{service_name} 服务重启成功。",
         data={"service_name": service_name, "status": "restarted", "mode": "mock"},
+        diagnostics={"adapter": "service_restart", "mode": "mock", "service_name": service_name},
     )

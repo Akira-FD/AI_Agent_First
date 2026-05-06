@@ -1,4 +1,5 @@
 from __future__ import annotations
+# ruff: noqa: E402
 
 import argparse
 import json
@@ -14,7 +15,6 @@ from app.datasets.github_case_builder import GithubEvalCaseBuilder
 from app.datasets.github_client import GithubApiRateLimitError, GithubRestClient
 from app.datasets.github_harvester import GithubHarvester
 from app.datasets.github_models import GithubHarvestConfig
-from app.datasets.github_case_builder import GithubEvalCaseBuilder
 from app.datasets.github_models import GithubIssueRecord, GithubReplyRecord
 from app.datasets.github_normalizer import GithubKnowledgeNormalizer
 from app.datasets.github_writer import GithubDatasetWriter

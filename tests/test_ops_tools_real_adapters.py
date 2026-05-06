@@ -43,10 +43,13 @@ class RealToolAdaptersTests(unittest.TestCase):
 
         self.assertTrue(result.success)
         self.assertEqual(result.code, "OK")
+        self.assertEqual(result.error_code, "OK")
         self.assertEqual(result.data["mode"], "real")
         self.assertEqual(result.data["service_name"], "redis")
         self.assertEqual(result.data["matched_name"], "Redis")
         self.assertEqual(result.data["status"], "Running")
+        self.assertIn("adapter", result.diagnostics)
+        self.assertIn("timeout_seconds", result.diagnostics)
 
     def test_search_error_logs_scans_controlled_log_directories(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -96,8 +99,10 @@ class RealToolAdaptersTests(unittest.TestCase):
 
         self.assertTrue(result.success)
         self.assertEqual(result.code, "DRY_RUN")
+        self.assertEqual(result.error_code, "DRY_RUN")
         self.assertEqual(result.data["mode"], "dry_run")
         self.assertIn("未实际执行", result.message)
+        self.assertIn("suggested_command", result.diagnostics)
 
 
 if __name__ == "__main__":

@@ -1187,6 +1187,8 @@ class MainWindow(QMainWindow):
         )
         document_count = escape(str(summary.get("document_count", 0)))
         chunk_count = escape(str(summary.get("chunk_count", 0)))
+        fallback_category_html = '<span class="topic-chip">通用</span>'
+        fallback_topic_html = '<span class="topic-chip">暂无</span>'
         return (
             "<div class='compact-stat-grid'>"
             "<div class='compact-stat'>"
@@ -1200,11 +1202,11 @@ class MainWindow(QMainWindow):
             "</div>"
             "<div class='summary-section'>"
             "<div class='summary-section-title'>覆盖领域</div>"
-            f"{category_html or '<span class=\"topic-chip\">通用</span>'}"
+            f"{category_html or fallback_category_html}"
             "</div>"
             "<div class='summary-section'>"
             "<div class='summary-section-title'>核心主题</div>"
-            f"<div class='topic-cloud'>{topic_html or '<span class=\"topic-chip\">暂无</span>'}</div>"
+            f"<div class='topic-cloud'>{topic_html or fallback_topic_html}</div>"
             "</div>"
         )
 

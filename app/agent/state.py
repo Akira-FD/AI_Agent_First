@@ -35,6 +35,12 @@ class AgentState:
     node_trace: list[str] = field(default_factory=list)
     retry_count: int = 0
     error: str = ""
+    should_call_tool: bool = False
+    pending_tool_actions: list[dict[str, Any]] = field(default_factory=list)
+    current_action_index: int = 0
+    current_action: dict[str, Any] = field(default_factory=dict)
+    last_tool_success: bool = True
+    answer_context_text: str = ""
 
     def mark(self, node_name: str) -> None:
         self.node_trace.append(node_name)

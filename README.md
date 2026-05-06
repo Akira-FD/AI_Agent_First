@@ -1,151 +1,194 @@
 # AI Agent First
 
-`AI Agent First` 是一个本地桌面端 AI Agent MVP，目标不是只做“能跑通的骨架”，而是把以下几条链路真正接起来：
+`AI Agent First` 是一个本地桌面端 AI Agent MVP，目标不是只做“能跑通的骨架”，而是把知识库、RAG、Agent、工具执行、真实大模型调用、桌面端交互和评测闭环真正接起来。
 
-- 本地知识库导入与整理
-- RAG 检索、粗排、BGE 重排和上下文构造
-- Agent 意图识别、工具路由、多步骤动作执行与会话摘要
-- OpenAI-compatible 大模型接入与 SSE 流式输出
-- 桌面端可视化交互、诊断面板与评测闭环
+当前仓库已经具备真实可运行能力：
 
-项目当前已经具备真实可运行能力，而不是单纯 demo：
+- 本地 Markdown 文档入库与 SQLite 持久化
+- `in-memory / milvus / milvus-lite / remote` 检索后端
+- `keyword / bge` reranker
+- 基于 LangGraph 的状态驱动 Agent
+- 受控真实工具适配器与 mock fallback
+- OpenAI-compatible LLM 接入与 SSE 流式输出
+- 桌面端可视化交互、provider 诊断、RAG 阶段耗时与会话摘要展示
+- GitHub 数据集构建、评测集与报告导出
 
-- 真实远程 LLM 调用
-- `Milvus / Milvus Lite` 向量检索
-- `BGE` reranker
-- 桌面端 SSE 渐进输出
-- RAG 评测集与评测报告
-- 受控真实工具适配器
-
-## 本次更新
-
-### `2026-04-27`
-
-这次更新的功能已在代码和测试中落地，并已纳入当前 README：
-
-- 新增 `LLM` 上下文压缩，减少送入 provider 的 prompt 体积，进一步压低首包延迟。
-- 新增 `BGE` 重复问题分数缓存，相同问题重复提问或重试时可直接复用本地重排结果。
-- 将 `mock tools` 升级为“受控真实工具适配器”：
-  - `check_service_status` 支持真实服务状态查询
-  - `search_error_logs` 支持受控日志目录真实检索
-  - `restart_mock_service` 升级为默认 `dry-run` 的受控重启适配器
-- 桌面端启动入口已切换为启用受控真实工具能力。
-- README 与当前项目架构、能力边界、运行方式保持同步。
-
-## 当前能力
+## 当前能力概览
 
 ### RAG
 
-- 支持 `Markdown -> chunk -> SQLite` 文档入库链路
-- 支持 `in-memory / milvus / milvus-lite` 检索后端切换
-- 支持 `keyword-tech-weighted / bge` 两级重排
-- 支持 `retrieval / coarse_rerank / bge_rerank / context_build` 分阶段耗时记录
-- 支持 `BGE` 重排缓存，降低重复查询的本地耗时
-- 支持来源引用、摘要化上下文和上下文长度控制
+- 支持 `Markdown -> parser -> chunk -> SQLite` 入库链路
+- 支持 `milvus / milvus-lite / in-memory / remote` 向量召回
+- 支持 `keyword-tech-weighted` 与 `BGE` 重排
+- 支持 `retrieval / coarse_rerank / bge_rerank / context_build` 四段耗时遥测
+- 支持来源引用与上下文长度控制
 
-### Agent
+### LangGraph Agent
 
-- 支持知识问答、排查类问答、执行类请求三种主路径
-- 支持多工具 action 列表执行
-- 支持工具失败后的 observation / recovery / replan
-- 支持 recent messages + summary 的长对话压缩与持久化
-- 支持 tool logs、plan route、node trace 输出
+- 已从顺序式编排器升级为真实 `LangGraph StateGraph`
+- 使用统一 `AgentState` 贯穿整条执行链路
+- 支持三类主路径：
+  - `knowledge -> retrieve -> answer`
+  - `troubleshoot -> retrieve -> diagnose -> answer`
+  - `execute -> tool_router -> tool_exec -> observation/recovery/replan -> answer`
+- 支持 `node_trace / plan_route / plan_steps / tool_actions / recovery_action / replan_steps` 可观测输出
+
+### 工具层
+
+- 保留 registry 机制，但已升级为“受控真实适配器 + mock fallback”
+- 工具结果统一结构化输出：
+  - `success`
+  - `message`
+  - `data`
+  - `retryable`
+  - `error_code`
+  - `diagnostics`
+- 已落地的低风险适配器：
+  - `check_service_status`
+  - `search_error_logs`
+  - `restart_mock_service`（默认 dry-run）
+  - `get_incident_summary`
 
 ### LLM
 
 - 支持 OpenAI-compatible `/chat/completions`
-- 支持 `gpt-5.2` 等模型名配置
-- 支持 `stream=true` 的 SSE 流式输出
+- 支持配置模型，例如 `gpt-5.2`
+- 支持真实 `stream=true` SSE 流式输出
 - 支持 timeout / disconnect / `HTTP 401` / `HTTP 429` / `HTTP 5xx` 诊断
-- 支持自动重试、退避配置、fallback 回退
-- 支持 provider 首包延迟、总耗时、诊断摘要展示
-- 支持调用前上下文压缩，降低 prompt 体积
+- 支持自动重试与退避
+- 未配置远程模型时自动回退到本地规则回答
 
 ### Desktop UI
 
-- 支持知识库摘要、聊天主区、来源引用、工具日志、会话摘要
-- 支持实时流式输出
-- 支持取消当前请求、超时提示、重试按钮
-- 支持显式展示：
-  - 回答来源 `remote / fallback`
-  - provider 诊断
+- 左侧展示知识库摘要，而不是原始文件清单
+- 中间展示会话区、输入区、流式回答
+- 右侧展示：
+  - provider diagnostics
   - 首包延迟 / 总耗时
-  - RAG 阶段耗时
-  - retrieval / embedding / reranker backend
+  - RAG 四段耗时
+  - 当前会话摘要
+  - 来源引用
+  - 工具日志
+- 支持取消请求、超时提示、重试按钮
 - 窗口默认居中启动
 
-### 数据集与评测
+### 评测与验收
 
 - 支持从 GitHub 高信号问题构建知识文档
-- 支持生成约 100 条项目相关问题测试集
-- 支持评测报告导出 `JSON / Markdown`
-- 支持 backend 对比维度、agent path 维度等评测汇总
+- 支持生成测试集与离线评测报告
+- 支持 `JSON / Markdown` 报告导出
+- 仓库内已包含真实验收记录和阶段结果
 
-### 受控真实工具
+## 当前架构概览
 
-- 支持真实服务状态查询
-- 支持真实日志目录检索
-- 支持受控白名单服务
-- 支持命令超时控制
-- 支持默认 `dry-run` 的真实重启适配器
-- 保留默认 mock 路径，确保测试与低风险开发体验稳定
+```mermaid
+flowchart TD
+    A["Desktop UI (PyQt6)"] --> B["ChatPage / MainWindow"]
+    B --> C["MVPAgent (LangGraph StateGraph)"]
+    C --> D["Intent"]
+    C --> E["Retrieve"]
+    C --> F["Plan"]
+    F --> G["Tool Router"]
+    G --> H["Tool Exec"]
+    H --> I["Observation / Recovery / Replan"]
+    C --> J["Answer Context Composer"]
+    J --> K["LLM Service"]
+    K --> L["OpenAI-Compatible Provider"]
+    K --> M["Rule-Based Fallback"]
+    E --> N["Retriever"]
+    N --> O["Vector Store"]
+    N --> P["Reranker"]
+    N --> Q["Context Builder"]
+    O --> R["Milvus / Milvus Lite / In-Memory / Remote"]
+    C --> S["SessionService / SummaryService"]
+    C --> T["SQLiteRepository"]
+    U["Markdown / GitHub Docs"] --> V["Ingest Pipeline"]
+    V --> T
+    W["Evaluation Cases"] --> X["Evaluation Runner"]
+    X --> C
+    X --> Y["Reports"]
+```
 
-## 推荐启动顺序
+## 目录结构
 
-### 1. 跑测试与运行时校验
+- `app/`
+  核心源码，包含 `agent / rag / services / repositories / tools / ui / evaluation / validation`
+- `data/docs/`
+  本地知识库与采集整理后的 Markdown 文档
+- `data/sqlite/`
+  SQLite 运行时数据
+- `data/milvus/`
+  Milvus Lite 运行时数据
+- `docs/`
+  架构与执行说明文档
+- `evaluation/`
+  评测集与评测报告
+- `results/`
+  真实验收记录
+- `scripts/`
+  启动、入库、评测、验证脚本
+- `tests/`
+  单测、集成测试、UI 行为测试
+
+## 快速开始
+
+### 1. 安装基础依赖
+
+```bash
+python -m pip install -e .
+python -m pip install -e .[rag]
+```
+
+如果只想先运行桌面端，至少需要：
+
+```bash
+python -m pip install PyQt6
+```
+
+### 2. 运行测试与运行时校验
 
 ```bash
 python -m unittest discover -s tests -v
 python scripts/validate_runtime.py
 ```
 
-### 2. 导入知识库
+### 3. 导入知识库
 
 ```bash
 python scripts/ingest_docs.py
 ```
 
-### 3. 启动桌面端
+### 4. 启动桌面端
 
 ```bash
 python scripts/run_desktop.py
 ```
 
-### 4. 命令行快速查看当前运行状态
+### 5. CLI 快速查看运行状态
 
 ```bash
 python -m app.main
 ```
 
-### 5. 运行演示或评测
+### 6. 运行演示或评测
 
 ```bash
 python scripts/run_demo.py
 python scripts/run_eval.py
 ```
 
-## 环境要求
+## 环境变量
 
-- Python `>= 3.11`
-- Windows 桌面环境
-- 可选依赖：
-  - `PyQt6`
-  - `pymilvus[milvus_lite]`
-  - `FlagEmbedding`
-  - `transformers`
-
-项目配置见 [pyproject.toml](pyproject.toml)。
-
-## 大模型接入
-
-项目支持 OpenAI-compatible 协议，既可接 OpenAI 官方，也可接兼容中转站。
-
-### 最小配置
+### LLM
 
 ```bash
 set AI_AGENT_FIRST_LLM_API_KEY=你的APIKey
 set AI_AGENT_FIRST_LLM_BASE_URL=https://api.openai.com/v1
 set AI_AGENT_FIRST_LLM_MODEL=gpt-5.2
+set AI_AGENT_FIRST_LLM_TIMEOUT_SECONDS=30
+set AI_AGENT_FIRST_LLM_RETRY_ATTEMPTS=2
+set AI_AGENT_FIRST_LLM_RETRY_BACKOFF_SECONDS=0.4
+set AI_AGENT_FIRST_LLM_CONTEXT_MAX_CHARS=1400
 ```
 
 也兼容：
@@ -154,45 +197,31 @@ set AI_AGENT_FIRST_LLM_MODEL=gpt-5.2
 set OPENAI_API_KEY=你的APIKey
 ```
 
-### 常用调优项
-
-```bash
-set AI_AGENT_FIRST_LLM_TIMEOUT_SECONDS=30
-set AI_AGENT_FIRST_LLM_RETRY_ATTEMPTS=2
-set AI_AGENT_FIRST_LLM_RETRY_BACKOFF_SECONDS=0.4
-set AI_AGENT_FIRST_LLM_CONTEXT_MAX_CHARS=1400
-```
-
-说明：
-
-- 未配置 API Key 时，系统自动回退到本地规则回答。
-- `AI_AGENT_FIRST_LLM_CONTEXT_MAX_CHARS` 用于控制送入 provider 的上下文大小，是本次首包优化的核心配置之一。
-- 桌面端会显示 `LLM backend`，例如 `openai-compatible:gpt-5.2`。
-- 桌面端状态栏与右侧面板会展示 provider 诊断，如 `provider=timeout`、`provider=disconnect`、`provider=http_429`。
-
-## Milvus / Milvus Lite 向量检索
-
-### 推荐单机配置
+### Retrieval / RAG
 
 ```bash
 set AI_AGENT_FIRST_RETRIEVAL_BACKEND=milvus-lite
-set AI_AGENT_FIRST_MILVUS_LITE_PATH=data/milvus/ai_agent_first_milvus_lite.db
-set AI_AGENT_FIRST_MILVUS_COLLECTION=ai_agent_first_chunks
-set AI_AGENT_FIRST_MILVUS_DIMENSION=96
+set AI_AGENT_FIRST_EMBEDDING_BACKEND=hash
 set AI_AGENT_FIRST_RERANKER_BACKEND=bge
-set AI_AGENT_FIRST_BGE_RERANKER_MODEL=BAAI/bge-reranker-v2-m3
+set AI_AGENT_FIRST_TOP_K=5
+set AI_AGENT_FIRST_RERANKER_PREFILTER_LIMIT=6
 ```
 
-### 可选远程 Milvus 配置
+### Milvus / Milvus Lite
 
 ```bash
 set AI_AGENT_FIRST_MILVUS_ENABLED=true
 set AI_AGENT_FIRST_MILVUS_URI=http://localhost:19530
+set AI_AGENT_FIRST_MILVUS_COLLECTION=ai_agent_first_chunks
+set AI_AGENT_FIRST_MILVUS_DIMENSION=96
+
+set AI_AGENT_FIRST_MILVUS_LITE_PATH=data/milvus/ai_agent_first_milvus_lite.db
 ```
 
-### BGE 相关调优
+### BGE Reranker
 
 ```bash
+set AI_AGENT_FIRST_BGE_RERANKER_MODEL=BAAI/bge-reranker-v2-m3
 set AI_AGENT_FIRST_BGE_RERANKER_TEXT_MAX_CHARS=900
 set AI_AGENT_FIRST_BGE_RERANKER_BATCH_SIZE=12
 set AI_AGENT_FIRST_BGE_RERANKER_QUERY_MAX_LENGTH=48
@@ -202,19 +231,10 @@ set AI_AGENT_FIRST_BGE_RERANKER_DEVICES=cpu
 set AI_AGENT_FIRST_BGE_RERANKER_SCORE_CACHE_SIZE=256
 ```
 
-说明：
-
-- `milvus-lite` 适合当前项目的单机开发与本地验证。
-- `AI_AGENT_FIRST_BGE_RERANKER_SCORE_CACHE_SIZE` 是本次新增项，可明显减少重复查询的本地 rerank 耗时。
-- `data/milvus/` 和 `data/models/` 属于本地运行产物，不纳入 Git。
-
-## 受控真实工具启用方式
-
-桌面端和 [run_desktop.py](scripts/run_desktop.py) 现在支持受控真实工具。
-
-### 推荐配置
+### 会话记忆与工具层
 
 ```bash
+set AI_AGENT_FIRST_RECENT_MESSAGE_LIMIT=8
 set AI_AGENT_FIRST_REAL_TOOLS_ENABLED=true
 set AI_AGENT_FIRST_TOOL_ALLOWED_SERVICES=redis,mysql,nginx
 set AI_AGENT_FIRST_TOOL_LOG_DIRS=data/logs
@@ -222,98 +242,170 @@ set AI_AGENT_FIRST_TOOL_COMMAND_TIMEOUT_SECONDS=5
 set AI_AGENT_FIRST_TOOL_RESTART_ENABLED=false
 ```
 
-说明：
+## 桌面端运行
 
-- `check_service_status` 会调用受控本地命令查询真实服务状态。
-- `search_error_logs` 会在受控日志目录内检索真实日志文件。
-- `restart_mock_service` 已升级为真实适配器，但默认只做 `dry-run` 提示。
-- 只有当 `AI_AGENT_FIRST_TOOL_RESTART_ENABLED=true` 且目标服务在白名单中时，才允许执行真实重启。
-- 这套真实工具能力默认只在桌面端入口启用，测试默认路径仍保持 mock 语义。
-
-## 桌面端说明
-
-运行桌面端前请先安装：
-
-```bash
-python -m pip install PyQt6
-```
-
-启动：
+启动命令：
 
 ```bash
 python scripts/run_desktop.py
 ```
 
-当前桌面端可以观察到：
+桌面端会显式展示：
 
-- 左侧知识库摘要
-- 中间聊天区与流式回答
-- 右侧来源引用
-- 工具日志
-- Provider 诊断
-- 首包 / 总耗时
-- RAG 分阶段耗时
+- 当前 LLM backend
+- Retrieval / Embedding / Reranker backend
+- provider diagnostics
+- 首包延迟 / 总耗时
+- RAG 阶段耗时
 - 当前会话摘要
+- 来源引用
+- 工具日志
 
-## 运行时验证
+## 文档入库与 RAG
 
-运行：
+默认知识库目录：
+
+- [data/docs](C:/Users/JXW/Desktop/My projects/AI_Agent_First/data/docs)
+
+入库脚本：
+
+```bash
+python scripts/ingest_docs.py
+```
+
+当前检索链路：
+
+1. 读取 SQLite 中的 chunk 元数据
+2. 向量召回
+3. `keyword` 或 `BGE` rerank
+4. 生成上下文文本与来源引用
+5. 记录 `retrieval / coarse_rerank / bge_rerank / context_build` 耗时
+
+## LangGraph Agent
+
+关键实现文件：
+
+- [app/agent/graph.py](C:/Users/JXW/Desktop/My projects/AI_Agent_First/app/agent/graph.py)
+- [app/agent/state.py](C:/Users/JXW/Desktop/My projects/AI_Agent_First/app/agent/state.py)
+
+当前 Agent 已经是真实 `LangGraph StateGraph`，包含这些节点：
+
+- `load_memory`
+- `persist_user_message`
+- `intent`
+- `retrieve`
+- `plan`
+- `tool_router`
+- `tool_exec`
+- `observation`
+- `recovery`
+- `replan`
+- `answer`
+- `persist_assistant_message`
+- `summary`
+
+### 会话摘要与 recent messages 回灌
+
+当前不会只把 summary 持久化后丢在 UI 展示，而是会真正参与回答 prompt 组装。
+
+当前 answer context 统一包含：
+
+- 会话摘要
+- 最近对话
+- 检索上下文
+- 工具结果
+- 当前用户问题
+
+并受 `AI_AGENT_FIRST_LLM_CONTEXT_MAX_CHARS` 等限制控制，避免 prompt 无限制膨胀。
+
+## 工具层说明
+
+关键实现文件：
+
+- [app/tools/base.py](C:/Users/JXW/Desktop/My projects/AI_Agent_First/app/tools/base.py)
+- [app/tools/ops_tools.py](C:/Users/JXW/Desktop/My projects/AI_Agent_First/app/tools/ops_tools.py)
+- [app/tools/registry.py](C:/Users/JXW/Desktop/My projects/AI_Agent_First/app/tools/registry.py)
+
+### 当前已落地工具
+
+- `check_service_status`
+  受控查询本地服务状态；未启用真实工具时回退 mock
+- `search_error_logs`
+  在受控日志目录中执行真实关键词检索
+- `restart_mock_service`
+  已升级为受控真实重启适配器，但默认只做 dry-run
+- `get_incident_summary`
+  根据当前工具结果返回摘要性说明
+
+### 受控原则
+
+- 默认优先只读或低风险能力
+- 服务名受白名单控制
+- 日志目录受白名单控制
+- 命令执行有超时
+- 重启动作默认不真正执行
+- 所有工具结果都保留结构化 `diagnostics`
+
+## 评测与验证
+
+运行时验证：
 
 ```bash
 python scripts/validate_runtime.py
 ```
 
-会输出：
+离线评测：
 
-- `docs_dir_ready`
-- `sqlite_dir_ready`
-- `retrieval_backend`
-- `embedding_backend`
-- `reranker_backend`
-- `llm_backend`
-- `llm_remote_configured`
-- `llm_sse_supported`
+```bash
+python scripts/run_eval.py
+```
 
-## 真实效果与当前瓶颈
+当前评测和运行时验证会关注：
 
-当前项目已经做过真实链路验证，确认不是“只显示正确”，而是真的走了：
+- docs/sqlite 是否可用
+- retrieval / embedding / reranker backend
+- llm backend
+- 是否远程模型已配置
+- 是否支持 SSE
 
-- 真实远程 `gpt-5.2`
-- 真实 `Milvus`
-- 真实 `BGE`
-- 真实 Agent 编排
-- 真实会话摘要持久化
+评测产物位于：
 
-当前主要瓶颈仍然是：
+- [evaluation/cases/github_cases.json](C:/Users/JXW/Desktop/My projects/AI_Agent_First/evaluation/cases/github_cases.json)
+- [evaluation/reports/eval_report.json](C:/Users/JXW/Desktop/My projects/AI_Agent_First/evaluation/reports/eval_report.json)
+- [evaluation/reports/eval_report.md](C:/Users/JXW/Desktop/My projects/AI_Agent_First/evaluation/reports/eval_report.md)
+- [results](C:/Users/JXW/Desktop/My projects/AI_Agent_First/results)
 
-- provider 侧首包延迟
-- 第一次命中某类问题时的本地 `BGE` CPU 开销
-- 真实工具能力目前以观测类能力为主，生产级执行能力仍需继续扩展
+## 已知限制
 
-## 目录结构
+- 真实工具层当前仍以观测类能力为主，生产级执行能力仍需继续扩展
+- `restart_mock_service` 默认为 dry-run，防止在本机开发环境误执行破坏性动作
+- `BGE` 首次命中时仍可能有 CPU 开销
+- 中转站或兼容 provider 的首包延迟与稳定性仍受外部网络条件影响
 
-- `app/`
-  核心源码，包含 `agent / rag / services / repositories / tools / ui`
-- `data/docs/`
-  本地知识库 Markdown 文档与 GitHub 采集整理后的资料
-- `data/sqlite/`
-  SQLite 运行时数据
-- `data/milvus/`
-  Milvus Lite 本地向量库运行时数据
-- `docs/`
-  当前架构说明、测试说明与后续执行规划文档
-- `evaluation/`
-  评测集、评测脚本输出与报告
-- `results/`
-  真实验收记录与阶段结果文件
-- `scripts/`
-  启动、入库、评测、验证、快捷方式安装等脚本
-- `tests/`
-  单元测试、集成测试与 UI 行为测试
+## 本次升级内容
+
+### LangGraph 化
+
+- 将顺序式 `MVPAgent` 升级为真实 `LangGraph StateGraph`
+- 保留现有 `run()/stream()`、UI、脚本入口的兼容性
+- 保留并增强 `node_trace / plan_route / recovery / replan` 等可观测输出
+
+### 工具层生产化
+
+- 将工具结果统一提升为结构化生产化输出
+- 引入 `error_code` 与 `diagnostics`
+- 将真实适配器与 mock fallback 并存
+- 为服务检查、日志搜索、重启动作增加受控边界
+
+### 会话摘要回灌 prompt
+
+- 修复“摘要只展示不参与回答”的问题
+- 将 `summary + recent messages + retrieved context + tool result` 统一回灌到回答上下文
+- 对非流式和 SSE 流式路径同时生效
 
 ## 相关文档
 
-- [AI_Agent_First_MVP_Architecture.md](AI_Agent_First_MVP_Architecture.md)
-- [AI_Agent_First_Development_Prompts.md](AI_Agent_First_Development_Prompts.md)
-- [PROJECT_CURRENT_ARCHITECTURE_AND_TESTING.md](docs/PROJECT_CURRENT_ARCHITECTURE_AND_TESTING.md)
-- [AGENT_CURRENT_ARCHITECTURE_AND_EXECUTION_PLAN.md](docs/AGENT_CURRENT_ARCHITECTURE_AND_EXECUTION_PLAN.md)
+- [AI_Agent_First_MVP_Architecture.md](C:/Users/JXW/Desktop/My projects/AI_Agent_First/AI_Agent_First_MVP_Architecture.md)
+- [AI_Agent_First_Development_Prompts.md](C:/Users/JXW/Desktop/My projects/AI_Agent_First/AI_Agent_First_Development_Prompts.md)
+- [PROJECT_CURRENT_ARCHITECTURE_AND_TESTING.md](C:/Users/JXW/Desktop/My projects/AI_Agent_First/docs/PROJECT_CURRENT_ARCHITECTURE_AND_TESTING.md)
+- [AGENT_CURRENT_ARCHITECTURE_AND_EXECUTION_PLAN.md](C:/Users/JXW/Desktop/My projects/AI_Agent_First/docs/AGENT_CURRENT_ARCHITECTURE_AND_EXECUTION_PLAN.md)
